@@ -1,290 +1,467 @@
 /* ================================================================
-   Prahari — Global Stylesheet (index.css)
-   "Vigilant Sage" Design System
-   ================================================================
-   Source: FEATURES_AND_STRUCTURE.md § 4.2 (Colours), § 4.3 (Typography),
-           § 4.4 (Spatial System), § 4.5 (Transitions)
-
-   Layer order:
-   1. Tailwind directives
-   2. CSS custom properties (design tokens)
-   3. Base resets & global element styles
-   4. Utility & animation classes
+   Prahari — Global Stylesheet (index.css) — v2.0
+   "Vigilant Sage" Design System — Enhanced Edition
    ================================================================ */
 
 /* ----------------------------------------------------------------
    1. Tailwind CSS Directives
    ---------------------------------------------------------------- */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 /* ----------------------------------------------------------------
-   2. Design Tokens — CSS Custom Properties
-   ----------------------------------------------------------------
-   All colour values are derived from FEATURES_AND_STRUCTURE.md § 4.2.
-   Using CSS variables allows runtime dark-mode switching without
-   JavaScript class toggling on every element. We set the tokens on
-   :root (light mode default) and override inside .dark (class-based
-   Tailwind dark mode).
+   2. Design Tokens — CSS Custom Properties (Light Mode)
    ---------------------------------------------------------------- */
-
 :root {
-  /* --- Surface / Backgrounds --- */
-  --color-surface:          #F7F5F0;   /* Primary page bg — warm off-white    */
-  --color-surface-card:     #FFFFFF;   /* Card & modal backgrounds             */
-  --color-beige:            #D4C5A9;   /* Secondary surfaces, disabled states  */
+  /* --- Surfaces --- */
+  --color-surface:          #F0F4F8;
+  --color-surface-card:     #FFFFFF;
+  --color-beige:            #DDD6C7;
+  --color-surface-2:        #E8EEF4;
 
-  /* --- Text Colours --- */
-  --color-text-primary:     #1A1A2E;   /* Headings & primary body copy         */
-  --color-text-secondary:   #5A5A72;   /* Captions, labels, metadata           */
-  --color-text-inverse:     #F7F5F0;   /* Text on dark/coloured backgrounds    */
+  /* --- Text --- */
+  --color-text-primary:     #0F172A;
+  --color-text-secondary:   #475569;
+  --color-text-inverse:     #F8FAFC;
+  --color-text-muted:       #94A3B8;
 
-  /* --- Brand Colours --- */
-  --color-sage:             #7A9E87;   /* Primary accent — safe/routine CTAs   */
-  --color-sage-light:       #B8D4C0;   /* Hover states, progress fills         */
-  --color-sage-dark:        #5C8069;   /* Sage pressed/active state            */
+  /* --- Brand: Teal (primary interactive) --- */
+  --color-teal:             #0D9488;
+  --color-teal-dark:        #0F766E;
+  --color-teal-light:       #2DD4BF;
+  --color-teal-subtle:      rgba(13, 148, 136, 0.08);
+  --color-teal-glow:        rgba(13, 148, 136, 0.25);
 
-  --color-teal:             #2A7F8C;   /* Interactive elements, links, info    */
-  --color-teal-dark:        #1C5C66;   /* Teal hover/active, focus borders     */
-  --color-teal-light:       #4FAABA;   /* Teal light tint                      */
+  /* --- Brand: Sage (health/safe) --- */
+  --color-sage:             #059669;
+  --color-sage-light:       #34D399;
+  --color-sage-dark:        #047857;
+  --color-sage-subtle:      rgba(5, 150, 105, 0.08);
+
+  /* --- Accent: Indigo (premium feel) --- */
+  --color-accent:           #6366F1;
+  --color-accent-light:     #818CF8;
+  --color-accent-subtle:    rgba(99, 102, 241, 0.08);
 
   /* --- Alert States --- */
-  --color-alert-critical:   #C0392B;   /* T1 — life-threatening drug interaction */
-  --color-alert-critical-bg:#FDECEA;
-  --color-alert-moderate:   #D4860A;   /* T2 — monitor closely                 */
-  --color-alert-moderate-bg:#FDF3E0;
-  --color-alert-safe:       #2E7D52;   /* T3 — minimal significance            */
-  --color-alert-safe-bg:    #E8F5EE;
+  --color-alert-critical:   #DC2626;
+  --color-alert-critical-bg:#FEF2F2;
+  --color-alert-critical-border: #FECACA;
+  --color-alert-moderate:   #D97706;
+  --color-alert-moderate-bg:#FFFBEB;
+  --color-alert-moderate-border: #FDE68A;
+  --color-alert-safe:       #059669;
+  --color-alert-safe-bg:    #ECFDF5;
+  --color-alert-safe-border:#A7F3D0;
 
   /* --- Borders & Focus --- */
-  --color-border:           #E2DCCF;   /* Input outlines, card borders         */
-  --color-focus-ring:       #2A7F8C;   /* 3px ring, 2px offset                 */
+  --color-border:           #E2E8F0;
+  --color-border-strong:    #CBD5E1;
+  --color-focus-ring:       #0D9488;
 
-  /* --- Spatial System (base unit: 4px) --- */
-  --spacing-section-desktop: 64px;
-  --spacing-section-mobile:  40px;
-  --spacing-card-desktop:    24px;
-  --spacing-card-mobile:     16px;
+  /* --- Gradients --- */
+  --gradient-hero:          linear-gradient(135deg, #0F172A 0%, #0F766E 50%, #047857 100%);
+  --gradient-card:          linear-gradient(145deg, #FFFFFF 0%, #F0F9FF 100%);
+  --gradient-teal:          linear-gradient(135deg, #0D9488 0%, #6366F1 100%);
+  --gradient-sage:          linear-gradient(135deg, #059669 0%, #0D9488 100%);
 
-  /* --- Typography Base --- */
+  /* --- Spatial System --- */
+  --spacing-section-desktop: 80px;
+  --spacing-section-mobile:  48px;
+  --spacing-card-desktop:    28px;
+  --spacing-card-mobile:     18px;
+
+  /* --- Typography --- */
   --font-display: 'DM Serif Display', Georgia, serif;
   --font-sans:    'Inter', system-ui, sans-serif;
   --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
 
   /* --- Transitions --- */
-  --transition-standard: all 150ms ease-in-out;
-  --transition-modal:    all 200ms ease-in-out;
+  --transition-fast:     all 120ms ease-in-out;
+  --transition-standard: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:     all 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce:   all 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Shadows --- */
+  --shadow-xs:   0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm:   0 2px 8px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-md:   0 4px 20px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-lg:   0 8px 32px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-xl:   0 16px 48px rgba(15, 23, 42, 0.16), 0 8px 24px rgba(15, 23, 42, 0.10);
+  --shadow-teal: 0 4px 20px rgba(13, 148, 136, 0.30);
+  --shadow-glow: 0 0 30px rgba(13, 148, 136, 0.20);
 }
 
 /* ----------------------------------------------------------------
    Dark Mode Token Overrides
-   ----------------------------------------------------------------
-   Applied when <html class="dark"> — set by ThemeToggle component.
-   Alert colours retain near-identical hue but are brightened by ~10%
-   to maintain WCAG AA contrast on dark surfaces.
-   Source: FEATURES_AND_STRUCTURE.md § 4.2 "Dark Mode Variants"
    ---------------------------------------------------------------- */
 .dark {
-  --color-surface:          #12141A;
-  --color-surface-card:     #1E2029;
-  --color-beige:            #2A2D38;
-  --color-text-primary:     #EDF0F5;
-  --color-text-secondary:   #9099AB;
-  --color-border:           #2D303A;
+  --color-surface:          #0A0F1A;
+  --color-surface-card:     #111827;
+  --color-beige:            #1E293B;
+  --color-surface-2:        #0F172A;
+  --color-text-primary:     #F1F5F9;
+  --color-text-secondary:   #94A3B8;
+  --color-text-muted:       #64748B;
+  --color-border:           #1E293B;
+  --color-border-strong:    #334155;
 
-  /* Alert colours brightened ~10% for dark surface contrast */
-  --color-alert-critical:   #D9534F;
-  --color-alert-critical-bg:#2D1714;
-  --color-alert-moderate:   #E8961A;
-  --color-alert-moderate-bg:#2A2010;
-  --color-alert-safe:       #3D9E6A;
-  --color-alert-safe-bg:    #0F2419;
+  --color-teal:             #14B8A6;
+  --color-teal-dark:        #0D9488;
+  --color-teal-light:       #5EEAD4;
+  --color-teal-subtle:      rgba(20, 184, 166, 0.12);
+  --color-teal-glow:        rgba(20, 184, 166, 0.20);
+
+  --color-sage:             #10B981;
+  --color-sage-light:       #6EE7B7;
+  --color-sage-dark:        #059669;
+  --color-sage-subtle:      rgba(16, 185, 129, 0.12);
+
+  --color-accent:           #818CF8;
+  --color-accent-light:     #A5B4FC;
+  --color-accent-subtle:    rgba(129, 140, 248, 0.12);
+
+  --color-alert-critical:   #EF4444;
+  --color-alert-critical-bg:#1C0A0A;
+  --color-alert-critical-border: #7F1D1D;
+  --color-alert-moderate:   #F59E0B;
+  --color-alert-moderate-bg:#1C1500;
+  --color-alert-moderate-border: #78350F;
+  --color-alert-safe:       #10B981;
+  --color-alert-safe-bg:    #022C22;
+  --color-alert-safe-border:#064E3B;
+
+  --gradient-card:          linear-gradient(145deg, #111827 0%, #0F172A 100%);
+  --shadow-xs:   0 1px 3px rgba(0,0,0,0.3);
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.35);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.40);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,0.45);
+  --shadow-xl:   0 16px 48px rgba(0,0,0,0.50);
 }
 
 /* ----------------------------------------------------------------
    3. Base Resets & Global Element Styles
    ---------------------------------------------------------------- */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
-  /* Smooth scrolling for in-page anchors */
   scroll-behavior: smooth;
-  /* Prevent font size inflation on iOS */
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
-  /* Apply our design token colours as defaults */
   background-color: var(--color-surface);
   color: var(--color-text-primary);
-
-  /* Typography */
   font-family: var(--font-sans);
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.65;
   font-weight: 400;
-
-  /* Smooth font rendering */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* Remove default margin */
   margin: 0;
-
-  /* Transition background/text when switching themes */
-  transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+  transition: background-color 250ms ease, color 250ms ease;
+  overflow-x: hidden;
 }
 
-/* Heading typography */
-h1, h2, h3, h4 {
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   color: var(--color-text-primary);
   margin-top: 0;
   line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
-h1 { font-size: 1.75rem; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.25rem; }
+h1 { font-size: clamp(1.75rem, 4vw, 2.25rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 1.875rem); }
+h3 { font-size: clamp(1.25rem, 2.5vw, 1.5rem); }
 
-/* Body copy */
-p {
-  margin-top: 0;
-  color: var(--color-text-secondary);
-}
+p { margin-top: 0; color: var(--color-text-secondary); }
 
-/* Links */
 a {
   color: var(--color-teal);
   text-decoration: none;
-  transition: color 150ms ease-in-out;
+  transition: var(--transition-fast);
 }
-a:hover {
-  color: var(--color-teal-dark);
-}
+a:hover { color: var(--color-teal-dark); }
 
-/* Drug names / chemical notation */
-code, kbd, pre, .font-mono {
-  font-family: var(--font-mono);
-}
+code, kbd, pre, .font-mono { font-family: var(--font-mono); }
 
-/* Focus ring — keyboard accessibility */
 :focus-visible {
-  outline: 3px solid var(--color-focus-ring);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+img, video { max-width: 100%; height: auto; display: block; }
+
+/* ----------------------------------------------------------------
+   4. Layout Utilities
+   ---------------------------------------------------------------- */
+.container-prahari {
+  width: 100%;
+  max-width: 1140px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 4vw, 2rem);
+  padding-right: clamp(1rem, 4vw, 2rem);
 }
 
 /* ----------------------------------------------------------------
-   4. Utility Classes & Animation
+   5. Card Component System
    ---------------------------------------------------------------- */
-
-/* --- Content Container --- */
-.container-prahari {
-  width: 100%;
-  max-width: 1100px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+.card {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: var(--spacing-card-desktop);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-standard);
+  position: relative;
+  overflow: hidden;
 }
 
-/* --- Card Base --- */
-.card {
-  background-color: var(--color-surface-card);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: var(--spacing-card-desktop);
-  box-shadow: 0 2px 12px rgba(26, 26, 46, 0.06);
-  transition: var(--transition-standard);
+@media (max-width: 640px) {
+  .card { padding: var(--spacing-card-mobile); border-radius: 12px; }
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(26, 26, 46, 0.12);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-strong);
 }
 
-/* --- Urgency Ribbon (4px left border — the signature design element) --- */
-/* Source: FEATURES_AND_STRUCTURE.md § 4.5 "Result Cards"                  */
+.card-glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+.dark .card-glass {
+  background: rgba(17, 24, 39, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Urgency ribbons — signature design element */
 .ribbon-safe     { border-left: 4px solid var(--color-alert-safe); }
 .ribbon-moderate { border-left: 4px solid var(--color-alert-moderate); }
 .ribbon-critical { border-left: 4px solid var(--color-alert-critical); }
 
-/* --- Skeleton Loader (shimmer animation) --- */
-/* Source: FEATURES_AND_STRUCTURE.md § 4.5 "Transitions"                   */
+/* ----------------------------------------------------------------
+   6. Button System
+   ---------------------------------------------------------------- */
+button { cursor: pointer; font-family: var(--font-sans); }
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  background: var(--gradient-teal);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  border: none;
+  border-radius: 10px;
+  box-shadow: var(--shadow-teal);
+  transition: var(--transition-standard);
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: var(--transition-fast);
+}
+.btn-primary:hover::after { background: rgba(255,255,255,0.1); }
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(13, 148, 136, 0.40);
+}
+.btn-primary:active { transform: translateY(0); box-shadow: var(--shadow-teal); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  background: transparent;
+  color: var(--color-teal);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  border: 2px solid var(--color-teal);
+  border-radius: 10px;
+  transition: var(--transition-standard);
+  white-space: nowrap;
+}
+.btn-secondary:hover {
+  background: var(--color-teal-subtle);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+.btn-secondary:active { transform: translateY(0); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 8px;
+  transition: var(--transition-fast);
+}
+.btn-ghost:hover {
+  background: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* ----------------------------------------------------------------
+   7. Form Inputs
+   ---------------------------------------------------------------- */
+.input-base {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface-card);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  outline: none;
+  transition: var(--transition-fast);
+  box-sizing: border-box;
+}
+.input-base:focus {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 3px var(--color-teal-glow);
+}
+.input-base::placeholder { color: var(--color-text-muted); }
+
+/* ----------------------------------------------------------------
+   8. Chip / Badge System
+   ---------------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.chip-safe     { background: var(--color-alert-safe-bg);     color: var(--color-alert-safe);     border: 1px solid var(--color-alert-safe-border); }
+.chip-moderate { background: var(--color-alert-moderate-bg); color: var(--color-alert-moderate); border: 1px solid var(--color-alert-moderate-border); }
+.chip-critical { background: var(--color-alert-critical-bg); color: var(--color-alert-critical); border: 1px solid var(--color-alert-critical-border); }
+.chip-info     { background: var(--color-teal-subtle); color: var(--color-teal); border: 1px solid rgba(13,148,136,0.2); }
+.chip-accent   { background: var(--color-accent-subtle); color: var(--color-accent); border: 1px solid rgba(99,102,241,0.2); }
+.chip-neutral  { background: var(--color-beige); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+
+/* ----------------------------------------------------------------
+   9. Animations & Keyframes
+   ---------------------------------------------------------------- */
+
+/* Shimmer skeleton loader */
 @keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0%   { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
 }
 
 .skeleton {
-  background: linear-gradient(
-    90deg,
+  border-radius: 6px;
+  background: linear-gradient(90deg,
     var(--color-beige) 25%,
     var(--color-surface-card) 50%,
     var(--color-beige) 75%
   );
-  background-size: 800px 100%;
-  border-radius: 4px;
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
 }
 
-/* skeleton-pulse: applies shimmer + opacity pulse to a card container */
-@keyframes skeleton-shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position:  400px 0; }
-}
 .skeleton-pulse {
-  animation: skeleton-shimmer 1.4s ease-in-out infinite;
-  background: linear-gradient(
-    90deg,
+  pointer-events: none;
+  background: linear-gradient(90deg,
     var(--color-beige) 25%,
-    var(--color-surface-card) 50%,
+    var(--color-surface-2) 50%,
     var(--color-beige) 75%
   );
-  background-size: 800px 100%;
-  pointer-events: none;
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
 }
 
-/* --- Pulsing ring for loading states (scanner processing) --- */
+/* Pulsing ring for loading */
 @keyframes pulse-ring {
-  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(122, 158, 135, 0.7); }
-  70%  { transform: scale(1);    box-shadow: 0 0 0 10px rgba(122, 158, 135, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(122, 158, 135, 0); }
+  0%   { transform: scale(0.94); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.5); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 12px rgba(13, 148, 136, 0); }
+  100% { transform: scale(0.94); box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); }
 }
+.pulse-ring { animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite; }
 
-.pulse-ring {
-  animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
-}
-
-/* --- Modal entry animation --- */
-/* Source: FEATURES_AND_STRUCTURE.md § 4.5 "Modal entry"                   */
+/* Modal/section entrance */
 @keyframes modal-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-enter { animation: modal-enter 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* Fade in from left */
+@keyframes fade-in-left {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.fade-in-left { animation: fade-in-left 350ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* Fade in up */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up { animation: fade-in-up 400ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* Staggered card animation */
+.card-stagger-1 { animation: fade-in-up 400ms ease forwards; animation-delay: 0ms; }
+.card-stagger-2 { animation: fade-in-up 400ms ease forwards; animation-delay: 80ms; }
+.card-stagger-3 { animation: fade-in-up 400ms ease forwards; animation-delay: 160ms; }
+.card-stagger-4 { animation: fade-in-up 400ms ease forwards; animation-delay: 240ms; }
+
+/* Float animation for hero icon */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+.float-anim { animation: float 4s ease-in-out infinite; }
+
+/* Gradient animation for hero */
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.gradient-animated {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
 }
 
-.modal-enter {
-  animation: modal-enter 200ms ease-in-out forwards;
-}
-
-/* --- Respect reduced motion preferences --- */
-/* Source: FEATURES_AND_STRUCTURE.md § 4.5 "prefers-reduced-motion"        */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -292,66 +469,285 @@ code, kbd, pre, .font-mono {
   }
 }
 
-/* --- Button base reset --- */
-button {
+/* ----------------------------------------------------------------
+   10. Hero Section Styles
+   ---------------------------------------------------------------- */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--gradient-hero);
+  padding: clamp(2.5rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+  margin-bottom: 2.5rem;
+  color: white;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top right, rgba(20,184,166,0.25) 0%, transparent 60%),
+              radial-gradient(ellipse at bottom left, rgba(99,102,241,0.20) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(20,184,166,0.08);
+  top: -120px;
+  right: -80px;
+  pointer-events: none;
+}
+
+/* ----------------------------------------------------------------
+   11. Stat Counter Cards
+   ---------------------------------------------------------------- */
+.stat-card {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: var(--transition-standard);
+}
+.stat-card:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+}
+
+/* ----------------------------------------------------------------
+   12. Feature Card Enhancements
+   ---------------------------------------------------------------- */
+.feature-card {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 1.75rem;
   cursor: pointer;
+  transition: var(--transition-standard);
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-teal);
+  opacity: 0;
+  transition: var(--transition-standard);
+  z-index: 0;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--color-teal);
+}
+
+.feature-card > * { position: relative; z-index: 1; }
+
+.feature-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  margin-bottom: 1.1rem;
+  transition: var(--transition-bounce);
+}
+
+.feature-card:hover .feature-icon-wrapper {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+/* ----------------------------------------------------------------
+   13. Search Bar
+   ---------------------------------------------------------------- */
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-wrapper input {
+  width: 100%;
+  padding: 0.875rem 3.5rem 0.875rem 1.25rem;
+  border-radius: 12px;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface-card);
+  color: var(--color-text-primary);
   font-family: var(--font-sans);
-}
-
-/* --- Primary Button --- */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  background-color: var(--color-teal);
-  color: var(--color-text-inverse);
-  font-weight: 500;
   font-size: 0.9375rem;
-  border: none;
-  border-radius: 8px;
+  outline: none;
   transition: var(--transition-standard);
-}
-.btn-primary:hover {
-  background-color: var(--color-teal-dark);
-  transform: translateY(-1px);
-}
-.btn-primary:active {
-  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
 }
 
-/* --- Secondary Button --- */
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  background-color: transparent;
+.search-wrapper input:focus {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 4px var(--color-teal-glow), var(--shadow-sm);
+}
+
+.search-wrapper input::placeholder { color: var(--color-text-muted); }
+
+/* ----------------------------------------------------------------
+   14. Page Header
+   ---------------------------------------------------------------- */
+.page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.page-header h1 {
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  margin-bottom: 0.4rem;
+  background: var(--gradient-teal);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-header p {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 580px;
+}
+
+/* ----------------------------------------------------------------
+   15. Progress Bar
+   ---------------------------------------------------------------- */
+.progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--color-beige);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--gradient-teal);
+  border-radius: 99px;
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ----------------------------------------------------------------
+   16. Mobile Quick-Pill Buttons
+   ---------------------------------------------------------------- */
+.pill-btn {
+  padding: 0.4rem 0.875rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface-card);
+  color: var(--color-text-secondary);
+  font-size: 0.825rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+.pill-btn:hover {
+  border-color: var(--color-teal);
   color: var(--color-teal);
-  font-weight: 500;
-  font-size: 0.9375rem;
-  border: 1.5px solid var(--color-teal);
-  border-radius: 8px;
-  transition: var(--transition-standard);
-}
-.btn-secondary:hover {
-  background-color: var(--color-teal);
-  color: var(--color-text-inverse);
+  background: var(--color-teal-subtle);
 }
 
-/* --- Chip / Badge --- */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+/* ----------------------------------------------------------------
+   17. Responsive Grid Utilities
+   ---------------------------------------------------------------- */
+.grid-auto-fill {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+}
+
+.grid-auto-fit {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+}
+
+/* ----------------------------------------------------------------
+   18. Section Divider
+   ---------------------------------------------------------------- */
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  border-radius: 4px;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
 }
 
-.chip-safe     { background: var(--color-alert-safe-bg);     color: var(--color-alert-safe); }
-.chip-moderate { background: var(--color-alert-moderate-bg); color: var(--color-alert-moderate); }
-.chip-critical { background: var(--color-alert-critical-bg); color: var(--color-alert-critical); }
-.chip-info     { background-color: #EAF4F6; color: var(--color-teal); }
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ----------------------------------------------------------------
+   19. Scrollbar Styling (webkit)
+   ---------------------------------------------------------------- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+/* ----------------------------------------------------------------
+   20. Mobile Responsive Helpers
+   ---------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-sm-auto {
+    width: auto !important;
+  }
+}
+
+/* Mobile safe area for bottom nav */
+.mobile-safe-bottom {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .mobile-safe-bottom { padding-bottom: 0; }
+}
+
+/* ----------------------------------------------------------------
+   21. Dark Mode Card Override
+   ---------------------------------------------------------------- */
+.dark .card {
+  background: var(--color-surface-card);
+  border-color: var(--color-border);
+}
+
+.dark .feature-card {
+  background: var(--color-surface-card);
+}
+
+/* ----------------------------------------------------------------
+   22. Transition on all interactive elements
+   ---------------------------------------------------------------- */
+button, a, input, select, textarea {
+  transition: var(--transition-fast);
+}

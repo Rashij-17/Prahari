@@ -1,17 +1,5 @@
 /**
- * MedicationsPage
- * ================
- * The Drug Intelligence hub — search for any drug by name and view
- * its full clinical profile from openFDA + RxNorm.
- *
- * States:
- *   idle     → Search bar prompt
- *   loading  → Skeleton loader during API call
- *   results  → List of matching drug summaries
- *   profile  → Full DrugProfileCard for a selected drug
- *   error    → Error state with retry
- *
- * Source: FEATURES_AND_STRUCTURE.md §2.2 (Drug Intelligence Module)
+ * MedicationsPage — v2.0 (Enhanced UI + Responsive)
  */
 
 import { useState, useRef, useCallback } from 'react'
@@ -19,50 +7,62 @@ import DrugProfileCard from '../components/medication/DrugProfileCard.jsx'
 import { getMedicationProfile, searchMedications } from '../services/api.js'
 
 // ---------------------------------------------------------------------------
-// Sub-components
+// Skeleton Card
 // ---------------------------------------------------------------------------
-
-/** Animated skeleton card shown during search/load */
 function SkeletonCard() {
   return (
-    <div className="card skeleton-pulse" style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-      <div style={{ height: '1rem', width: '60%', backgroundColor: 'var(--color-border)', borderRadius: '4px' }} />
-      <div style={{ height: '0.75rem', width: '40%', backgroundColor: 'var(--color-border)', borderRadius: '4px' }} />
-      <div style={{ height: '0.75rem', width: '80%', backgroundColor: 'var(--color-border)', borderRadius: '4px' }} />
+    <div className="card skeleton-pulse" style={{
+      padding: '1rem 1.25rem',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.625rem',
+    }}>
+      <div style={{ height: '1rem', width: '55%', background: 'var(--color-border)', borderRadius: '6px' }}/>
+      <div style={{ height: '0.75rem', width: '35%', background: 'var(--color-border)', borderRadius: '6px' }}/>
+      <div style={{ height: '0.75rem', width: '75%', background: 'var(--color-border)', borderRadius: '6px' }}/>
     </div>
   )
 }
 
-/** Individual drug result card in the search list */
+// ---------------------------------------------------------------------------
+// Drug Result Item
+// ---------------------------------------------------------------------------
 function DrugResultItem({ drug, onSelect }) {
-  const name        = drug.generic_name || drug.name || drug.brand_name || 'Unknown'
-  const brand       = drug.brand_name && drug.brand_name !== name ? drug.brand_name : ''
-  const route       = Array.isArray(drug.route) ? drug.route.join(', ') : ''
-  const urgency     = drug.urgency_level || 'safe'
-  const urgencyColor = { safe: 'var(--color-sage)', moderate: 'var(--color-alert-moderate)', critical: 'var(--color-alert-critical)' }[urgency]
+  const name     = drug.generic_name || drug.name || drug.brand_name || 'Unknown'
+  const brand    = drug.brand_name && drug.brand_name !== name ? drug.brand_name : ''
+  const route    = Array.isArray(drug.route) ? drug.route.join(', ') : ''
+  const urgency  = drug.urgency_level || 'safe'
+  const urgencyColor = {
+    safe:     'var(--color-alert-safe)',
+    moderate: 'var(--color-alert-moderate)',
+    critical: 'var(--color-alert-critical)',
+  }[urgency]
+
+  const [hovered, setHovered] = useState(false)
 
   return (
     <button
       onClick={() => onSelect(name)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         width:           '100%',
         textAlign:       'left',
-        background:      'var(--color-surface-card)',
-        border:          '1px solid var(--color-border)',
-        borderRadius:    '10px',
+        background:      hovered ? 'var(--color-teal-subtle)' : 'var(--color-surface-card)',
+        border:          `1.5px solid ${hovered ? 'var(--color-teal)' : 'var(--color-border)'}`,
+        borderRadius:    '12px',
         padding:         '0.875rem 1.125rem',
         cursor:          'pointer',
-        transition:      'all 150ms ease-in-out',
+        transition:      'var(--transition-standard)',
         display:         'flex',
         alignItems:      'center',
         justifyContent:  'space-between',
         gap:             '0.75rem',
+        boxShadow:       hovered ? 'var(--shadow-sm)' : 'none',
       }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-teal)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(42,127,140,0.12)' }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.boxShadow = 'none' }}
     >
       <div>
-        <p style={{ margin: '0 0 0.2rem', fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>
+        <p style={{ margin: '0 0 0.2rem', fontWeight: 700, color: 'var(--color-text-primary)', fontSize: '0.9375rem' }}>
           {name}
         </p>
         {brand && (
@@ -71,32 +71,41 @@ function DrugResultItem({ drug, onSelect }) {
           </p>
         )}
         {route && (
-          <p style={{ margin: 0, color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
+          <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
             Route: {route}
           </p>
         )}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem', flexShrink: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem', flexShrink: 0 }}>
         {drug.has_boxed_warning && (
-          <span style={{ fontSize: '0.65rem', color: 'var(--color-alert-critical)', fontWeight: 700 }}>⬛ BLACK BOX</span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--color-alert-critical)', fontWeight: 700, letterSpacing: '0.02em' }}>
+            ⬛ BLACK BOX
+          </span>
         )}
-        <span style={{ fontSize: '0.7rem', color: urgencyColor, fontWeight: 600, textTransform: 'uppercase' }}>
+        <span style={{ fontSize: '0.68rem', color: urgencyColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           {urgency}
         </span>
-        <span style={{ color: 'var(--color-teal)', fontSize: '1rem' }}>→</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="var(--color-teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
       </div>
     </button>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Main Page Component
+// Main Page
 // ---------------------------------------------------------------------------
+
+const QUICK_SEARCHES = [
+  'Metformin', 'Paracetamol', 'Amoxicillin', 'Omeprazole',
+  'Ibuprofen', 'Aspirin', 'Atorvastatin', 'Losartan',
+]
 
 export default function MedicationsPage() {
   const [phase,       setPhase]       = useState('idle')
-  // Phases: 'idle' | 'loading' | 'results' | 'profile' | 'error'
-
   const [query,       setQuery]       = useState('')
   const [results,     setResults]     = useState([])
   const [profile,     setProfile]     = useState(null)
@@ -104,19 +113,13 @@ export default function MedicationsPage() {
   const [error,       setError]       = useState('')
   const inputRef = useRef(null)
 
-  // ---------------------------------------------------------------------------
-  // Search
-  // ---------------------------------------------------------------------------
-
   const handleSearch = useCallback(async (searchQuery) => {
     const q = (searchQuery || query).trim()
     if (q.length < 2) return
-
     setPhase('loading')
     setError('')
     setResults([])
     setProfile(null)
-
     try {
       const data = await searchMedications(q)
       setResults(data.results || [])
@@ -127,29 +130,20 @@ export default function MedicationsPage() {
     }
   }, [query])
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleSearch()
-  }
-
-  // ---------------------------------------------------------------------------
-  // Profile Load
-  // ---------------------------------------------------------------------------
+  const handleKeyDown = (e) => { if (e.key === 'Enter') handleSearch() }
 
   const loadProfile = useCallback(async (drugName) => {
     setPhase('loading')
     setProfileName(drugName)
     setError('')
-
     try {
       const data = await getMedicationProfile(drugName)
       setProfile(data)
       setPhase('profile')
     } catch (err) {
-      if (err.message?.includes('404')) {
-        setError(`No clinical data found for "${drugName}". Try searching by the generic name.`)
-      } else {
-        setError(err.message || 'Could not load drug profile.')
-      }
+      setError(err.message?.includes('404')
+        ? `No clinical data found for "${drugName}". Try the generic name.`
+        : err.message || 'Could not load drug profile.')
       setPhase('error')
     }
   }, [])
@@ -159,42 +153,20 @@ export default function MedicationsPage() {
     setPhase(results.length > 0 ? 'results' : 'idle')
   }
 
-  // ---------------------------------------------------------------------------
-  // Popular Quick Searches
-  // ---------------------------------------------------------------------------
-
-  const QUICK_SEARCHES = [
-    'Metformin', 'Paracetamol', 'Amoxicillin', 'Omeprazole',
-    'Ibuprofen', 'Aspirin', 'Atorvastatin', 'Losartan',
-  ]
-
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
-
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '760px', margin: '0 auto' }}>
 
-      {/* Page heading (always visible unless viewing profile) */}
+      {/* Page Header */}
       {phase !== 'profile' && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize:   '1.75rem',
-            color:      'var(--color-text-primary)',
-            margin:     '0 0 0.375rem',
-          }}>
-            Drug Intelligence
-          </h1>
-          <p style={{ color: 'var(--color-text-secondary)', margin: 0, fontSize: '0.95rem' }}>
-            Search any medication to view indications, dosage, warnings, and interactions — sourced from openFDA and RxNorm.
-          </p>
+        <div className="page-header">
+          <h1>Drug Intelligence</h1>
+          <p>Search any medication to view indications, dosage, warnings, and interactions — sourced from openFDA and RxNorm.</p>
         </div>
       )}
 
-      {/* === SEARCH BAR (visible except on profile) === */}
+      {/* Search Bar */}
       {phase !== 'profile' && (
-        <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+        <div className="search-wrapper" style={{ marginBottom: '1.5rem' }}>
           <input
             id="medication-search-input"
             ref={inputRef}
@@ -204,21 +176,6 @@ export default function MedicationsPage() {
             onKeyDown={handleKeyDown}
             placeholder="Search by drug name, brand, or ingredient…"
             aria-label="Search medications"
-            style={{
-              width:           '100%',
-              padding:         '0.875rem 3.5rem 0.875rem 1.125rem',
-              borderRadius:    '10px',
-              border:          '1.5px solid var(--color-border)',
-              backgroundColor: 'var(--color-surface-card)',
-              color:           'var(--color-text-primary)',
-              fontFamily:      'var(--font-sans)',
-              fontSize:        '0.95rem',
-              outline:         'none',
-              boxSizing:       'border-box',
-              transition:      'border-color 150ms ease',
-            }}
-            onFocus={e => e.target.style.borderColor = 'var(--color-teal)'}
-            onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
           />
           <button
             id="medication-search-btn"
@@ -226,105 +183,107 @@ export default function MedicationsPage() {
             disabled={query.length < 2}
             aria-label="Search"
             style={{
-              position:        'absolute',
-              right:           '0.75rem',
-              top:             '50%',
-              transform:       'translateY(-50%)',
-              background:      'none',
-              border:          'none',
-              cursor:          query.length < 2 ? 'not-allowed' : 'pointer',
-              fontSize:        '1.25rem',
-              opacity:         query.length < 2 ? 0.4 : 1,
-              padding:         '0.25rem',
+              position:   'absolute',
+              right:      '0.75rem',
+              background: 'none',
+              border:     'none',
+              cursor:     query.length < 2 ? 'not-allowed' : 'pointer',
+              fontSize:   '1.25rem',
+              opacity:    query.length < 2 ? 0.35 : 1,
+              padding:    '0.25rem',
+              transition: 'var(--transition-fast)',
+              transform:  query.length >= 2 ? 'scale(1.1)' : 'scale(1)',
             }}
-          >
-            🔍
-          </button>
+          >🔍</button>
         </div>
       )}
 
-      {/* === IDLE — Quick searches === */}
+      {/* Idle — Quick Searches */}
       {phase === 'idle' && (
-        <div>
-          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
-            Popular searches:
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className="fade-in-up">
+          <div className="section-label">Popular searches</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem' }}>
             {QUICK_SEARCHES.map(name => (
               <button
                 key={name}
+                className="pill-btn"
                 onClick={() => { setQuery(name); handleSearch(name) }}
-                style={{
-                  padding:         '0.4rem 0.875rem',
-                  borderRadius:    '999px',
-                  border:          '1px solid var(--color-border)',
-                  background:      'var(--color-surface-card)',
-                  color:           'var(--color-text-secondary)',
-                  fontSize:        '0.825rem',
-                  cursor:          'pointer',
-                  transition:      'all 120ms ease',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-teal)'; e.currentTarget.style.color = 'var(--color-teal)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text-secondary)' }}
               >
                 {name}
               </button>
             ))}
           </div>
+
+          {/* Feature info cards */}
+          <div className="grid-auto-fill" style={{ '--min': '220px' }}>
+            {[
+              { icon: '🔬', title: 'Clinical Data', desc: 'Indications, dosage, contraindications from FDA' },
+              { icon: '⚠️', title: 'Drug Interactions', desc: 'Pairwise interaction checks with severity tiers' },
+              { icon: '💊', title: 'Brand Lookup', desc: 'Resolve brand names to generic equivalents' },
+            ].map(f => (
+              <div key={f.title} className="card" style={{ padding: '1.25rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>{f.icon}</div>
+                <h3 style={{ fontSize: '0.9375rem', margin: '0 0 0.375rem' }}>{f.title}</h3>
+                <p style={{ fontSize: '0.8rem', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* === LOADING === */}
+      {/* Loading */}
       {phase === 'loading' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
       )}
 
-      {/* === RESULTS === */}
+      {/* Results */}
       {phase === 'results' && (
-        <div>
-          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
-            {results.length} result{results.length !== 1 ? 's' : ''} for "{query}"
-          </p>
+        <div className="fade-in-up">
+          <div className="section-label">{results.length} result{results.length !== 1 ? 's' : ''} for "{query}"</div>
           {results.length === 0 ? (
-            <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🔎</div>
-              <p style={{ color: 'var(--color-text-secondary)' }}>
+            <div className="card" style={{ padding: '2.5rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔎</div>
+              <h3 style={{ color: 'var(--color-text-primary)', fontSize: '1rem' }}>No results found</h3>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
                 No drugs found for "<strong>{query}</strong>". Try the generic name (e.g. "paracetamol" instead of "Calpol").
               </p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
               {results.map((drug, idx) => (
-                <DrugResultItem
-                  key={idx}
-                  drug={drug}
-                  onSelect={loadProfile}
-                />
+                <DrugResultItem key={idx} drug={drug} onSelect={loadProfile} />
               ))}
             </div>
           )}
         </div>
       )}
 
-      {/* === PROFILE === */}
+      {/* Profile */}
       {phase === 'profile' && profile && (
         <DrugProfileCard profile={profile} onClose={backToResults} />
       )}
 
-      {/* === ERROR === */}
+      {/* Error */}
       {phase === 'error' && (
-        <div className="card ribbon-moderate" style={{ padding: '1.25rem 1.25rem 1.25rem 1.75rem' }}>
-          <h3 style={{ color: 'var(--color-alert-moderate)', margin: '0 0 0.5rem' }}>Could not load results</h3>
-          <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 1rem', fontSize: '0.9rem' }}>{error}</p>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button id="medication-retry-btn" className="btn-primary" onClick={() => handleSearch()}>Retry</button>
-            <button className="btn-secondary" onClick={() => { setPhase('idle'); setQuery('') }}>Clear Search</button>
+        <div className="card ribbon-moderate modal-enter" style={{ padding: '1.5rem 1.5rem 1.5rem 1.875rem' }}>
+          <h3 style={{ color: 'var(--color-alert-moderate)', margin: '0 0 0.5rem', fontSize: '1rem' }}>
+            ⚠️ Could not load results
+          </h3>
+          <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 1.25rem', fontSize: '0.875rem' }}>
+            {error}
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button id="medication-retry-btn" className="btn-primary btn-sm-auto" onClick={() => handleSearch()}>
+              Retry
+            </button>
+            <button className="btn-secondary btn-sm-auto" onClick={() => { setPhase('idle'); setQuery('') }}>
+              Clear Search
+            </button>
           </div>
         </div>
       )}
-
     </div>
   )
 }

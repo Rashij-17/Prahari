@@ -1,3 +1,11 @@
+<div align="center">
+
+<br/>
+
+<!-- Logo / Banner -->
+<img src="https://readme-typing-svg.demolab.com?font=DM+Serif+Display&size=60&duration=3000&pause=1000&color=2A7F8C&center=true&vCenter=true&width=600&lines=🩺+Prahari;Your+Health+Guardian" alt="Prahari Banner" />
+
+<br/>
 
 # Prahari — MedLens
 
