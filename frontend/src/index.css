@@ -1,0 +1,357 @@
+/* ================================================================
+   Prahari — Global Stylesheet (index.css)
+   "Vigilant Sage" Design System
+   ================================================================
+   Source: FEATURES_AND_STRUCTURE.md § 4.2 (Colours), § 4.3 (Typography),
+           § 4.4 (Spatial System), § 4.5 (Transitions)
+
+   Layer order:
+   1. Tailwind directives
+   2. CSS custom properties (design tokens)
+   3. Base resets & global element styles
+   4. Utility & animation classes
+   ================================================================ */
+
+/* ----------------------------------------------------------------
+   1. Tailwind CSS Directives
+   ---------------------------------------------------------------- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ----------------------------------------------------------------
+   2. Design Tokens — CSS Custom Properties
+   ----------------------------------------------------------------
+   All colour values are derived from FEATURES_AND_STRUCTURE.md § 4.2.
+   Using CSS variables allows runtime dark-mode switching without
+   JavaScript class toggling on every element. We set the tokens on
+   :root (light mode default) and override inside .dark (class-based
+   Tailwind dark mode).
+   ---------------------------------------------------------------- */
+
+:root {
+  /* --- Surface / Backgrounds --- */
+  --color-surface:          #F7F5F0;   /* Primary page bg — warm off-white    */
+  --color-surface-card:     #FFFFFF;   /* Card & modal backgrounds             */
+  --color-beige:            #D4C5A9;   /* Secondary surfaces, disabled states  */
+
+  /* --- Text Colours --- */
+  --color-text-primary:     #1A1A2E;   /* Headings & primary body copy         */
+  --color-text-secondary:   #5A5A72;   /* Captions, labels, metadata           */
+  --color-text-inverse:     #F7F5F0;   /* Text on dark/coloured backgrounds    */
+
+  /* --- Brand Colours --- */
+  --color-sage:             #7A9E87;   /* Primary accent — safe/routine CTAs   */
+  --color-sage-light:       #B8D4C0;   /* Hover states, progress fills         */
+  --color-sage-dark:        #5C8069;   /* Sage pressed/active state            */
+
+  --color-teal:             #2A7F8C;   /* Interactive elements, links, info    */
+  --color-teal-dark:        #1C5C66;   /* Teal hover/active, focus borders     */
+  --color-teal-light:       #4FAABA;   /* Teal light tint                      */
+
+  /* --- Alert States --- */
+  --color-alert-critical:   #C0392B;   /* T1 — life-threatening drug interaction */
+  --color-alert-critical-bg:#FDECEA;
+  --color-alert-moderate:   #D4860A;   /* T2 — monitor closely                 */
+  --color-alert-moderate-bg:#FDF3E0;
+  --color-alert-safe:       #2E7D52;   /* T3 — minimal significance            */
+  --color-alert-safe-bg:    #E8F5EE;
+
+  /* --- Borders & Focus --- */
+  --color-border:           #E2DCCF;   /* Input outlines, card borders         */
+  --color-focus-ring:       #2A7F8C;   /* 3px ring, 2px offset                 */
+
+  /* --- Spatial System (base unit: 4px) --- */
+  --spacing-section-desktop: 64px;
+  --spacing-section-mobile:  40px;
+  --spacing-card-desktop:    24px;
+  --spacing-card-mobile:     16px;
+
+  /* --- Typography Base --- */
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-sans:    'Inter', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
+
+  /* --- Transitions --- */
+  --transition-standard: all 150ms ease-in-out;
+  --transition-modal:    all 200ms ease-in-out;
+}
+
+/* ----------------------------------------------------------------
+   Dark Mode Token Overrides
+   ----------------------------------------------------------------
+   Applied when <html class="dark"> — set by ThemeToggle component.
+   Alert colours retain near-identical hue but are brightened by ~10%
+   to maintain WCAG AA contrast on dark surfaces.
+   Source: FEATURES_AND_STRUCTURE.md § 4.2 "Dark Mode Variants"
+   ---------------------------------------------------------------- */
+.dark {
+  --color-surface:          #12141A;
+  --color-surface-card:     #1E2029;
+  --color-beige:            #2A2D38;
+  --color-text-primary:     #EDF0F5;
+  --color-text-secondary:   #9099AB;
+  --color-border:           #2D303A;
+
+  /* Alert colours brightened ~10% for dark surface contrast */
+  --color-alert-critical:   #D9534F;
+  --color-alert-critical-bg:#2D1714;
+  --color-alert-moderate:   #E8961A;
+  --color-alert-moderate-bg:#2A2010;
+  --color-alert-safe:       #3D9E6A;
+  --color-alert-safe-bg:    #0F2419;
+}
+
+/* ----------------------------------------------------------------
+   3. Base Resets & Global Element Styles
+   ---------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Smooth scrolling for in-page anchors */
+  scroll-behavior: smooth;
+  /* Prevent font size inflation on iOS */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* Apply our design token colours as defaults */
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+
+  /* Typography */
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+
+  /* Smooth font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Remove default margin */
+  margin: 0;
+
+  /* Transition background/text when switching themes */
+  transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+}
+
+/* Heading typography */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
+  margin-top: 0;
+  line-height: 1.2;
+}
+
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+
+/* Body copy */
+p {
+  margin-top: 0;
+  color: var(--color-text-secondary);
+}
+
+/* Links */
+a {
+  color: var(--color-teal);
+  text-decoration: none;
+  transition: color 150ms ease-in-out;
+}
+a:hover {
+  color: var(--color-teal-dark);
+}
+
+/* Drug names / chemical notation */
+code, kbd, pre, .font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Focus ring — keyboard accessibility */
+:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ----------------------------------------------------------------
+   4. Utility Classes & Animation
+   ---------------------------------------------------------------- */
+
+/* --- Content Container --- */
+.container-prahari {
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* --- Card Base --- */
+.card {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: var(--spacing-card-desktop);
+  box-shadow: 0 2px 12px rgba(26, 26, 46, 0.06);
+  transition: var(--transition-standard);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(26, 26, 46, 0.12);
+}
+
+/* --- Urgency Ribbon (4px left border — the signature design element) --- */
+/* Source: FEATURES_AND_STRUCTURE.md § 4.5 "Result Cards"                  */
+.ribbon-safe     { border-left: 4px solid var(--color-alert-safe); }
+.ribbon-moderate { border-left: 4px solid var(--color-alert-moderate); }
+.ribbon-critical { border-left: 4px solid var(--color-alert-critical); }
+
+/* --- Skeleton Loader (shimmer animation) --- */
+/* Source: FEATURES_AND_STRUCTURE.md § 4.5 "Transitions"                   */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-beige) 25%,
+    var(--color-surface-card) 50%,
+    var(--color-beige) 75%
+  );
+  background-size: 800px 100%;
+  border-radius: 4px;
+}
+
+/* skeleton-pulse: applies shimmer + opacity pulse to a card container */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.skeleton-pulse {
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    var(--color-beige) 25%,
+    var(--color-surface-card) 50%,
+    var(--color-beige) 75%
+  );
+  background-size: 800px 100%;
+  pointer-events: none;
+}
+
+/* --- Pulsing ring for loading states (scanner processing) --- */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(122, 158, 135, 0.7); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 10px rgba(122, 158, 135, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(122, 158, 135, 0); }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+
+/* --- Modal entry animation --- */
+/* Source: FEATURES_AND_STRUCTURE.md § 4.5 "Modal entry"                   */
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-enter {
+  animation: modal-enter 200ms ease-in-out forwards;
+}
+
+/* --- Respect reduced motion preferences --- */
+/* Source: FEATURES_AND_STRUCTURE.md § 4.5 "prefers-reduced-motion"        */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Button base reset --- */
+button {
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+/* --- Primary Button --- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: var(--color-teal);
+  color: var(--color-text-inverse);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  border: none;
+  border-radius: 8px;
+  transition: var(--transition-standard);
+}
+.btn-primary:hover {
+  background-color: var(--color-teal-dark);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* --- Secondary Button --- */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: transparent;
+  color: var(--color-teal);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  border: 1.5px solid var(--color-teal);
+  border-radius: 8px;
+  transition: var(--transition-standard);
+}
+.btn-secondary:hover {
+  background-color: var(--color-teal);
+  color: var(--color-text-inverse);
+}
+
+/* --- Chip / Badge --- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 4px;
+}
+
+.chip-safe     { background: var(--color-alert-safe-bg);     color: var(--color-alert-safe); }
+.chip-moderate { background: var(--color-alert-moderate-bg); color: var(--color-alert-moderate); }
+.chip-critical { background: var(--color-alert-critical-bg); color: var(--color-alert-critical); }
+.chip-info     { background-color: #EAF4F6; color: var(--color-teal); }

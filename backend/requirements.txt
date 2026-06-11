@@ -1,0 +1,30 @@
+# ============================================================
+# Prahari (MedLens) — Backend Dependencies
+# FastAPI + Uvicorn server stack
+# ============================================================
+
+# --- Web Framework & ASGI Server ---
+fastapi==0.111.0
+uvicorn[standard]>=0.30.1
+
+# --- Computer Vision & OCR ---
+opencv-python>=4.9.0.80  # pin relaxed for Python 3.14 wheel compatibility
+pytesseract>=0.3.13     # 0.3.10 uses pkgutil.find_loader removed in Python 3.14
+Pillow>=10.4.0          # 10.3.0 has no Windows wheel; 10.4+ ships pre-built .whl
+numpy>=2.0.0            # 2.x ships prebuilt wheels for Python 3.14; 1.x has no cp314 wheel
+
+# --- HTTP Client (for external API calls) ---
+httpx>=0.27.0           # relax pin — older wheels may not have cp314
+
+# --- Data Validation & Serialisation ---
+pydantic>=2.10.0        # 2.10+ ships pydantic-core with cp314 wheels; 2.7.x does not
+pydantic-settings>=2.4.0
+
+# --- Language Detection (for triage symptom input) ---
+langdetect==1.0.9
+
+# --- Environment Variable Management ---
+python-dotenv==1.0.1
+
+# --- CORS & Security Middleware ---
+# (included with fastapi via starlette)

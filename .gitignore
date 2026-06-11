@@ -1,0 +1,53 @@
+# ============================================================
+# Prahari — .gitignore
+# ============================================================
+
+# --- Python virtual environment ---
+backend/venv/
+backend/.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# --- Environment secrets (NEVER commit these) ---
+backend/.env
+.env
+*.env
+
+# --- Node.js ---
+frontend/node_modules/
+node_modules/
+dist/
+build/
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs ---
+*.log
+npm-debug.log*
+
+# --- Test / Coverage ---
+.coverage
+htmlcov/
+.pytest_cache/
+
+# --- Build artefacts ---
+*.egg-info/
+*.egg
+.eggs/
+site/
+
+# --- Tesseract (binary — not needed in repo) ---
+*.traineddata

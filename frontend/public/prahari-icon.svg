@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Shield body: Prahari sentinel mark -->
+  <path
+    d="M16 2L4 7v9c0 6.627 5.373 12 12 12s12-5.373 12-12V7L16 2z"
+    fill="#2A7F8C"
+    fill-opacity="0.2"
+    stroke="#2A7F8C"
+    stroke-width="1.5"
+  />
+  <!-- Health cross symbol in sage green -->
+  <rect x="14" y="9" width="4" height="14" rx="1" fill="#7A9E87"/>
+  <rect x="9" y="14" width="14" height="4" rx="1" fill="#7A9E87"/>
+</svg>
