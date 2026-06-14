@@ -2,7 +2,8 @@
  * MedicationsPage — v2.0 (Enhanced UI + Responsive)
  */
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import DrugProfileCard from '../components/medication/DrugProfileCard.jsx'
 import { getMedicationProfile, searchMedications } from '../services/api.js'
 
@@ -39,17 +40,20 @@ function DrugResultItem({ drug, onSelect }) {
   }[urgency]
 
   const [hovered, setHovered] = useState(false)
+  const [focused, setFocused] = useState(false)
 
   return (
     <button
       onClick={() => onSelect(name)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       style={{
         width:           '100%',
         textAlign:       'left',
         background:      hovered ? 'var(--color-teal-subtle)' : 'var(--color-surface-card)',
-        border:          `1.5px solid ${hovered ? 'var(--color-teal)' : 'var(--color-border)'}`,
+        border:          `1.5px solid ${hovered || focused ? 'var(--color-teal)' : 'var(--color-border)'}`,
         borderRadius:    '12px',
         padding:         '0.875rem 1.125rem',
         cursor:          'pointer',
@@ -58,7 +62,8 @@ function DrugResultItem({ drug, onSelect }) {
         alignItems:      'center',
         justifyContent:  'space-between',
         gap:             '0.75rem',
-        boxShadow:       hovered ? 'var(--shadow-sm)' : 'none',
+        boxShadow:       hovered || focused ? 'var(--shadow-sm), 0 0 0 3px rgba(42, 127, 140, 0.2)' : 'none',
+        outline:         'none',
       }}
     >
       <div>
@@ -105,6 +110,9 @@ const QUICK_SEARCHES = [
 ]
 
 export default function MedicationsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const searchParam = searchParams.get('search')
+
   const [phase,       setPhase]       = useState('idle')
   const [query,       setQuery]       = useState('')
   const [results,     setResults]     = useState([])
@@ -129,6 +137,13 @@ export default function MedicationsPage() {
       setPhase('error')
     }
   }, [query])
+
+  useEffect(() => {
+    if (searchParam) {
+      setQuery(searchParam)
+      handleSearch(searchParam)
+    }
+  }, [searchParam, handleSearch])
 
   const handleKeyDown = (e) => { if (e.key === 'Enter') handleSearch() }
 

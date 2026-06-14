@@ -36,6 +36,9 @@ _TIMEOUT     = 10.0  # seconds
 # SCD = Clinical Drug
 _VALID_TTYS = {"IN", "BN", "SBD", "SCD", "MIN"}
 
+# In-memory cache for resolved drug names to RxCUI
+_RESOLVE_CACHE: dict[str, Optional[str]] = {}
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -87,6 +90,12 @@ async def resolve_name_to_rxcui(drug_name: str) -> Optional[str]:
     if not drug_name:
         return None
 
+    cache_key = drug_name.lower()
+    if cache_key in _RESOLVE_CACHE:
+        logger.info("RxNorm cache hit: '%s' → RxCUI %s", drug_name, _RESOLVE_CACHE[cache_key])
+        return _RESOLVE_CACHE[cache_key]
+
+    rxcui = None
     async with httpx.AsyncClient() as client:
         try:
             # First try exact match via /rxcui
@@ -97,6 +106,7 @@ async def resolve_name_to_rxcui(drug_name: str) -> Optional[str]:
             )
             if rxcui:
                 logger.info("RxNorm exact match: '%s' → RxCUI %s", drug_name, rxcui)
+                _RESOLVE_CACHE[cache_key] = rxcui
                 return rxcui
 
             # Fallback: approximate term search
@@ -112,11 +122,14 @@ async def resolve_name_to_rxcui(drug_name: str) -> Optional[str]:
             if candidates:
                 rxcui = candidates[0].get("rxcui")
                 logger.info("RxNorm approx match: '%s' → RxCUI %s", drug_name, rxcui)
+                _RESOLVE_CACHE[cache_key] = rxcui
                 return rxcui
 
         except Exception as exc:
             logger.warning("RxNorm resolve failed for '%s': %s", drug_name, exc)
 
+    # Cache failure to prevent repeated external API requests
+    _RESOLVE_CACHE[cache_key] = None
     return None
 
 

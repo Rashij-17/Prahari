@@ -43,9 +43,11 @@ Prahari maintains strict ethical and legal boundaries:
 
 ```
  Phase 1: Core Setup  ──►  Phase 2: Sage UI  ──►  Phase 3: Scanner  ──►  Phase 4: Drug Intel  ──►  Phase 5: Triage  ──►  Phase 6: Deployment
-    [ COMPLETE ]             [ COMPLETE ]        [ IN PROGRESS ]       [ IN PROGRESS ]        [ IN PROGRESS ]           [ PLANNED ]
+    [ COMPLETE ]             [ COMPLETE ]        [ COMPLETE ]          [ COMPLETE ]           [ COMPLETE ]          [ IN PROGRESS ]
 ```
 
 *   **Phase 1 & 2:** Established FastAPI backend configurations, React client layout structure, CSS variables, and layout routing.
 *   **Phase 3 & 4:** Image capture canvas triggers, OpenCV preprocess services, RxNorm lookup mapping, and openFDA details rendering.
-*   **Phase 5 & 6:** Symptom query parsers, Places nearby search integration, Haversine geo-sorting, and PWA configuration checklists.
+*   **Phase 5:** Triage Symptom NLP assessments, Places nearby search integrations, Haversine geo-sorting, and router splitting.
+*   **Phase 6:** Response caching, API rate limiting, PWA manifests & offline service workers, and automated test suites.
+

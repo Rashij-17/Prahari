@@ -24,6 +24,10 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+# In-memory caches for drug profile lookups
+_PROFILE_BY_NAME_CACHE: dict[str, Optional[dict]] = {}
+_PROFILE_BY_RXCUI_CACHE: dict[str, Optional[dict]] = {}
+
 # ---------------------------------------------------------------------------
 # openFDA Configuration
 # ---------------------------------------------------------------------------
@@ -31,18 +35,7 @@ logger = logging.getLogger(__name__)
 _OPENFDA_BASE = "https://api.fda.gov/drug/label.json"
 _TIMEOUT      = 12.0  # openFDA can be slow on first request
 
-# Fields we extract from the full label response
-_LABEL_FIELDS = [
-    "brand_name",
-    "generic_name",
-    "manufacturer_name",
-    "product_type",
-    "route",
-    "substance_name",
-    "rxcui",
-    "unii",
-    "ndc",
-]
+
 
 
 # ---------------------------------------------------------------------------
@@ -164,6 +157,11 @@ async def get_drug_profile_by_name(drug_name: str) -> Optional[dict]:
     if not drug_name:
         return None
 
+    cache_key = drug_name.lower()
+    if cache_key in _PROFILE_BY_NAME_CACHE:
+        logger.info("openFDA name cache hit: '%s'", drug_name)
+        return _PROFILE_BY_NAME_CACHE[cache_key]
+
     # Strategy 1: search by generic name (ingredient)
     for field in ["openfda.generic_name", "openfda.brand_name", "openfda.substance_name"]:
         params = {
@@ -174,9 +172,11 @@ async def get_drug_profile_by_name(drug_name: str) -> Optional[dict]:
         if data and data.get("results"):
             profile = _extract_profile(data["results"][0])
             logger.info("openFDA hit via %s for '%s': %s", field, drug_name, profile["brand_name"] or profile["generic_name"])
+            _PROFILE_BY_NAME_CACHE[cache_key] = profile
             return profile
 
     logger.info("openFDA: no results for '%s'", drug_name)
+    _PROFILE_BY_NAME_CACHE[cache_key] = None
     return None
 
 
@@ -191,6 +191,14 @@ async def get_drug_profile_by_rxcui(rxcui: str) -> Optional[dict]:
     Returns:
         Normalised drug profile dict, or None if not found.
     """
+    rxcui = rxcui.strip() if rxcui else ""
+    if not rxcui:
+        return None
+
+    if rxcui in _PROFILE_BY_RXCUI_CACHE:
+        logger.info("openFDA RxCUI cache hit: %s", rxcui)
+        return _PROFILE_BY_RXCUI_CACHE[rxcui]
+
     params = {
         "search": f"openfda.rxcui:{rxcui}",
         "limit": 1,
@@ -199,7 +207,10 @@ async def get_drug_profile_by_rxcui(rxcui: str) -> Optional[dict]:
     if data and data.get("results"):
         profile = _extract_profile(data["results"][0])
         logger.info("openFDA hit via RxCUI %s: %s", rxcui, profile["generic_name"])
+        _PROFILE_BY_RXCUI_CACHE[rxcui] = profile
         return profile
+
+    _PROFILE_BY_RXCUI_CACHE[rxcui] = None
     return None
 
 
@@ -220,8 +231,7 @@ async def search_drugs_openfda(query: str, limit: int = 8) -> list[dict]:
 
     params = {
         "search": (
-            f'openfda.generic_name:"{query}" '
-            f'openfda.brand_name:"{query}"'
+            f'openfda.generic_name:"{query}"+OR+openfda.brand_name:"{query}"'
         ),
         "limit": limit,
     }

@@ -81,13 +81,19 @@ function UrgencyResult({ result, onReset }) {
                 </span>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{
-                    width: `${Math.round(c.probability * 100)}px`,
-                    maxWidth: '100px',
+                    width: '100px',
                     height: '6px',
-                    backgroundColor: 'var(--color-sage)',
+                    backgroundColor: 'var(--color-border)',
                     borderRadius: '3px',
+                    overflow: 'hidden',
                     marginBottom: '2px',
-                  }} />
+                  }}>
+                    <div style={{
+                      width: `${Math.round(c.probability * 100)}%`,
+                      height: '100%',
+                      backgroundColor: 'var(--color-sage)',
+                    }} />
+                  </div>
                   <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
                     {Math.round(c.probability * 100)}%
                   </span>

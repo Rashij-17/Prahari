@@ -18,12 +18,14 @@ Source: FEATURES_AND_STRUCTURE.md §2.2 (Drug Intelligence)
         IMPLEMENTATION_PLAN.md Phase 4
 """
 
+import asyncio
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Query, Depends
 
+from middleware.rate_limiter import limit_profile
+from models.medication import DrugProfile, DrugSummary, MedicationSearchResponse
 from services.rxnorm_service import resolve_name_to_rxcui, search_drugs
 from services.openfda_service import (
     get_drug_profile_by_name,
@@ -37,68 +39,13 @@ router = APIRouter()
 
 
 # ---------------------------------------------------------------------------
-# Response Schemas
-# ---------------------------------------------------------------------------
-
-class DrugProfile(BaseModel):
-    """
-    Full clinical drug profile returned by GET /medication/profile.
-    Fields may be empty strings if the openFDA label does not contain them.
-    """
-    # Identity
-    brand_name:    str = ""
-    generic_name:  str = ""
-    manufacturer:  str = ""
-    product_type:  str = ""
-    route:         list[str] = []
-    rxcui:         list[str] = []
-    ndc:           list[str] = []
-
-    # Clinical
-    indications:       str = ""
-    dosage:            str = ""
-    warnings:          str = ""
-    boxed_warning:     str = ""
-    contraindications: str = ""
-    adverse_reactions: str = ""
-    drug_interactions: str = ""
-    precautions:       str = ""
-    storage:           str = ""
-    description:       str = ""
-
-    # Safety classification
-    has_boxed_warning: bool = False
-    urgency_level:     str = "safe"   # "safe" | "moderate" | "critical"
-
-
-class DrugSummary(BaseModel):
-    """Lightweight drug result returned by search endpoints."""
-    rxcui:           Optional[str] = None
-    name:            str = ""
-    brand_name:      str = ""
-    generic_name:    str = ""
-    manufacturer:    str = ""
-    route:           list[str] = []
-    has_boxed_warning: bool = False
-    urgency_level:   str = "safe"
-    tty:             str = ""   # RxNorm term type (IN, BN, SCD, etc.)
-
-
-class MedicationSearchResponse(BaseModel):
-    """Combined search response from both RxNorm and openFDA."""
-    query:   str
-    results: list[DrugSummary]
-    total:   int
-    source:  str   # "rxnorm" | "openfda" | "combined"
-
-
-# ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
 
 @router.get(
     "/profile",
     response_model=DrugProfile,
+    dependencies=[Depends(limit_profile)],
     summary="Get full drug clinical profile",
     description=(
         "Two-stage pipeline: RxNorm resolves the drug name to an RxCUI, "
@@ -180,12 +127,19 @@ async def search_medications(
     logger.info("Medication search: '%s' (limit=%d)", q, limit)
 
     # Query both sources concurrently
-    import asyncio
     rxnorm_results, fda_results = await asyncio.gather(
         search_drugs(q, max_results=limit),
         search_drugs_openfda(q, limit=limit),
         return_exceptions=True,
     )
+
+    if isinstance(rxnorm_results, Exception):
+        logger.error("RxNorm search failed during query '%s'", q, exc_info=rxnorm_results)
+        rxnorm_results = []
+
+    if isinstance(fda_results, Exception):
+        logger.error("openFDA search failed during query '%s'", q, exc_info=fda_results)
+        fda_results = []
 
     summaries: list[DrugSummary] = []
     seen_names: set[str] = set()

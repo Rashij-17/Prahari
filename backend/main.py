@@ -92,10 +92,10 @@ from routers import medication
 app.include_router(medication.router, prefix="/medication", tags=["Medication"])
 
 # Phase 5 — Symptom Triage + Provider Directory
-from routers import phase5
+from routers import triage, directory
 
-app.include_router(phase5.router, prefix="/triage",    tags=["Triage"],    include_in_schema=True)
-app.include_router(phase5.router, prefix="/directory", tags=["Directory"], include_in_schema=True)
+app.include_router(triage.router, prefix="/triage",    tags=["Triage"],    include_in_schema=True)
+app.include_router(directory.router, prefix="/directory", tags=["Directory"], include_in_schema=True)
 
 # ---------------------------------------------------------------------------
 # Development Entry Point
