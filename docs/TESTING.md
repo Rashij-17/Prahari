@@ -8,10 +8,10 @@ This manual details the testing suite configuration, test directory layout, and 
 
 | Scope | Tooling | Run Command |
 | :--- | :--- | :--- |
-| **Backend Unit & Routes** | `pytest` + `pytest-asyncio` | `cd backend && pytest` |
-| **Backend Coverage** | `pytest-cov` | `pytest --cov=services --cov=routers` |
-| **Frontend Unit** | `Vitest` + React Testing Library | `cd frontend && npm run test` |
-| **Frontend Coverage** | `Vitest` Coverage UI | `npm run coverage` |
+| **Backend Unit & Routes** | *(planned)* `pytest` + `pytest-asyncio` | *(not set up yet)* |
+| **Backend Coverage** | *(planned)* `pytest-cov` | *(not set up yet)* |
+| **Frontend Unit** | *(planned)* `Vitest` + React Testing Library | *(not set up yet)* |
+| **Frontend Coverage** | *(planned)* `Vitest` coverage | *(not set up yet)* |
 
 ---
 

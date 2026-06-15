@@ -6,7 +6,7 @@ This document outlines the Progressive Web App (PWA) requirements, service worke
 
 ## 1. PWA Manifest Specifications
 
-To allow installation on mobile devices (Android/iOS) and desktop browsers, Prahari includes a `manifest.json` under `frontend/public/`:
+To allow installation on mobile devices (Android/iOS) and desktop browsers, Prahari should include a `manifest.json` under `frontend/public/` (not currently present in this repo):
 
 ```json
 {

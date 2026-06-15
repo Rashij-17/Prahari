@@ -21,7 +21,7 @@ Medication reminders are designed to run locally using the **HTML5 Service Worke
 
 1.  **Registering Schedules:** Tapping a medication's "Remind Me" toggle registers a schedule inside the client-side `localStorage`.
 2.  **Notification Authorization:** The browser requests permission via `Notification.requestPermission()`.
-3.  **Active Service Worker Listener:** The Service Worker listens to timers and generates local OS notifications using `self.registration.showNotification()`.
+3.  **Service Worker Trigger:** Notifications are shown in response to events (e.g., Push messages from a backend or user interaction); long-running timers in a Service Worker are not reliable.
 
 ---
 
@@ -71,8 +71,8 @@ When the service worker fires, the OS notification utilizes the following payloa
   "title": "🛡️ Prahari Medication Sentinel",
   "options": {
     "body": "It's time to take Metformin 500mg. Tap to review warnings.",
-    "icon": "/logo192.png",
-    "badge": "/favicon.ico",
+    "icon": "/prahari-icon.svg",
+    "badge": "/prahari-icon.svg",
     "tag": "med-reminder-metformin",
     "requireInteraction": true,
     "actions": [

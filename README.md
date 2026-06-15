@@ -58,30 +58,10 @@
 Prahari utilizes a clinical, highly legible, and reassuring color scheme combined with dynamic animations to optimize accessibility for visually challenged or anxious patients.
 
 <details>
-<summary><b>🎨 View CSS Variables Token Registry (`index.css`)</b></summary>
+<summary><b>🎨 View CSS Variables Token Registry (`frontend/src/index.css`)</b></summary>
 
-```css
-:root {
-  /* Core Colors */
-  --color-bg:                  #fbfbf9;   /* Off-white, soft on eyes */
-  --color-surface:             #ffffff;   /* Card background */
-  --color-surface-card:        #f5f4ef;   /* Shaded cards */
-  --color-text-primary:        #181c1b;   /* Off-black text */
-  --color-text-secondary:      #555e5c;   /* Soft slate gray */
-  --color-border:              #e3e1d5;   /* Reassuring boundary lines */
+See [`frontend/src/index.css`](frontend/src/index.css) for the authoritative token registry.
 
-  /* Clinical Branding */
-  --color-sage:                #7a9e87;   /* Sage green — health & healing */
-  --color-sage-light:          #a4c0ae;
-  --color-teal:                #2a7f8c;   /* Teal — trust & precision */
-  --color-teal-subtle:         #eaf2f3;
-
-  /* Urgency / Status */
-  --color-alert-safe:          #3d8b5a;   /* Routine / Safe */
-  --color-alert-moderate:      #d48d2a;   /* See Doctor / Warning */
-  --color-alert-critical:      #c24b3c;   /* Emergency / Danger */
-}
-```
 </details>
 
 ---
@@ -208,7 +188,7 @@ During our architectural alignment sprint, the following issues were resolved to
 
 ### 2. Backend Setup
 ```powershell
-cd d:\Prahari\backend
+cd backend
 python -m venv venv
 .\venv\Scripts\activate
 
@@ -225,7 +205,7 @@ uvicorn main:app --reload --port 8000
 
 ### 3. Frontend Setup
 ```powershell
-cd d:\Prahari\frontend
+cd frontend
 npm install
 npm run dev
 ```

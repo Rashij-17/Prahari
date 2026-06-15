@@ -31,7 +31,7 @@ ANIMATIONS:  Spring physics and subtle micro-animations:
 
 ## 2. Color Token Registry
 
-Defined as native CSS variables in `frontend/src/index.css`:
+Defined as native CSS variables in `frontend/src/index.css` (authoritative; this brief may lag behind the implementation):
 
 ```css
 :root {

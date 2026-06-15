@@ -11,7 +11,7 @@ Prahari contains four core functional modules. Their exact specifications and da
 ### 1.1 Visual Label Scanner
 *   **Purpose:** Captures prescription label photos and extracts candidate terms.
 *   **Technological Bounds:** Rear-camera selector, SVG guides, 1920x1080 canvas export, OpenCV greyscale/adaptive thresholding/deskewing, PyTesseract OCR (LSTM), and text correction heuristics.
-*   **Reference Document:** See detailed layout under [FEATURES_AND_STRUCTURE.md](file:///d:/Prahari/FEATURES_AND_STRUCTURE.md#21-visual-label-scanner).
+*   **Reference Document:** See detailed layout under [FEATURES_AND_STRUCTURE.md](../FEATURES_AND_STRUCTURE.md#21-visual-label-scanner).
 
 ### 1.2 Drug Intelligence Engine
 *   **Purpose:** Resolves extracted strings to verified concepts and clinical FDA details.
