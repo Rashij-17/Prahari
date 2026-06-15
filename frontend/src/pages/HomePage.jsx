@@ -18,12 +18,11 @@ const FEATURES = [
     subtitle:    'Point. Capture. Understand.',
     description: 'Photograph any medication label. Our OCR engine reads the text and instantly looks up clinical information from openFDA and RxNorm.',
     path:        '/scanner',
-    icon:        '📷',
     cta:         'Open Scanner',
     status:      'Live',
     statusClass: 'chip-safe',
     gradient:    'linear-gradient(135deg, #0D9488 0%, #0F766E 100%)',
-    iconBg:      'rgba(13,148,136,0.12)',
+    iconBg:      'rgba(28,92,102,0.1)',
   },
   {
     id:          'feature-medications',
@@ -31,12 +30,11 @@ const FEATURES = [
     subtitle:    'Ingredients · Warnings · Interactions',
     description: 'Search any medication name to see active ingredients, dosage guidance, contraindications, and drug–drug interaction alerts.',
     path:        '/medications',
-    icon:        '💊',
     cta:         'Search Medications',
     status:      'Live',
     statusClass: 'chip-safe',
     gradient:    'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
-    iconBg:      'rgba(99,102,241,0.12)',
+    iconBg:      'rgba(28,92,102,0.1)',
   },
   {
     id:          'feature-triage',
@@ -44,12 +42,11 @@ const FEATURES = [
     subtitle:    'Describe. Assess. Act.',
     description: "Enter your symptoms in plain language. AI evaluates your input and recommends an urgency tier — from self-care to emergency action.",
     path:        '/triage',
-    icon:        '🩺',
     cta:         'Check Symptoms',
     status:      'Beta',
     statusClass: 'chip-moderate',
     gradient:    'linear-gradient(135deg, #D97706 0%, #DC2626 100%)',
-    iconBg:      'rgba(217,119,6,0.12)',
+    iconBg:      'rgba(28,92,102,0.1)',
   },
   {
     id:          'feature-directory',
@@ -57,12 +54,11 @@ const FEATURES = [
     subtitle:    'Local specialists, real-time.',
     description: 'Find nearby clinics, hospitals, and specialists sorted by distance. Filter by specialty, availability, and open status.',
     path:        '/directory',
-    icon:        '📍',
     cta:         'Find Providers',
     status:      'Live',
     statusClass: 'chip-safe',
     gradient:    'linear-gradient(135deg, #059669 0%, #0D9488 100%)',
-    iconBg:      'rgba(5,150,105,0.12)',
+    iconBg:      'rgba(28,92,102,0.1)',
   },
 ]
 
@@ -80,14 +76,50 @@ const STATS = [
 function FeatureCard({ feature, index }) {
   const staggerClass = `card-stagger-${Math.min(index + 1, 4)}`
 
+  // Render clean clinical SVGs instead of emojis
+  const renderIcon = () => {
+    switch (feature.id) {
+      case 'feature-scanner':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        )
+      case 'feature-medications':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>
+            <path d="m8.5 8.5 7 7"/>
+          </svg>
+        )
+      case 'feature-triage':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        )
+      case 'feature-directory':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
     <NavLink
       id={feature.id}
       to={feature.path}
       style={{ textDecoration: 'none', display: 'block', height: '100%' }}
+      className="cursor-pointer"
     >
       <div
-        className={`feature-card ${staggerClass}`}
+        className={`feature-card card-hover-lift ${staggerClass}`}
         style={{ opacity: 0 }}
       >
         {/* Status chip */}
@@ -103,7 +135,12 @@ function FeatureCard({ feature, index }) {
             justifyContent: 'center',
             fontSize: '0.875rem',
             opacity: 0.7,
-          }}>→</div>
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </div>
         </div>
 
         {/* Icon */}
@@ -111,7 +148,7 @@ function FeatureCard({ feature, index }) {
           className="feature-icon-wrapper"
           style={{ background: feature.iconBg }}
         >
-          {feature.icon}
+          {renderIcon()}
         </div>
 
         {/* Title */}
@@ -191,8 +228,15 @@ function Hero() {
             color:       '#fff',
             border:      '1px solid rgba(255,255,255,0.25)',
             backdropFilter: 'blur(8px)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '0.35rem 0.75rem',
           }}>
-            🛡️ Your Personal Health Guardian
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Your Personal Health Guardian
           </span>
         </div>
 
@@ -259,7 +303,11 @@ function Hero() {
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)' }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)' }}
               >
-                📷 Scan a Medication
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: 'inline', verticalAlign: 'middle' }}>
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                Scan a Medication
               </NavLink>
               <NavLink to="/triage" id="hero-cta-triage" style={{
                 display:       'inline-flex',
@@ -280,7 +328,10 @@ function Hero() {
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)' }}
               >
-                🩺 Check Symptoms
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ display: 'inline', verticalAlign: 'middle' }}>
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                Check Symptoms
               </NavLink>
             </div>
           </div>
@@ -307,7 +358,9 @@ function Hero() {
               fontSize: '4rem',
               backdropFilter: 'blur(12px)',
             }}>
-              🛡️
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
             </div>
           </div>
         </div>
@@ -345,10 +398,49 @@ function Hero() {
 // ----------------------------------------------------------------
 function TrustBadges() {
   const sources = [
-    { icon: '🏛️', name: 'openFDA',    desc: 'FDA Drug Labels' },
-    { icon: '💉', name: 'RxNorm',     desc: 'NLM Drug Database' },
-    { icon: '🧠', name: 'Infermedica',desc: 'AI Triage Engine' },
-    { icon: '🗺️', name: 'Google Places', desc: 'Provider Directory' },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M3 22h18"/>
+          <path d="M6 18v-7"/>
+          <path d="M10 18v-7"/>
+          <path d="M14 18v-7"/>
+          <path d="M18 18v-7"/>
+          <path d="M4 11h16L12 2z"/>
+        </svg>
+      ),
+      name: 'openFDA',
+      desc: 'FDA Drug Labels'
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      ),
+      name: 'RxNorm',
+      desc: 'NLM Drug Database'
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-3.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/>
+          <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-3.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/>
+        </svg>
+      ),
+      name: 'Infermedica',
+      desc: 'AI Triage Engine'
+    },
+    {
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      ),
+      name: 'Google Places',
+      desc: 'Provider Directory'
+    },
   ]
   return (
     <div style={{ margin: '0.5rem 0 2.5rem' }}>
@@ -365,11 +457,12 @@ function TrustBadges() {
             background:   'var(--color-surface-card)',
             boxShadow:    'var(--shadow-xs)',
             transition:   'var(--transition-fast)',
+            cursor:       'default',
           }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-teal)'; e.currentTarget.style.boxShadow = 'var(--shadow-teal)' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.boxShadow = 'var(--shadow-xs)' }}
           >
-            <span style={{ fontSize: '1rem' }}>{s.icon}</span>
+            <span style={{ display: 'flex', alignItems: 'center' }}>{s.icon}</span>
             <div>
               <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>{s.name}</div>
               <div style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>{s.desc}</div>
@@ -408,13 +501,18 @@ export default function HomePage() {
         padding:      '1.25rem 1.5rem',
         borderRadius: '14px',
         background:   'var(--color-teal-subtle)',
-        border:       '1px solid rgba(13,148,136,0.2)',
+        border:       '1px solid rgba(28,92,102,0.15)',
         display:      'flex',
         alignItems:   'center',
         gap:          '1rem',
         flexWrap:     'wrap',
       }}>
-        <span style={{ fontSize: '1.75rem', flexShrink: 0 }}>🔒</span>
+        <span style={{ display: 'flex', alignItems: 'center' }}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </span>
         <div>
           <p style={{ margin: '0 0 0.15rem', fontWeight: 700, color: 'var(--color-text-primary)', fontSize: '0.9rem' }}>
             Zero Data Retention

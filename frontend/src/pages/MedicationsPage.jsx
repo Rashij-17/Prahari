@@ -83,8 +83,11 @@ function DrugResultItem({ drug, onSelect }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem', flexShrink: 0 }}>
         {drug.has_boxed_warning && (
-          <span style={{ fontSize: '0.65rem', color: 'var(--color-alert-critical)', fontWeight: 700, letterSpacing: '0.02em' }}>
-            ⬛ BLACK BOX
+          <span style={{ fontSize: '0.65rem', color: 'var(--color-alert-critical)', fontWeight: 700, letterSpacing: '0.02em', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true" style={{ flexShrink: 0 }}>
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            </svg>
+            BLACK BOX
           </span>
         )}
         <span style={{ fontSize: '0.68rem', color: urgencyColor, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -203,13 +206,19 @@ export default function MedicationsPage() {
               background: 'none',
               border:     'none',
               cursor:     query.length < 2 ? 'not-allowed' : 'pointer',
-              fontSize:   '1.25rem',
               opacity:    query.length < 2 ? 0.35 : 1,
               padding:    '0.25rem',
               transition: 'var(--transition-fast)',
               transform:  query.length >= 2 ? 'scale(1.1)' : 'scale(1)',
+              display:    'flex',
+              alignItems: 'center',
             }}
-          >🔍</button>
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: query.length < 2 ? 'var(--color-text-muted)' : 'var(--color-teal)' }}>
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </button>
         </div>
       )}
 
@@ -232,12 +241,42 @@ export default function MedicationsPage() {
           {/* Feature info cards */}
           <div className="grid-auto-fill" style={{ '--min': '220px' }}>
             {[
-              { icon: '🔬', title: 'Clinical Data', desc: 'Indications, dosage, contraindications from FDA' },
-              { icon: '⚠️', title: 'Drug Interactions', desc: 'Pairwise interaction checks with severity tiers' },
-              { icon: '💊', title: 'Brand Lookup', desc: 'Resolve brand names to generic equivalents' },
+              {
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4.5 16.5c-1.5 1.25-2.5 3-2.5 5.5"/>
+                    <path d="M19.5 16.5c1.5 1.25 2.5 3 2.5 5.5"/>
+                    <path d="M12 2a4 4 0 0 0-4 4v7a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4Z"/>
+                    <path d="M8 10h8"/>
+                  </svg>
+                ),
+                title: 'Clinical Data',
+                desc: 'Indications, dosage, contraindications from FDA'
+              },
+              {
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-alert-moderate)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                ),
+                title: 'Drug Interactions',
+                desc: 'Pairwise interaction checks with severity tiers'
+              },
+              {
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>
+                    <path d="m8.5 8.5 7 7"/>
+                  </svg>
+                ),
+                title: 'Brand Lookup',
+                desc: 'Resolve brand names to generic equivalents'
+              },
             ].map(f => (
               <div key={f.title} className="card" style={{ padding: '1.25rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>{f.icon}</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>{f.icon}</div>
                 <h3 style={{ fontSize: '0.9375rem', margin: '0 0 0.375rem' }}>{f.title}</h3>
                 <p style={{ fontSize: '0.8rem', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
               </div>
@@ -259,7 +298,12 @@ export default function MedicationsPage() {
           <div className="section-label">{results.length} result{results.length !== 1 ? 's' : ''} for "{query}"</div>
           {results.length === 0 ? (
             <div className="card" style={{ padding: '2.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔎</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+              </div>
               <h3 style={{ color: 'var(--color-text-primary)', fontSize: '1rem' }}>No results found</h3>
               <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
                 No drugs found for "<strong>{query}</strong>". Try the generic name (e.g. "paracetamol" instead of "Calpol").
@@ -283,8 +327,13 @@ export default function MedicationsPage() {
       {/* Error */}
       {phase === 'error' && (
         <div className="card ribbon-moderate modal-enter" style={{ padding: '1.5rem 1.5rem 1.5rem 1.875rem' }}>
-          <h3 style={{ color: 'var(--color-alert-moderate)', margin: '0 0 0.5rem', fontSize: '1rem' }}>
-            ⚠️ Could not load results
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-alert-moderate)', margin: '0 0 0.5rem', fontSize: '1rem', fontWeight: 700 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Could not load results
           </h3>
           <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 1.25rem', fontSize: '0.875rem' }}>
             {error}

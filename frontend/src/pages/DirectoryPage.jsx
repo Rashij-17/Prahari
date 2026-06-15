@@ -1,13 +1,3 @@
-/**
- * DirectoryPage
- * ==============
- * Nearby healthcare provider search using the user's geolocation.
- * Integrates with Google Places API via the backend /directory/search endpoint.
- *
- * States: idle → locating → loading → results | error
- * Source: FEATURES_AND_STRUCTURE.md §2.4
- */
-
 import { useState } from 'react'
 import { searchProviders } from '../services/api.js'
 
@@ -17,12 +7,28 @@ import { searchProviders } from '../services/api.js'
 
 function ProviderCard({ provider }) {
   const isOpen     = provider.open_now
-  const openStatus = isOpen === true ? '🟢 Open now' : isOpen === false ? '🔴 Closed' : '⚪ Hours unknown'
+  const statusIcon = isOpen === true ? (
+    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" style={{ marginRight: '0.375rem', display: 'inline-block', verticalAlign: 'middle' }}>
+      <circle cx="4" cy="4" r="4" fill="var(--color-alert-safe)" />
+    </svg>
+  ) : isOpen === false ? (
+    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" style={{ marginRight: '0.375rem', display: 'inline-block', verticalAlign: 'middle' }}>
+      <circle cx="4" cy="4" r="4" fill="var(--color-alert-critical)" />
+    </svg>
+  ) : (
+    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" style={{ marginRight: '0.375rem', display: 'inline-block', verticalAlign: 'middle' }}>
+      <circle cx="4" cy="4" r="4" fill="var(--color-text-muted)" />
+    </svg>
+  )
+  const statusText = isOpen === true ? 'Open now' : isOpen === false ? 'Closed' : 'Hours unknown'
 
   const stars = (rating) => {
     const full = Math.floor(rating)
     return '★'.repeat(full) + '☆'.repeat(5 - full)
   }
+
+  const [hovered, setHovered] = useState(false)
+  const [focused, setFocused] = useState(false)
 
   return (
     <a
@@ -30,36 +36,53 @@ function ProviderCard({ provider }) {
       target="_blank"
       rel="noopener noreferrer"
       id={`provider-${provider.place_id}`}
-      style={{ textDecoration: 'none' }}
+      style={{ textDecoration: 'none', display: 'block', outline: 'none' }}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <div
         className="card"
         style={{
           padding:    '1rem 1.125rem',
           cursor:     'pointer',
-          transition: 'all 150ms ease-in-out',
+          border:     `1.5px solid ${hovered || focused ? 'var(--color-teal)' : 'var(--color-border)'}`,
+          transform:  hovered || focused ? 'translateY(-2px)' : 'none',
+          boxShadow:  hovered || focused ? 'var(--shadow-md), 0 0 0 3px rgba(42, 127, 140, 0.2)' : 'none',
+          transition: 'var(--transition-standard)',
         }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-teal)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.transform = 'none' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem' }}>
           <div style={{ flex: 1 }}>
             <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 0.25rem' }}>
               {provider.name}
             </h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.375rem' }}>
-              📍 {provider.address || 'Address not available'}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.375rem' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, color: 'var(--color-text-muted)' }}>
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              <span>{provider.address || 'Address not available'}</span>
+            </div>
             {provider.phone && (
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-teal)', margin: '0 0 0.375rem' }}>
-                📞 {provider.phone}
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.8rem', color: 'var(--color-teal)', margin: '0 0 0.375rem' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+                <span>{provider.phone}</span>
+              </div>
             )}
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{openStatus}</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center' }}>
+                {statusIcon}
+                {statusText}
+              </span>
               {provider.rating > 0 && (
-                <span style={{ fontSize: '0.75rem', color: '#F5A623' }}>
-                  {stars(provider.rating)} {provider.rating.toFixed(1)} ({provider.total_ratings})
+                <span style={{ fontSize: '0.75rem', color: '#F5A623', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <span>{stars(provider.rating)}</span>
+                  <span>{provider.rating.toFixed(1)}</span>
+                  <span style={{ color: 'var(--color-text-muted)' }}>({provider.total_ratings})</span>
                 </span>
               )}
             </div>
@@ -207,6 +230,16 @@ export default function DirectoryPage() {
                   color: 'var(--color-text-primary)',
                   fontFamily: 'var(--font-sans)',
                   fontSize: '0.875rem',
+                  outline: 'none',
+                  transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+                }}
+                onFocus={e => {
+                  e.target.style.borderColor = 'var(--color-teal)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+                }}
+                onBlur={e => {
+                  e.target.style.borderColor = 'var(--color-border)';
+                  e.target.style.boxShadow = 'none';
                 }}
               >
                 {SPECIALTIES.map(s => (
@@ -233,6 +266,16 @@ export default function DirectoryPage() {
                   color: 'var(--color-text-primary)',
                   fontFamily: 'var(--font-sans)',
                   fontSize: '0.875rem',
+                  outline: 'none',
+                  transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+                }}
+                onFocus={e => {
+                  e.target.style.borderColor = 'var(--color-teal)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+                }}
+                onBlur={e => {
+                  e.target.style.borderColor = 'var(--color-border)';
+                  e.target.style.boxShadow = 'none';
                 }}
               >
                 <option value={2}>2 km</option>
@@ -247,8 +290,13 @@ export default function DirectoryPage() {
             id="directory-search-btn"
             className="btn-primary"
             onClick={locateAndSearch}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: 'auto' }}
           >
-            📍 Use My Location & Search
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+            </svg>
+            Use My Location & Search
           </button>
         </div>
       )}
@@ -256,8 +304,17 @@ export default function DirectoryPage() {
       {/* === LOCATING / LOADING === */}
       {(phase === 'locating' || phase === 'loading') && (
         <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-          <div className="pulse-ring" style={{ width: '56px', height: '56px', margin: '0 auto 1.25rem' }}>
-            <span style={{ fontSize: '2rem' }}>{phase === 'locating' ? '📍' : '🏥'}</span>
+          <div className="pulse-ring" style={{ width: '56px', height: '56px', margin: '0 auto 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {phase === 'locating' ? (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 2v3m0 14v3M2 12h3m14 0h3" />
+              </svg>
+            ) : (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            )}
           </div>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
             {phase === 'locating' ? 'Accessing your location…' : 'Searching for nearby providers…'}
@@ -297,7 +354,14 @@ export default function DirectoryPage() {
 
           {results.length === 0 ? (
             <div className="card" style={{ padding: '2.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🏥</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 21V9a2 2 0 0 0-2-2h-3a2 2 0 0 0-2 2v12" />
+                  <path d="M3 21V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v16" />
+                  <path d="M14 13h1" />
+                  <path d="M14 17h1" />
+                </svg>
+              </div>
               <p style={{ color: 'var(--color-text-secondary)' }}>
                 No providers found within {radius} km. Try increasing the search radius.
               </p>

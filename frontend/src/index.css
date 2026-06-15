@@ -15,56 +15,57 @@
    ---------------------------------------------------------------- */
 :root {
   /* --- Surfaces --- */
-  --color-surface:          #F0F4F8;
-  --color-surface-card:     #FFFFFF;
-  --color-beige:            #DDD6C7;
-  --color-surface-2:        #E8EEF4;
+  --color-surface:          #FAF9F5;   /* Warm off-white paper background (reduces glare) */
+  --color-surface-card:     #FFFFFF;   /* Pure white card backgrounds */
+  --color-beige:            #E5E3D8;   /* earth-grey border/neutral accents */
+  --color-surface-2:        #F1EFEB;   /* slightly darker warm background */
+  --color-surface-translucent: rgba(250, 249, 245, 0.88);
 
-  /* --- Text --- */
-  --color-text-primary:     #0F172A;
-  --color-text-secondary:   #475569;
-  --color-text-inverse:     #F8FAFC;
-  --color-text-muted:       #94A3B8;
+  /* --- Text (High Contrast Slate) --- */
+  --color-text-primary:     #111615;   /* High-contrast off-black (>7:1 contrast) */
+  --color-text-secondary:   #3E4A48;   /* slate gray for details (>4.5:1 contrast) */
+  --color-text-inverse:     #FBFBF9;   /* inverse warm text */
+  --color-text-muted:       #768482;   /* muted gray for metadata */
 
-  /* --- Brand: Teal (primary interactive) --- */
-  --color-teal:             #0D9488;
-  --color-teal-dark:        #0F766E;
-  --color-teal-light:       #2DD4BF;
-  --color-teal-subtle:      rgba(13, 148, 136, 0.08);
-  --color-teal-glow:        rgba(13, 148, 136, 0.25);
+  /* --- Brand: Forest Teal (primary interactive) --- */
+  --color-teal:             #1C5C66;   /* rich clinical forest teal */
+  --color-teal-dark:        #113A40;   /* active and focused states */
+  --color-teal-light:       #2A7F8C;   /* hover state text/markers */
+  --color-teal-subtle:      #EAF2F3;   /* subtle fill background */
+  --color-teal-glow:        rgba(28, 92, 102, 0.15);
 
   /* --- Brand: Sage (health/safe) --- */
-  --color-sage:             #059669;
-  --color-sage-light:       #34D399;
-  --color-sage-dark:        #047857;
-  --color-sage-subtle:      rgba(5, 150, 105, 0.08);
+  --color-sage:             #3D724E;   /* Calm Sage Green (healing/safe) */
+  --color-sage-light:       #649F75;   /* hover states and progress fills */
+  --color-sage-dark:        #284E34;   /* focused sage highlights */
+  --color-sage-subtle:      #EDF7ED;   /* safe alert block background */
 
   /* --- Accent: Indigo (premium feel) --- */
-  --color-accent:           #6366F1;
-  --color-accent-light:     #818CF8;
-  --color-accent-subtle:    rgba(99, 102, 241, 0.08);
+  --color-accent:           #4E54C8;
+  --color-accent-light:     #6C72E0;
+  --color-accent-subtle:    rgba(78, 84, 200, 0.08);
 
-  /* --- Alert States --- */
-  --color-alert-critical:   #DC2626;
-  --color-alert-critical-bg:#FEF2F2;
-  --color-alert-critical-border: #FECACA;
-  --color-alert-moderate:   #D97706;
-  --color-alert-moderate-bg:#FFFBEB;
-  --color-alert-moderate-border: #FDE68A;
-  --color-alert-safe:       #059669;
-  --color-alert-safe-bg:    #ECFDF5;
-  --color-alert-safe-border:#A7F3D0;
+  /* --- Alert States (Symbol Compliant Fills & Texts) --- */
+  --color-alert-critical:   #9B2C2C;   /* WCAG Compliant Red text */
+  --color-alert-critical-bg:#FDEDEC;   /* Red background fill */
+  --color-alert-critical-border: #F5B7B1;
+  --color-alert-moderate:   #855600;   /* WCAG Compliant Amber text */
+  --color-alert-moderate-bg:#FFF4E5;   /* Amber background fill */
+  --color-alert-moderate-border: #F5CBA7;
+  --color-alert-safe:       #2D5B3A;   /* WCAG Compliant Green text */
+  --color-alert-safe-bg:    #EDF7ED;   /* Green background fill */
+  --color-alert-safe-border:#ABEBC6;
 
   /* --- Borders & Focus --- */
-  --color-border:           #E2E8F0;
-  --color-border-strong:    #CBD5E1;
-  --color-focus-ring:       #0D9488;
+  --color-border:           #E3E1D8;   /* earth-gray borders */
+  --color-border-strong:    #CBD0C8;   /* interactive outline border */
+  --color-focus-ring:       #1C5C66;   /* focus indicator color */
 
-  /* --- Gradients --- */
-  --gradient-hero:          linear-gradient(135deg, #0F172A 0%, #0F766E 50%, #047857 100%);
-  --gradient-card:          linear-gradient(145deg, #FFFFFF 0%, #F0F9FF 100%);
-  --gradient-teal:          linear-gradient(135deg, #0D9488 0%, #6366F1 100%);
-  --gradient-sage:          linear-gradient(135deg, #059669 0%, #0D9488 100%);
+  /* --- Gradients (calm clinical, no neon purples) --- */
+  --gradient-hero:          linear-gradient(135deg, #113A40 0%, #1C5C66 50%, #284E34 100%);
+  --gradient-card:          linear-gradient(145deg, #FFFFFF 0%, #FAF9F5 100%);
+  --gradient-teal:          linear-gradient(135deg, #1C5C66 0%, #2A7F8C 100%);
+  --gradient-sage:          linear-gradient(135deg, #3D724E 0%, #1C5C66 100%);
 
   /* --- Spatial System --- */
   --spacing-section-desktop: 80px;
@@ -77,67 +78,68 @@
   --font-sans:    'Inter', system-ui, sans-serif;
   --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
 
-  /* --- Transitions --- */
-  --transition-fast:     all 120ms ease-in-out;
-  --transition-standard: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow:     all 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* --- Transitions (ease-out cubic bezier) --- */
+  --transition-fast:     all 120ms ease-out;
+  --transition-standard: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow:     all 350ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-bounce:   all 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* --- Shadows --- */
-  --shadow-xs:   0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-sm:   0 2px 8px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-md:   0 4px 20px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
-  --shadow-lg:   0 8px 32px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.08);
-  --shadow-xl:   0 16px 48px rgba(15, 23, 42, 0.16), 0 8px 24px rgba(15, 23, 42, 0.10);
-  --shadow-teal: 0 4px 20px rgba(13, 148, 136, 0.30);
-  --shadow-glow: 0 0 30px rgba(13, 148, 136, 0.20);
+  --shadow-xs:   0 1px 3px rgba(17, 22, 21, 0.05), 0 1px 2px rgba(17, 22, 21, 0.03);
+  --shadow-sm:   0 2px 8px rgba(17, 22, 21, 0.06), 0 1px 3px rgba(17, 22, 21, 0.04);
+  --shadow-md:   0 4px 20px rgba(17, 22, 21, 0.08), 0 2px 8px rgba(17, 22, 21, 0.04);
+  --shadow-lg:   0 8px 32px rgba(17, 22, 21, 0.10), 0 4px 12px rgba(17, 22, 21, 0.06);
+  --shadow-xl:   0 16px 48px rgba(17, 22, 21, 0.12), 0 8px 24px rgba(17, 22, 21, 0.08);
+  --shadow-teal: 0 4px 20px rgba(28, 92, 102, 0.20);
+  --shadow-glow: 0 0 30px rgba(28, 92, 102, 0.10);
 }
 
 /* ----------------------------------------------------------------
-   Dark Mode Token Overrides
+   Dark Mode Token Overrides (Premium Dark Forest/Slate)
    ---------------------------------------------------------------- */
 .dark {
-  --color-surface:          #0A0F1A;
-  --color-surface-card:     #111827;
-  --color-beige:            #1E293B;
-  --color-surface-2:        #0F172A;
-  --color-text-primary:     #F1F5F9;
-  --color-text-secondary:   #94A3B8;
-  --color-text-muted:       #64748B;
-  --color-border:           #1E293B;
-  --color-border-strong:    #334155;
+  --color-surface:          #0A0E0E;   /* Deep slate-teal dark background */
+  --color-surface-card:     #121818;   /* slightly lighter card surface */
+  --color-beige:            #1B2424;   /* earthy dark border accent */
+  --color-surface-2:        #0E1414;
+  --color-surface-translucent: rgba(10, 14, 14, 0.88);
+  --color-text-primary:     #F3F6F6;
+  --color-text-secondary:   #A7B3B2;
+  --color-text-muted:       #6E7B7A;
+  --color-border:           #1D2626;
+  --color-border-strong:    #2F3D3D;
 
-  --color-teal:             #14B8A6;
-  --color-teal-dark:        #0D9488;
-  --color-teal-light:       #5EEAD4;
-  --color-teal-subtle:      rgba(20, 184, 166, 0.12);
-  --color-teal-glow:        rgba(20, 184, 166, 0.20);
+  --color-teal:             #2E8B99;
+  --color-teal-dark:        #1C5C66;
+  --color-teal-light:       #4EABB8;
+  --color-teal-subtle:      rgba(46, 139, 153, 0.10);
+  --color-teal-glow:        rgba(46, 139, 153, 0.15);
 
-  --color-sage:             #10B981;
-  --color-sage-light:       #6EE7B7;
-  --color-sage-dark:        #059669;
-  --color-sage-subtle:      rgba(16, 185, 129, 0.12);
+  --color-sage:             #4FA66C;
+  --color-sage-light:       #71C18B;
+  --color-sage-dark:        #3D724E;
+  --color-sage-subtle:      rgba(79, 166, 108, 0.10);
 
-  --color-accent:           #818CF8;
-  --color-accent-light:     #A5B4FC;
-  --color-accent-subtle:    rgba(129, 140, 248, 0.12);
+  --color-accent:           #7D83FF;
+  --color-accent-light:     #9CA0FF;
+  --color-accent-subtle:    rgba(125, 131, 255, 0.10);
 
-  --color-alert-critical:   #EF4444;
-  --color-alert-critical-bg:#1C0A0A;
-  --color-alert-critical-border: #7F1D1D;
-  --color-alert-moderate:   #F59E0B;
-  --color-alert-moderate-bg:#1C1500;
-  --color-alert-moderate-border: #78350F;
-  --color-alert-safe:       #10B981;
-  --color-alert-safe-bg:    #022C22;
-  --color-alert-safe-border:#064E3B;
+  --color-alert-critical:   #E74C3C;
+  --color-alert-critical-bg:#260F0F;
+  --color-alert-critical-border: #7B241C;
+  --color-alert-moderate:   #F39C12;
+  --color-alert-moderate-bg:#261E0F;
+  --color-alert-moderate-border: #7E5109;
+  --color-alert-safe:       #2ECC71;
+  --color-alert-safe-bg:    #0F2617;
+  --color-alert-safe-border: #145A32;
 
-  --gradient-card:          linear-gradient(145deg, #111827 0%, #0F172A 100%);
-  --shadow-xs:   0 1px 3px rgba(0,0,0,0.3);
-  --shadow-sm:   0 2px 8px rgba(0,0,0,0.35);
-  --shadow-md:   0 4px 20px rgba(0,0,0,0.40);
-  --shadow-lg:   0 8px 32px rgba(0,0,0,0.45);
-  --shadow-xl:   0 16px 48px rgba(0,0,0,0.50);
+  --gradient-card:          linear-gradient(145deg, #121818 0%, #0A0E0E 100%);
+  --shadow-xs:   0 1px 3px rgba(0,0,0,0.4);
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.45);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.50);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,0.55);
+  --shadow-xl:   0 16px 48px rgba(0,0,0,0.60);
 }
 
 /* ----------------------------------------------------------------

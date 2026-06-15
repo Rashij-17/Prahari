@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 _OCR_SUBSTITUTIONS: dict[str, str] = {
     # Dosage numeral corrections
-    r"\bl\b": "1",          # lowercase l read as 1 in dosage (e.g., "l0mg" → "10mg")
+    r"\bl(?=\d)": "1",      # lowercase l read as 1 in dosage (e.g., "l0mg" → "10mg")
     r"(?<=[A-Z])0(?=[A-Z])": "O",  # 0 → O in amino acid / drug prefixes
     r"rn": "m",             # 'rn' ligature read as 'm' (e.g., "arnoxicillin" → "amoxicillin")
     r"\bcl(?=ia|ic|ig|il|ol|ul|eslora|exame)": "d", # 'cl' misread for 'd' (e.g., cliazepam -> diazepam)

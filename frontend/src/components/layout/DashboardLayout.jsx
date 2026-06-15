@@ -49,9 +49,8 @@ const NAV_ITEMS = [
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M10.5 20H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H20a2 2 0 0 1 2 2v3"/>
-        <circle cx="18" cy="18" r="3"/>
-        <path d="m15.5 15.5 5 5"/>
+        <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>
+        <path d="m8.5 8.5 7 7"/>
       </svg>
     ),
   },
@@ -330,7 +329,7 @@ function TopNav({ scrolled, onHamburgerClick, drawerOpen }) {
         top:             0,
         zIndex:          100,
         backgroundColor: scrolled
-          ? 'rgba(240, 244, 248, 0.88)'
+          ? 'var(--color-surface-translucent, var(--color-surface))'
           : 'var(--color-surface)',
         backdropFilter:        scrolled ? 'blur(16px)' : 'none',
         WebkitBackdropFilter:  scrolled ? 'blur(16px)' : 'none',
@@ -542,7 +541,14 @@ function Footer() {
               color:      'var(--color-text-secondary)',
               margin:     0,
             }}>
-              <strong style={{ color: 'var(--color-text-primary)' }}>⚕️ Medical Disclaimer: </strong>
+              <strong style={{ color: 'var(--color-text-primary)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: 'var(--color-teal)' }}>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <line x1="12" y1="8" x2="12" y2="16"/>
+                  <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                Medical Disclaimer:{' '}
+              </strong>
               Prahari is an informational tool only and does not constitute medical advice, diagnosis,
               or treatment. Always consult a qualified healthcare professional before making any decision.{' '}
               <strong>In an emergency: call 112 (India) · 911 (USA) · 999 (UK).</strong>

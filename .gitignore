@@ -42,6 +42,8 @@ npm-debug.log*
 .coverage
 htmlcov/
 .pytest_cache/
+frontend/coverage/
+coverage/
 
 # --- Build artefacts ---
 *.egg-info/

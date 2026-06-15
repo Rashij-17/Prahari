@@ -1,0 +1,15 @@
+{
+  "short_name": "Prahari",
+  "name": "Prahari MedLens Sentinel",
+  "icons": [
+    {
+      "src": "/prahari-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2A7F8C",
+  "background_color": "#fbfbf9"
+}

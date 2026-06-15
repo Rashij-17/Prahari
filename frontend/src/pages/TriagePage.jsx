@@ -16,9 +16,41 @@ import { assessSymptoms } from '../services/api.js'
 // ---------------------------------------------------------------------------
 
 const URGENCY_CONFIG = {
-  safe:     { icon: '✅', color: 'var(--color-alert-safe)',     bg: 'var(--color-alert-safe-bg)',     cls: 'ribbon-safe' },
-  moderate: { icon: '⚠️', color: 'var(--color-alert-moderate)', bg: 'var(--color-alert-moderate-bg)', cls: 'ribbon-moderate' },
-  critical: { icon: '🚨', color: 'var(--color-alert-critical)', bg: 'var(--color-alert-critical-bg)', cls: 'ribbon-critical' },
+  safe: {
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    ),
+    color: 'var(--color-alert-safe)',
+    bg: 'var(--color-alert-safe-bg)',
+    cls: 'ribbon-safe'
+  },
+  moderate: {
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+    ),
+    color: 'var(--color-alert-moderate)',
+    bg: 'var(--color-alert-moderate-bg)',
+    cls: 'ribbon-moderate'
+  },
+  critical: {
+    icon: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    ),
+    color: 'var(--color-alert-critical)',
+    bg: 'var(--color-alert-critical-bg)',
+    cls: 'ribbon-critical'
+  },
 }
 
 function UrgencyResult({ result, onReset }) {
@@ -32,8 +64,8 @@ function UrgencyResult({ result, onReset }) {
         style={{ backgroundColor: cfg.bg, padding: '1.5rem 1.5rem 1.5rem 1.75rem', marginBottom: '1rem' }}
         role="alert"
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-          <span style={{ fontSize: '2rem' }}>{cfg.icon}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', color: cfg.color }}>
+          {cfg.icon}
           <h2 style={{
             fontFamily: 'var(--font-display)',
             fontSize: '1.4rem',
@@ -105,21 +137,42 @@ function UrgencyResult({ result, onReset }) {
       )}
 
       {/* Disclaimer */}
-      <p style={{
+      <div style={{
         fontSize: '0.75rem',
         color: 'var(--color-text-secondary)',
-        fontStyle: 'italic',
         lineHeight: 1.6,
         borderTop: '1px solid var(--color-border)',
         paddingTop: '0.75rem',
         margin: '0 0 1.25rem',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '0.4rem',
       }}>
-        ⚕️ This assessment is for educational purposes only and does not constitute medical advice.
-        Always consult a qualified healthcare professional for medical decisions.
-      </p>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, marginTop: '0.125rem' }}>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+        <span>
+          This assessment is for educational purposes only and does not constitute medical advice.
+          Always consult a qualified healthcare professional for medical decisions.
+        </span>
+      </div>
 
-      <button id="triage-reset-btn" className="btn-primary" onClick={onReset}>
-        🩺 Assess New Symptoms
+      <button
+        id="triage-reset-btn"
+        className="btn-primary"
+        onClick={onReset}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: 'auto' }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M4.8 3A2.4 2.4 0 1 0 9.6 3A2.4 2.4 0 1 0 4.8 3z"/>
+          <path d="M14.4 3A2.4 2.4 0 1 0 19.2 3A2.4 2.4 0 1 0 14.4 3z"/>
+          <path d="M7.2 5.4v4.2a4.8 4.8 0 0 0 9.6 0V5.4"/>
+          <path d="M12 9.6v5.4a3 3 0 0 0 6 0v-1.2"/>
+          <circle cx="18" cy="11.4" r="2"/>
+        </svg>
+        Assess New Symptoms
       </button>
     </div>
   )
@@ -211,9 +264,16 @@ export default function TriagePage() {
                 outline: 'none',
                 boxSizing: 'border-box',
                 lineHeight: 1.6,
+                transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
               }}
-              onFocus={e => e.target.style.borderColor = 'var(--color-teal)'}
-              onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
+              onFocus={e => {
+                e.target.style.borderColor = 'var(--color-teal)';
+                e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = 'var(--color-border)';
+                e.target.style.boxShadow = 'none';
+              }}
             />
             <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.375rem 0 0' }}>
               Include symptom duration, severity (1–10), and any relevant medical history.
@@ -239,6 +299,16 @@ export default function TriagePage() {
                   color: 'var(--color-text-primary)',
                   fontFamily: 'var(--font-sans)',
                   fontSize: '0.9rem',
+                  outline: 'none',
+                  transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+                }}
+                onFocus={e => {
+                  e.target.style.borderColor = 'var(--color-teal)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+                }}
+                onBlur={e => {
+                  e.target.style.borderColor = 'var(--color-border)';
+                  e.target.style.boxShadow = 'none';
                 }}
               >
                 <option value="male">Male</option>
@@ -265,6 +335,16 @@ export default function TriagePage() {
                   color: 'var(--color-text-primary)',
                   fontFamily: 'var(--font-sans)',
                   fontSize: '0.9rem',
+                  outline: 'none',
+                  transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+                }}
+                onFocus={e => {
+                  e.target.style.borderColor = 'var(--color-teal)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+                }}
+                onBlur={e => {
+                  e.target.style.borderColor = 'var(--color-border)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
@@ -289,6 +369,28 @@ export default function TriagePage() {
                   fontSize: '0.8rem',
                   cursor: 'pointer',
                   lineHeight: 1.4,
+                  transition: 'var(--transition-fast)',
+                  outline: 'none',
+                }}
+                onFocus={e => {
+                  e.target.style.borderColor = 'var(--color-teal)';
+                  e.target.style.color = 'var(--color-text-primary)';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+                }}
+                onBlur={e => {
+                  e.target.style.borderColor = 'var(--color-border)';
+                  e.target.style.color = 'var(--color-text-secondary)';
+                  e.target.style.boxShadow = 'none';
+                }}
+                onMouseEnter={e => {
+                  e.target.style.borderColor = 'var(--color-teal)';
+                  e.target.style.color = 'var(--color-text-primary)';
+                }}
+                onMouseLeave={e => {
+                  if (document.activeElement !== e.target) {
+                    e.target.style.borderColor = 'var(--color-border)';
+                    e.target.style.color = 'var(--color-text-secondary)';
+                  }
                 }}
               >
                 "{ex}"
@@ -308,9 +410,22 @@ export default function TriagePage() {
             className="btn-primary"
             onClick={handleAssess}
             disabled={symptoms.trim().length < 5}
-            style={{ opacity: symptoms.trim().length < 5 ? 0.5 : 1 }}
+            style={{
+              opacity: symptoms.trim().length < 5 ? 0.5 : 1,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              width: 'auto'
+            }}
           >
-            🩺 Assess My Symptoms
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4.8 3A2.4 2.4 0 1 0 9.6 3A2.4 2.4 0 1 0 4.8 3z"/>
+              <path d="M14.4 3A2.4 2.4 0 1 0 19.2 3A2.4 2.4 0 1 0 14.4 3z"/>
+              <path d="M7.2 5.4v4.2a4.8 4.8 0 0 0 9.6 0V5.4"/>
+              <path d="M12 9.6v5.4a3 3 0 0 0 6 0v-1.2"/>
+              <circle cx="18" cy="11.4" r="2"/>
+            </svg>
+            Assess My Symptoms
           </button>
         </div>
       )}
