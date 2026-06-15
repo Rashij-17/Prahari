@@ -1,430 +1,251 @@
 <div align="center">
+  <!-- Prahari Sentinel Logo -->
+  <svg width="150" height="150" viewBox="0 0 32 32" fill="none" style="border-radius: 20%; filter: drop-shadow(0px 8px 24px rgba(42, 127, 140, 0.35));" aria-hidden="true">
+    <rect width="32" height="32" rx="6" fill="#12141a" />
+    <path d="M16 4L6 8.5v8.5c0 6.275 4.582 11.4 10 12.5 5.418-1.1 10-6.225 10-12.5V8.5L16 4z" fill="#2A7F8C" fill-opacity="0.15" stroke="#2A7F8C" stroke-width="1.5" />
+    <rect x="14" y="10" width="4" height="12" rx="1" fill="#7A9E87" />
+    <rect x="10" y="14" width="12" height="4" rx="1" fill="#7A9E87" />
+  </svg>
 
-<br/>
+  <br /><br />
 
-<!-- Logo / Banner -->
-<img src="https://readme-typing-svg.demolab.com?font=DM+Serif+Display&size=60&duration=3000&pause=1000&color=2A7F8C&center=true&vCenter=true&width=600&lines=🩺+Prahari;Your+Health+Guardian" alt="Prahari Banner" />
+  <!-- Animated Typing Headline -->
+  <a href="https://github.com/Rashij-17/Prahari">
+    <img src="https://readme-typing-svg.herokuapp.com?font=DM+Serif+Display&weight=800&size=55&pause=1000&color=2A7F8C&center=true&vCenter=true&width=800&lines=🛡️+PRAHARI;YOUR+HEALTH+SENTINEL+🩺;VISUAL+DRUG+SCANNER+📸;AI+TRIAGE+AND+CARE+DIRECTORY+📍" alt="Prahari Typing Headline" />
+  </a>
 
-<br/>
+  <h3>🛡️ Patient-Centric Health Sentinel, Medication Demystifier & Triage PWA 🛡️</h3>
+  
+  <p>
+    Prahari is a responsive Progressive Web App (PWA) designed to solve the critical gaps in health literacy and emergency care navigation for India's semi-urban populations.
+  </p>
 
-# Prahari — MedLens
+  <!-- Badges -->
+  <p>
+    <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+    <img src="https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+    <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+    <img src="https://img.shields.io/badge/Vite-5.2-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+    <img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
+    <img src="https://img.shields.io/badge/OpenCV-4.9-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV" />
+  </p>
 
-### *Medication Demystifier · Symptom Triage · Local Doctor Directory*
+  <br />
 
-<p align="center">
-  <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
-  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/Vite-5.2-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" />
-  <img src="https://img.shields.io/badge/OpenCV-4.9-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" />
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" />
-  <img src="https://img.shields.io/badge/Status-Active%20Development-orange?style=flat-square" />
-  <img src="https://img.shields.io/badge/Version-0.1.0-blue?style=flat-square" />
-  <img src="https://img.shields.io/badge/API-RxNorm%20%7C%20openFDA%20%7C%20Infermedica-purple?style=flat-square" />
-</p>
-
-<br/>
-
-> **Prahari** (Sanskrit: प्रहरी) means *Guardian* or *Sentinel*.  
-> This application stands watch over your health — decoding prescriptions, triaging symptoms, and connecting you to the right care.
+  <!-- Bento Grid Status -->
+  <table align="center" style="border-collapse: collapse; border: 2px solid #2A7F8C; background: #12141a; font-family: 'Courier New', Courier, monospace; width: 100%; border-radius: 8px; overflow: hidden; box-shadow: 0px 8px 30px rgba(42,127,140,0.25);">
+    <tr style="border-bottom: 1px solid #222;">
+      <td style="padding: 15px; border-right: 1px solid #222; color: #FFF;"><strong>🛡️ SYSTEM STATUS</strong></td>
+      <td style="padding: 15px; color: #7A9E87; border-right: 1px solid #222; text-shadow: 0 0 5px #7A9E87;">🟢 ACTIVE DEVELOPMENT</td>
+      <td style="padding: 15px; border-right: 1px solid #222; color: #FFF;"><strong>🧠 CLINICAL NLP</strong></td>
+      <td style="padding: 15px; color: #2A7F8C; text-shadow: 0 0 5px #2A7F8C;">🩺 INFERMEDICA v3</td>
+    </tr>
+    <tr>
+      <td style="padding: 15px; border-right: 1px solid #222; color: #FFF;"><strong>🏥 DRUG DATABASE</strong></td>
+      <td style="padding: 15px; color: #2A7F8C; border-right: 1px solid #222; text-shadow: 0 0 5px #2A7F8C;">⚡ FDA + RXNORM</td>
+      <td style="padding: 15px; border-right: 1px solid #222; color: #FFF;"><strong>📍 GEOLOCATION</strong></td>
+      <td style="padding: 15px; color: #7A9E87; text-shadow: 0 0 5px #7A9E87;">🗺️ GOOGLE PLACES</td>
+    </tr>
+  </table>
 
 </div>
 
----
+<br />
+<hr style="border: 0; border-top: 2px dashed #2A7F8C; margin: 2rem 0;" />
 
-## 📋 Table of Contents
+## 🎨 The Design System (v2.0 Vigilant Sage)
 
-- [Problem Statement](#-problem-statement)
-- [Core Features](#-core-features)
-- [Architecture Overview](#-architecture-overview)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Backend Setup](#backend-setup)
-  - [Frontend Setup](#frontend-setup)
-- [Environment Variables](#-environment-variables)
-- [API Reference](#-api-reference)
-- [Data Privacy & Safety](#-data-privacy--safety)
-- [Screenshots](#-screenshots)
-- [Contributing](#-contributing)
-- [License](#-license)
+Prahari utilizes a clinical, highly legible, and reassuring color scheme combined with dynamic animations to optimize accessibility for visually challenged or anxious patients.
+
+<details>
+<summary><b>🎨 View CSS Variables Token Registry (`frontend/src/index.css`)</b></summary>
+
+See [`frontend/src/index.css`](frontend/src/index.css) for the authoritative token registry.
+
+</details>
 
 ---
 
-## 🩹 Problem Statement
+## 🚀 Core Features
 
-Medication non-adherence, misidentification of prescription labels, delayed triage decisions, and inaccessible specialist directories collectively represent one of the most **preventable categories of adverse health outcomes**.
-
-| Gap | Problem | Prahari's Response |
-|-----|---------|-------------------|
-| 💊 **Medication Literacy** | Patients cannot decode chemical names, interactions, or dosage schedules from physical labels | Visual Label Scanner + Medication Demystification Engine |
-| 🚨 **Triage Safety** | Non-clinicians cannot determine whether symptoms warrant emergency care or watchful waiting | Symptom & Triage Analyzer powered by Infermedica |
-| 📍 **Provider Access** | Patients lack reliable, real-time local directories filtered by specialty and distance | Geographic Specialist Directory powered by Google Places API |
-
-> In India alone, **55%+ of patients** in semi-urban and rural contexts cannot interpret pharmaceutical labels written in technical English nomenclature.
-
----
-
-## ✨ Core Features
-
-### 📸 1. Visual Label Scanner
-Transforms a physical pharmaceutical label into a structured drug profile using a full computer vision pipeline.
-
-- 🎥 **Live Camera Capture** — Rear-camera stream with scan-frame overlay guide
-- 🔬 **OpenCV Image Pre-Processing** — Greyscale, adaptive thresholding, deskewing (±15°), and morphological opening
-- 📝 **Tesseract OCR** — Dual-pass extraction with LSTM engine (`--oem 3`) for maximum pharmaceutical label accuracy
-- 🔍 **Intelligent Text Refinement** — OCR correction lookups, noise stripping, candidate phrase extraction
-- 📤 **File Upload Fallback** — Graceful static image upload when camera is unavailable
-
-### 💊 2. Medication Demystification Engine
-Takes raw chemical or brand-name drug strings and returns a comprehensive, patient-readable drug profile.
-
-- 🔗 **RxNorm API** — Resolves drug names to canonical RxCUI identifiers with fuzzy matching
-- 🏥 **openFDA Enrichment** — Extracts indications, dosage, contraindications, warnings, side effects, and storage
-- ⚠️ **Drug Interaction Checker** — Pairwise interaction checks across your entire medication list with 3-tier severity classification:
-
-  | Tier | Severity | Visual Treatment |
-  |------|----------|-----------------|
-  | T1 | 🔴 Critical | Full-bleed red alert banner |
-  | T2 | 🟠 Moderate | Amber warning card |
-  | T3 | 🟡 Minor | Teal informational chip |
-
-### 🩺 3. Symptom & Triage Analyzer
-Converts free-text symptom descriptions into structured triage assessments and urgency classifications.
-
-- 🗣️ **Free-Text Symptom Input** — Plain language descriptions accepted
-- 🧠 **Infermedica AI** — Differential generation and urgency classification via `/v3/diagnosis` + `/v3/triage`
-- 🗺️ **Interactive SVG Body Diagram** — Tap anatomical regions to pre-seed symptom context
-- 🚨 **5-Level Triage System**:
-
-  | Urgency | Label | Action |
-  |---------|-------|--------|
-  | 🔴 CRITICAL | Emergency | Immediate emergency services modal |
-  | 🔴 CRITICAL | Urgent Care | Emergency department within the hour |
-  | 🟠 MODERATE | See a Doctor Today | Same-day appointment + local urgent care |
-  | 🟡 ROUTINE | Schedule an Appointment | Standard GP referral |
-  | 🟢 ROUTINE | Self-Care Advised | Self-management guidance shown |
-
-### 📍 4. Geographic Specialist Directory
-Live, filterable map and list view of nearby healthcare providers.
-
-- 📡 **Browser Geolocation API** — High-accuracy positioning with postal code fallback
-- 🗺️ **Google Places API** — Nearby search filtered by specialty, distance (1–25 km), and open-now status
-- 📊 **Haversine Sorting** — Results sorted by computed distance from user
-- 🏥 **Enriched Provider Cards** — Name, specialty, distance, rating, hours, phone (`tel:` linked), and directions
+<table style="width: 100%; border-collapse: separate; border-spacing: 12px;">
+  <tr>
+    <td style="background: #181c1b; color: #fff; padding: 20px; border: 1.5px solid #7a9e87; border-radius: 12px; width: 50%; vertical-align: top;">
+      <h3 style="margin-top:0; color: #7a9e87;">📸 1. Visual Label Scanner</h3>
+      <p style="color: #bbb; font-size: 13.5px; line-height: 1.6;">Point the camera at any medication bottle. The CV pipeline handles frames, runs deskewing, binarizes characters, and extracts candidates through a text refiner.</p>
+      <span style="font-size: 11px; background: rgba(122,158,135,0.2); color: #7a9e87; padding: 3px 8px; border-radius: 4px;">OPENCV + TESSERACT</span>
+    </td>
+    <td style="background: #181c1b; color: #fff; padding: 20px; border: 1.5px solid #2a7f8c; border-radius: 12px; width: 50%; vertical-align: top;">
+      <h3 style="margin-top:0; color: #2a7f8c;">💊 2. Drug Intelligence</h3>
+      <p style="color: #bbb; font-size: 13.5px; line-height: 1.6;">Resolves brand/generic names to canonical RxCUIs via NLM RxNorm, then scrapes openFDA records to yield structured dosage, warnings, and interactions.</p>
+      <span style="font-size: 11px; background: rgba(42,127,140,0.2); color: #2a7f8c; padding: 3px 8px; border-radius: 4px;">FDA + RXNORM API</span>
+    </td>
+  </tr>
+  <tr>
+    <td style="background: #181c1b; color: #fff; padding: 20px; border: 1.5px solid #c24b3c; border-radius: 12px; width: 50%; vertical-align: top;">
+      <h3 style="margin-top:0; color: #c24b3c;">🩺 3. Symptom Triage</h3>
+      <p style="color: #bbb; font-size: 13.5px; line-height: 1.6;">Accepts unstructured plain text symptoms (e.g., *"my head hurts since last night"*), detects language, parses clinical tokens, and categorizes urgency with actionable care paths.</p>
+      <span style="font-size: 11px; background: rgba(194,75,60,0.2); color: #c24b3c; padding: 3px 8px; border-radius: 4px;">INFERMEDICA AI</span>
+    </td>
+    <td style="background: #181c1b; color: #fff; padding: 20px; border: 1.5px solid #d48d2a; border-radius: 12px; width: 50%; vertical-align: top;">
+      <h3 style="margin-top:0; color: #d48d2a;">📍 4. Doctor Directory</h3>
+      <p style="color: #bbb; font-size: 13.5px; line-height: 1.6;">Fetches live latitude/longitude from your browser, computes Haversine distances, and queries Google Places for nearby specialist clinics and hospitals.</p>
+      <span style="font-size: 11px; background: rgba(212,141,42,0.2); color: #d48d2a; padding: 3px 8px; border-radius: 4px;">GOOGLE PLACES API</span>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## 🏗️ Architecture Overview
+## 🛠️ Tech Stack & Dependencies
+
+### Frontend Architecture
+* **React 18.3** — Single Page Application (SPA) structure.
+* **Vite** — High-speed Hot Module Replacement (HMR) bundler.
+* **React Router DOM 6** — Client-side route navigator.
+* **TailwindCSS 3.4** — Component responsive utility styling.
+* **HTML5 Canvas / MediaDevices** — Handles direct camera frame capture in 4:3 ratios.
+
+### Backend Pipeline
+* **FastAPI 0.111** — Asynchronous Python web framework.
+* **Uvicorn** — ASGI production server.
+* **OpenCV (cv2) 4.9** — Image preprocessing (up-scaling, blurring, adaptive thresholding).
+* **PyTesseract** — Wrapper binding Tesseract OCR LSTM Engine.
+* **HTTPX** — Fully async client requests to RxNorm, openFDA, and Google.
+
+---
+
+## 🟢 Implementation Status
+
+| Feature | Status | Backend Service | Frontend Interface |
+| :--- | :--- | :--- | :--- |
+| **Drug Intelligence** | 🟢 **100% Functional** | RxNorm + openFDA resolvers | Search bar + full detailed profile |
+| **Symptom Triage** | 🟡 **Demo Mode** | Infermedica NLP (Fallback mocks) | Symptom submission + conditions list |
+| **Doctor Directory** | 🟡 **Demo Mode** | Google Places (Fallback mocks) | Geo-sorted lists, map directions |
+| **Label Scanner** | 🟡 **Partially Connected** | OpenCV Preprocess + Tesseract | Camera frame capture & crop canvas |
+
+---
+
+## 📸 The Visual Scanner Roadmap (Architectural Options)
+
+For our visual scanner, we have analyzed four paths for resolving medication text on curved bottles. We will keep these options open for future updates:
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                      CLIENT LAYER (React.js + Tailwind CSS)          │
-│                                                                       │
-│   ScannerView        TriageView        DirectoryView                 │
-│   (Camera/Upload)    (Symptom Input)   (Map + List)                  │
-│                                                                       │
-│   ──────────────── React State / Context ─────────────────────────  │
-│                         │  HTTPS / REST                              │
-└─────────────────────────┼───────────────────────────────────────────┘
-                          │
-              ┌───────────▼───────────┐
-              │   FastAPI Backend      │
-              │   (Python 3.11+)       │
-              │                        │
-              │  POST /scan/process    │
-              │  GET  /medication/...  │
-              │  POST /triage/parse    │
-              │  POST /triage/assess   │
-              │  POST /directory/search│
-              └───────────┬───────────┘
-                          │
-      ┌───────────────────┼────────────────────┐
-      ▼                   ▼                    ▼
-┌──────────┐    ┌──────────────────┐  ┌─────────────────┐
-│ RxNorm   │    │  Infermedica API  │  │ Google Places   │
-│ openFDA  │    │  (Diagnosis +     │  │ (Nearby Search  │
-│          │    │   Triage)         │  │  + Details)     │
-└──────────┘    └──────────────────┘  └─────────────────┘
+                  ┌────────────────────────────────────────┐
+                  │        Medication Scan Request         │
+                  └───────────────────┬────────────────────┘
+                                      │
+             ┌────────────────────────┼────────────────────────┐
+             ▼                        ▼                        ▼
+    [Option A: Local Tesseract]  [Option B: Gemini Flash]  [Option C: Cloud Vision]
+    - Low server RAM             - Zero server RAM         - Zero server RAM
+    - Inaccurate on curves       - Perfect curve accuracy  - Perfect curve accuracy
+    - Local & Free               - Free developer tier     - Free 1k scans/mo
 ```
 
-**Vision Pipeline (within FastAPI):**
-```
-Camera JPEG → cv2.imdecode → Greyscale → Resize ×1.5 → Gaussian Blur
-→ Adaptive Threshold → Deskew → Morph Opening → Tesseract OCR
-→ Text Refinement → RxNorm Parallel Lookup → MedicationProfile JSON
-```
+### Option A: Local Tesseract OCR (Current Implementation)
+* **How:** Browser canvas captures image $\rightarrow$ Base64 posted $\rightarrow$ OpenCV greyscales & deskews $\rightarrow$ Tesseract extracts text.
+* **Pros:** Free, completely self-contained.
+* **Cons:** Setup is highly system-dependent (requires Tesseract binary installation on Windows/Linux). Accuracy is extremely low on cylindrical containers (pill bottles) or under bad lighting.
+
+### Option B: Gemini 1.5 / 2.5 Flash API (Multimodal AI) — *Recommended*
+* **How:** Frontend posts the captured frame directly $\rightarrow$ Backend forwards the image to Gemini Flash with a parser prompt $\rightarrow$ Gemini returns structured drug names in JSON.
+* **Pros:** Flawless reading capability on distorted surfaces, curved bottles, and shadows. Zero RAM impact on the python backend. Completely free developer tier (15 RPM / 1500 RPD).
+* **Cons:** Requires active internet connectivity and API keys.
+
+### Option C: Google Cloud Vision API (Commercial OCR)
+* **How:** Backend routes the captured frame to Google Cloud Vision's OCR endpoint.
+* **Pros:** Highly accurate on rotated text, curves, and glares. Zero RAM impact on the backend.
+* **Cons:** Free up to 1,000 requests/month, after which it charges $1.50 per 1,000 requests.
+
+### Option D: Client-Side Barcode Scanning
+* **How:** Browser runs `html5-qrcode` to scan the medicine package barcode $\rightarrow$ posts number $\rightarrow$ openFDA NDC API returns the drug profile.
+* **Pros:** 100% accurate. Zero server RAM overhead.
+* **Cons:** Only works on retail medicine boxes with standard barcodes; fails on custom hospital pharmacy bottles.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚨 Codebase Shortcomings & Active Bugs
 
-### Frontend
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| React.js | 18.3 | UI framework |
-| React Router DOM | 6.23 | Client-side routing |
-| Tailwind CSS | 3.4 | Utility-first styling |
-| Vite | 5.2 | Build tool & dev server |
-| HTML5 APIs | — | Camera (`getUserMedia`), Canvas, Geolocation |
+The following critical issues were uncovered during the codebase audit and need to be fixed:
 
-### Backend
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| FastAPI | 0.111 | REST API framework |
-| Uvicorn | ≥0.30 | ASGI server |
-| OpenCV | ≥4.9 | Image pre-processing |
-| Tesseract / pytesseract | ≥0.3.13 | OCR engine |
-| Pydantic | ≥2.10 | Data validation & serialisation |
-| httpx | ≥0.27 | Async HTTP client |
-| langdetect | 1.0.9 | Symptom input language detection |
-| Pillow | ≥10.4 | Image handling |
-| NumPy | ≥2.0 | Numerical computation |
+### 1. 🔴 Scanner $\rightarrow$ Drug Intelligence Handoff is Disconnected
+* **Location:** [`CameraScanner.jsx`](frontend/src/components/scanner/CameraScanner.jsx)
+* **Bug:** The candidate drug chips generated by the OCR are displayed correctly but are not interactive. Clicking a chip does not trigger a medication search. The component still displays a static message: *"Drug Intelligence lookup will be available in Phase 4."*
 
-### External APIs
-| API | Provider | Usage |
-|-----|---------|-------|
-| RxNorm REST API | NLM / NIH | Drug name resolution, interaction IDs |
-| openFDA Drug Labels | FDA | Clinical data enrichment |
-| Infermedica v3 | Infermedica | Symptom parsing, diagnosis, triage |
-| Google Places API | Google | Provider discovery & details |
+### 2. 🔴 Duplicate Routes via Shared Router Instance
+* **Location:** [`main.py`](backend/main.py) & [`phase5.py`](backend/routers/phase5.py)
+* **Bug:** Both symptom triage and directory lookups share a single router object (`phase5.py`). In `main.py`, this router is mounted twice at different prefixes (`/triage` and `/directory`), meaning all triage routes are also exposed under the `/directory` path and vice-versa.
+
+### 3. 🟠 Fragile OCR Replacement Rule
+* **Location:** [`text_refiner.py`](backend/utils/text_refiner.py)
+* **Bug:** The regex replacement pattern `r"cl": "d"` is far too broad. It replaces the character sequence `cl` anywhere in the text without boundary limits, causing common words like `"clinical"` to be incorrectly modified into `"dinical"`.
+
+### 4. 🟠 Missing Pydantic Models Organization
+* **Location:** `backend/models/`
+* **Bug:** The `models/` directory in the backend is completely empty. Instead of being modular, Pydantic schemas (like `TriageResponse` or `DrugProfile`) are written inline inside the route files, violating the codebase structure guidelines.
+
+### 5. 🟡 Silent Exception Swallowing
+* **Location:** [`backend/routers/medication.py`](backend/routers/medication.py)
+* **Bug:** The API call executes `asyncio.gather(..., return_exceptions=True)`. However, if an exception is raised, it gets returned as an exception object instead of a list. The code checks `isinstance(rxnorm_results, list)` but silently swallows the error if it fails, leaving the user with zero error feedback.
+
+### 6. 🟡 Missing Rate Limiting and Caching
+* **Location:** `backend/routers/`
+* **Bug:** The endpoints that query third-party APIs (openFDA, Google Places) have no caching or rate-limiting system. This makes the app highly vulnerable to denial-of-service and API quota exhaustion.
 
 ---
 
-## 📁 Project Structure
+## 🔧 Getting Started & Installation
 
-```
-Prahari/
-├── backend/                        # FastAPI application
-│   ├── main.py                     # App entry point, CORS, router registration
-│   ├── requirements.txt            # Python dependencies
-│   ├── .env.example                # Environment variable template
-│   ├── core/                       # App configuration & settings
-│   ├── models/                     # Pydantic data models
-│   │   ├── medication.py           # MedicationProfile, InteractionAlert
-│   │   └── triage.py               # TriageResult, ProviderListing
-│   ├── routers/                    # API route handlers
-│   │   ├── vision.py               # POST /scan/process
-│   │   ├── medication.py           # GET /medication/profile
-│   │   └── phase5.py               # Triage & directory endpoints
-│   ├── services/                   # Business logic layer
-│   │   ├── vision_service.py       # OpenCV + Tesseract pipeline
-│   │   ├── med_resolver_service.py # RxNorm + openFDA integration
-│   │   ├── triage_service.py       # Infermedica integration
-│   │   └── directory_service.py    # Google Places integration
-│   ├── middleware/                 # CORS, logging middleware
-│   └── utils/                     # Shared utilities (Haversine, OCR corrections)
-│
-├── frontend/                       # React.js application
-│   ├── index.html                  # HTML entry point
-│   ├── package.json                # Node dependencies
-│   ├── vite.config.js              # Vite configuration
-│   ├── tailwind.config.js          # Tailwind design tokens
-│   └── src/
-│       ├── main.jsx                # React root
-│       ├── App.jsx                 # Router setup
-│       ├── index.css               # Global styles & CSS variables
-│       ├── pages/
-│       │   ├── HomePage.jsx        # Landing page
-│       │   ├── MedicationsPage.jsx # Label scanner + drug profile
-│       │   ├── TriagePage.jsx      # Symptom input + triage results
-│       │   └── DirectoryPage.jsx   # Map + provider list
-│       ├── components/             # Reusable UI components
-│       ├── hooks/                  # Custom React hooks
-│       └── services/               # API client functions
-│
-├── FEATURES_AND_STRUCTURE.md       # Detailed product blueprint (v1.0.0)
-├── IMPLEMENTATION_PLAN.md          # Technical implementation roadmap
-├── push.ps1                        # Git push helper script
-└── README.md                       # ← You are here
-```
+### 1. System Prerequisites
+* **Python 3.11+**
+* **Node.js 18+**
+* **Tesseract OCR (v5.0+)** $\rightarrow$ [Download UB-Mannheim Builds](https://github.com/UB-Mannheim/tesseract/wiki) (Add to Windows `PATH` variable).
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-Ensure you have the following installed:
-
-| Requirement | Minimum Version | Check Command |
-|------------|----------------|---------------|
-| Python | 3.11+ | `python --version` |
-| Node.js | 18+ | `node --version` |
-| npm | 9+ | `npm --version` |
-| Tesseract OCR | 5.0+ | `tesseract --version` |
-| Git | Any | `git --version` |
-
-> **Windows:** Install Tesseract from [UB Mannheim Tesseract builds](https://github.com/UB-Mannheim/tesseract/wiki) and add it to your system `PATH`.
-
----
-
-### Backend Setup
-
-```bash
-# 1. Navigate to backend directory
+### 2. Backend Setup
+```powershell
 cd backend
-
-# 2. Create and activate a virtual environment
 python -m venv venv
-venv\Scripts\activate          # Windows
-# source venv/bin/activate     # macOS/Linux
+.\venv\Scripts\activate
 
-# 3. Install dependencies
+# Install requirements
 pip install -r requirements.txt
 
-# 4. Set up environment variables
-copy .env.example .env
-# Edit .env and populate your API keys
+# Create your .env file
+Copy-Item .env.example .env
 
-# 5. Start the development server
+# Run FastAPI
 uvicorn main:app --reload --port 8000
 ```
+* **API Documentation (Swagger UI):** `http://localhost:8000/docs`
 
-The FastAPI backend will be available at: **http://localhost:8000**  
-Interactive API docs (Swagger UI): **http://localhost:8000/docs**
-
----
-
-### Frontend Setup
-
-```bash
-# 1. Navigate to frontend directory
+### 3. Frontend Setup
+```powershell
 cd frontend
-
-# 2. Install dependencies
 npm install
-
-# 3. Start the development server
 npm run dev
 ```
+* **Web UI Access:** `http://localhost:5173`
 
-The React frontend will be available at: **http://localhost:5173**
-
----
-
-## 🔐 Environment Variables
-
-Create a `.env` file in the `backend/` directory based on `.env.example`:
-
+### 4. Environment File Configuration (`backend/.env`)
 ```env
-# ─── Infermedica Symptom Triage ────────────────────────────────────────
-INFERMEDICA_APP_ID=your_infermedica_app_id_here
-INFERMEDICA_APP_KEY=your_infermedica_app_key_here
+# Infermedica API credentials (Triage)
+INFERMEDICA_APP_ID=your_id
+INFERMEDICA_APP_KEY=your_key
 
-# ─── Google Places (Doctor Directory) ──────────────────────────────────
-GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
+# Google Places API key (Doctor Directory)
+GOOGLE_PLACES_API_KEY=your_google_places_api_key
 
-# ─── Application Settings ──────────────────────────────────────────────
-DEBUG=false
+# App Environment Settings
+DEBUG=true
 FRONTEND_ORIGIN=http://localhost:5173
 ```
-
-### How to obtain API keys:
-
-| API | Registration Link | Notes |
-|-----|------------------|-------|
-| **Infermedica** | [infermedica.com](https://infermedica.com) | Free developer tier available |
-| **Google Places** | [console.cloud.google.com](https://console.cloud.google.com) | Enable "Places API" in your project |
-| **RxNorm** | *(No key required)* | Free public API by NIH |
-| **openFDA** | *(No key required)* | Free public API by FDA |
-
-> ⚠️ **Never commit your `.env` file to version control.** It is included in `.gitignore` by default.
-
----
-
-## 📡 API Reference
-
-| Method | Endpoint | Description | Request Body |
-|--------|----------|-------------|-------------|
-| `POST` | `/scan/process` | Process Base64 image, run OCR pipeline | `{ image_b64: string }` |
-| `GET` | `/medication/profile` | Fetch drug profile from RxNorm + openFDA | `?drug_name=string` |
-| `GET` | `/medication/interactions` | Check interactions between multiple drugs | `?rxcuis=id1+id2+...` |
-| `POST` | `/triage/parse` | Parse free-text symptoms via Infermedica | `{ text, age, sex }` |
-| `POST` | `/triage/assess` | Get triage level + specialist suggestions | `{ evidence[], age, sex }` |
-| `POST` | `/directory/search` | Search nearby providers via Google Places | `{ lat, lng, specialty, radius }` |
-
-Full interactive documentation available at `http://localhost:8000/docs` when the backend is running.
-
----
-
-## 🛡️ Data Privacy & Safety
-
-Prahari is built with **Privacy-by-Design** principles:
-
-- 🚫 **No persistent storage** — Camera frames, OCR outputs, and symptom logs are **never stored** beyond a single request lifecycle.
-- 🚫 **No PII collection** — Patient context (age, sex) is transmitted only for the duration of an API call and is not retained.
-- 🚫 **No diagnosis** — Prahari triages and defers; it **never prescribes or diagnoses**.
-- ✅ **Emergency escalation** — Critical triage results surface local emergency numbers immediately.
-- ✅ **Authoritative data sources** — All clinical data comes from openFDA, RxNorm, and Infermedica — not proprietary models.
-
-> 🔴 **Medical Disclaimer:** Prahari is a health information and triage aid tool. It does **not** replace professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for medical decisions.
-
----
-
-## 🎨 Design System
-
-Prahari uses a carefully curated, clinically-inspired design system:
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--color-sage` | `#7A9E87` | Primary brand accent, CTAs |
-| `--color-teal` | `#2A7F8C` | Interactive elements, links |
-| `--color-surface` | `#F7F5F0` | Warm off-white background |
-| `--color-alert-critical` | `#C0392B` | Emergency alerts |
-| `--color-alert-moderate` | `#D4860A` | Moderate warnings |
-| `--color-alert-safe` | `#2E7D52` | Safe/routine indicators |
-
-**Typography:** `DM Serif Display` (headings) · `Inter` (body/UI) · `IBM Plex Mono` (drug names/chemical)
-
-**Dark Mode** is supported via `[data-theme="dark"]` CSS attribute on `<html>`, with WCAG AA contrast ratios maintained across all alert states.
-
----
-
-## 🗺️ Roadmap
-
-- [x] Project architecture & design system
-- [x] FastAPI backend scaffolding (routers, models, services)
-- [x] React frontend scaffolding (pages, components, routing)
-- [x] OpenCV + Tesseract OCR pipeline
-- [x] RxNorm + openFDA medication engine
-- [ ] Infermedica triage integration (in progress)
-- [ ] Google Places directory integration (in progress)
-- [ ] Drug interaction checker UI
-- [ ] Dark mode toggle
-- [ ] PWA / mobile optimization
-- [ ] v1.1: Google Translate integration for multilingual symptom input
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/your-feature-name`
-3. **Commit** your changes: `git commit -m 'feat: add some feature'`
-4. **Push** to the branch: `git push origin feature/your-feature-name`
-5. **Open** a Pull Request
-
-Please ensure your code follows the existing architecture patterns and that API keys are never committed.
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
 <div align="center">
 
-**Built with ❤️ and a mission to make healthcare accessible.**
+**Built with ❤️ for accessible healthcare.**
 
 *Prahari — Your Health Guardian*
 

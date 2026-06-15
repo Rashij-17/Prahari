@@ -32,7 +32,7 @@ _OCR_SUBSTITUTIONS: dict[str, str] = {
     r"\bl\b": "1",          # lowercase l read as 1 in dosage (e.g., "l0mg" → "10mg")
     r"(?<=[A-Z])0(?=[A-Z])": "O",  # 0 → O in amino acid / drug prefixes
     r"rn": "m",             # 'rn' ligature read as 'm' (e.g., "arnoxicillin" → "amoxicillin")
-    r"cl": "d",             # 'cl' misread in 'chloro-' prefixes
+    r"\bcl(?=ia|ic|ig|il|ol|ul|eslora|exame)": "d", # 'cl' misread for 'd' (e.g., cliazepam -> diazepam)
     r"\|": "I",             # pipe character read as capital I
     r"(?<=\d)O(?=\d)": "0",  # O between digits should be 0 in dose numbers
 
@@ -40,7 +40,6 @@ _OCR_SUBSTITUTIONS: dict[str, str] = {
     r"rnin": "min",         # "rninutes" → "minutes"
     r"hydrochloricle": "hydrochloride",
     r"sulphcite": "sulphate",
-    r"capsule$": "capsule",
 
     # Brand/generic name patterns
     r"(?<=[A-Z])\s(?=[A-Z]{2,})": "",  # remove erroneous space mid-word in all-caps brand names
@@ -56,6 +55,20 @@ _PHARMA_KEYWORDS: set[str] = {
     "usp", "bp", "ip", "oral", "topical", "intravenous", "iv", "im",
     "dose", "dosage", "strength", "each", "contains", "active", "ingredient",
     "500", "250", "100", "50", "25", "10", "5", "1000",
+}
+
+# Common words that appear on labels but are not drug names
+_STOP_WORDS: set[str] = {
+    "tablet", "tablets", "capsule", "capsules", "film", "coated",
+    "injection", "solution", "oral", "topical", "each", "contains",
+    "active", "ingredient", "ingredients", "manufactured", "distributed",
+    "store", "below", "keep", "reach", "children", "direction",
+    "physician", "consult", "before", "after", "food", "read", "label",
+    "warning", "caution", "danger", "important", "notice", "batch",
+    "expiry", "expires", "date", "mfg", "mfd", "license", "licensed",
+    "under", "from", "with", "this", "that", "only", "once", "twice",
+    "daily", "times", "take", "dose", "dosage", "adults", "children",
+    "uses", "side", "effects", "indicated", "contraindicated",
 }
 
 # ---------------------------------------------------------------------------
@@ -174,20 +187,6 @@ def _filter_boilerplate(candidates: list[str]) -> list[str]:
     Returns:
         Filtered list with boilerplate removed.
     """
-    # Common words that appear on labels but are not drug names
-    _STOP_WORDS: set[str] = {
-        "tablet", "tablets", "capsule", "capsules", "film", "coated",
-        "injection", "solution", "oral", "topical", "each", "contains",
-        "active", "ingredient", "ingredients", "manufactured", "distributed",
-        "store", "below", "keep", "reach", "children", "direction",
-        "physician", "consult", "before", "after", "food", "read", "label",
-        "warning", "caution", "danger", "important", "notice", "batch",
-        "expiry", "expires", "date", "mfg", "mfd", "license", "licensed",
-        "under", "from", "with", "this", "that", "only", "once", "twice",
-        "daily", "times", "take", "dose", "dosage", "adults", "children",
-        "uses", "side", "effects", "indicated", "contraindicated",
-    }
-
     return [
         c for c in candidates
         if c.lower() not in _stop_words_lower(_STOP_WORDS)

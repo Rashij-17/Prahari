@@ -19,6 +19,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { processFrame } from '../../services/api.js'
 
 // ---------------------------------------------------------------------------
@@ -211,7 +212,7 @@ function FileUploadFallback({ onFileSelected }) {
 /**
  * OCR Results panel — displays extracted text and drug candidates.
  */
-function OCRResultsPanel({ result, onReset }) {
+function OCRResultsPanel({ result, onReset, onCandidateClick }) {
   const { raw_text, candidates, word_count, psm_used, processing_note } = result
 
   return (
@@ -256,6 +257,7 @@ function OCRResultsPanel({ result, onReset }) {
               <div
                 key={idx}
                 className="card ribbon-safe"
+                onClick={() => onCandidateClick && onCandidateClick(name)}
                 style={{
                   padding: '0.75rem 1rem 0.75rem 1.25rem',
                   display: 'flex',
@@ -284,7 +286,7 @@ function OCRResultsPanel({ result, onReset }) {
             margin: '0.5rem 0 0',
             fontStyle: 'italic',
           }}>
-            Drug Intelligence lookup will be available in Phase 4.
+            💡 Tip: Click on a candidate name to search its drug intelligence profile.
           </p>
         </div>
       )}
@@ -349,6 +351,8 @@ function OCRResultsPanel({ result, onReset }) {
 // ---------------------------------------------------------------------------
 
 export default function CameraScanner() {
+  const navigate = useNavigate()
+
   // --- State ---
   const [phase, setPhase] = useState('idle')
   // Phases: 'idle' | 'camera' | 'capturing' | 'processing' | 'results' | 'error' | 'upload'
@@ -496,6 +500,10 @@ export default function CameraScanner() {
     setPhase('idle')
   }, [stopStream])
 
+  const handleCandidateClick = useCallback((candidateName) => {
+    navigate(`/medications?search=${encodeURIComponent(candidateName)}`)
+  }, [navigate])
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
@@ -626,7 +634,7 @@ export default function CameraScanner() {
 
       {/* === RESULTS === */}
       {phase === 'results' && ocrResult && (
-        <OCRResultsPanel result={ocrResult} onReset={reset} />
+        <OCRResultsPanel result={ocrResult} onReset={reset} onCandidateClick={handleCandidateClick} />
       )}
 
       {/* === FILE UPLOAD FALLBACK === */}

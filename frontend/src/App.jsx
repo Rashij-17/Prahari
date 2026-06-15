@@ -17,7 +17,6 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 
 import DashboardLayout from './components/layout/DashboardLayout.jsx'
 import HomePage from './pages/HomePage.jsx'
-import PlaceholderPage from './pages/PlaceholderPage.jsx'
 import CameraScanner from './components/scanner/CameraScanner.jsx'
 import MedicationsPage from './pages/MedicationsPage.jsx'
 import TriagePage from './pages/TriagePage.jsx'
