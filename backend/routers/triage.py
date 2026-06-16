@@ -12,7 +12,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from middleware.rate_limiter import limit_assess
+from middleware.rate_limiter import limit_assess, limit_chat
 from models.triage import TriageRequest, TriageResponse, TriageChatRequest, TriageChatResponse
 from services.triage_service import assess_symptoms, assess_triage_chat
 
@@ -56,7 +56,7 @@ async def assess_triage(body: TriageRequest) -> TriageResponse:
 @router.post(
     "/chat",
     response_model=TriageChatResponse,
-    dependencies=[Depends(limit_assess)],
+    dependencies=[Depends(limit_chat)],
     summary="Multi-turn triage chat endpoint",
     description="Provides follow-up questions or final triage outcomes in a conversational symptom check loop.",
 )

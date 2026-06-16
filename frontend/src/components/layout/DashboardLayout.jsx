@@ -73,16 +73,6 @@ const Icons = {
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
       <path d="M9 12h6M12 9v6"/>
     </svg>
-  ),
-  Interactions: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="m7 21-4-4 4-4"/>
-      <path d="M21 17H3"/>
-      <path d="m17 3 4 4-4 4"/>
-      <path d="M3 7h18"/>
-    </svg>
-  ),
 }
 
 // ----------------------------------------------------------------
@@ -92,7 +82,6 @@ const NAV_ITEMS = [
   { id: 'home',        label: 'Home',        path: '/', exact: true, Icon: Icons.Home },
   { id: 'scanner',     label: 'Scanner',     path: '/scanner',     Icon: Icons.Scanner },
   { id: 'medications', label: 'Medications', path: '/medications', Icon: Icons.Pill },
-  { id: 'interactions', label: 'Interactions', path: '/interactions', Icon: Icons.Interactions },
   { id: 'triage',      label: 'Triage',      path: '/triage',      Icon: Icons.Heartbeat },
   { id: 'directory',   label: 'Directory',   path: '/directory',   Icon: Icons.MapPin },
 ]

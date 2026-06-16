@@ -177,22 +177,67 @@ function TriageChatResult({ result, onReset }) {
 // Main Chatbot Component
 // ---------------------------------------------------------------------------
 export default function TriageChatbot() {
-  // Config states
-  const [sex, setSex] = useState('male')
-  const [age, setAge] = useState(30)
-  const [started, setStarted] = useState(false)
-  const [initialText, setInitialText] = useState('')
+  // Config states (loaded from sessionStorage if present to survive tab changes)
+  const [sex, setSex] = useState(() => sessionStorage.getItem('prahari_chat_sex') || 'male')
+  const [age, setAge] = useState(() => {
+    const val = sessionStorage.getItem('prahari_chat_age')
+    return val ? Number(val) : 30
+  })
+  const [started, setStarted] = useState(() => sessionStorage.getItem('prahari_chat_started') === 'true')
+  const [initialText, setInitialText] = useState(() => sessionStorage.getItem('prahari_chat_initialText') || '')
 
   // Conversation state
-  const [messages, setMessages] = useState([]) // [{ sender: 'bot'|'user', text: string, question?: object, isTriage?: boolean }]
-  const [evidence, setEvidence] = useState([])
+  const [messages, setMessages] = useState(() => {
+    const val = sessionStorage.getItem('prahari_chat_messages')
+    return val ? JSON.parse(val) : []
+  })
+  const [evidence, setEvidence] = useState(() => {
+    const val = sessionStorage.getItem('prahari_chat_evidence')
+    return val ? JSON.parse(val) : []
+  })
   const [loading, setLoading] = useState(false)
-  const [triageResult, setTriageResult] = useState(null)
+  const [triageResult, setTriageResult] = useState(() => {
+    const val = sessionStorage.getItem('prahari_chat_triageResult')
+    return val ? JSON.parse(val) : null
+  })
   
   // Multiple choice group temp states
   const [checkedIds, setCheckedIds] = useState({}) // { [symptomId]: boolean }
 
   const chatEndRef = useRef(null)
+
+  // Persist states to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('prahari_chat_sex', sex)
+  }, [sex])
+
+  useEffect(() => {
+    sessionStorage.setItem('prahari_chat_age', age.toString())
+  }, [age])
+
+  useEffect(() => {
+    sessionStorage.setItem('prahari_chat_started', started.toString())
+  }, [started])
+
+  useEffect(() => {
+    sessionStorage.setItem('prahari_chat_initialText', initialText)
+  }, [initialText])
+
+  useEffect(() => {
+    sessionStorage.setItem('prahari_chat_messages', JSON.stringify(messages))
+  }, [messages])
+
+  useEffect(() => {
+    sessionStorage.setItem('prahari_chat_evidence', JSON.stringify(evidence))
+  }, [evidence])
+
+  useEffect(() => {
+    if (triageResult) {
+      sessionStorage.setItem('prahari_chat_triageResult', JSON.stringify(triageResult))
+    } else {
+      sessionStorage.removeItem('prahari_chat_triageResult')
+    }
+  }, [triageResult])
 
   // Scroll to bottom helper
   useEffect(() => {
@@ -396,6 +441,14 @@ export default function TriageChatbot() {
 
   // Reset conversation to initial state
   const resetAll = () => {
+    // Clear session storage values
+    sessionStorage.removeItem('prahari_chat_started')
+    sessionStorage.removeItem('prahari_chat_initialText')
+    sessionStorage.removeItem('prahari_chat_messages')
+    sessionStorage.removeItem('prahari_chat_evidence')
+    sessionStorage.removeItem('prahari_chat_triageResult')
+
+    // Reset state values
     setMessages([])
     setEvidence([])
     setTriageResult(null)

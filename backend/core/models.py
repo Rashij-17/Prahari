@@ -4,8 +4,6 @@ Prahari Backend — Centralized LLM Models & Fallback Configurations
 Defines the models and fallback chains for both Symptom Triage and Prescription OCR.
 """
 
-from core.config import settings
-
 # ---------------------------------------------------------------------------
 # Supported Models Registry
 # ---------------------------------------------------------------------------
@@ -34,13 +32,13 @@ OCR_FALLBACK_CHAIN = [
     {
         "tier": 1,
         "provider": "gemini",
-        "model_name": settings.gemini_model_name or "gemini-3.1-flash-lite",
+        "model_name": "gemini-3.1-flash-lite",
         "description": "Primary multimodal OCR using Google Gemini Flash"
     },
     {
         "tier": 2,
         "provider": "groq",
-        "model_name": settings.groq_model_name or "llama-3.3-70b-versatile",
+        "model_name": "llama-3.3-70b-versatile",
         "description": "Fallback OCR using Groq Llama-Vision"
     },
     {
@@ -60,15 +58,15 @@ TRIAGE_FALLBACK_CHAIN = [
     },
     {
         "tier": 2,
-        "provider": "gemini",
-        "model_name": settings.gemini_model_name or "gemini-3.1-flash-lite",
-        "description": "Symptom check follow-ups using Google Gemini Flash"
+        "provider": "groq",
+        "model_name": "llama-3.3-70b-versatile",
+        "description": "Primary symptom check follow-ups using Groq Llama"
     },
     {
         "tier": 3,
-        "provider": "groq",
-        "model_name": settings.groq_model_name or "llama-3.3-70b-versatile",
-        "description": "Fallback symptom check using Groq Llama"
+        "provider": "gemini",
+        "model_name": "gemini-3.1-flash-lite",
+        "description": "Fallback symptom check using Google Gemini Flash"
     },
     {
         "tier": 4,

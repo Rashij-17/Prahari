@@ -7,45 +7,6 @@ import json
 client = TestClient(app)
 
 # ---------------------------------------------------------------------------
-# Test Drug-Drug Interaction Matrix Endpoint
-# ---------------------------------------------------------------------------
-
-def test_interactions_endpoint_success(mocker):
-    # Mock check_drug_interactions in interaction_service
-    mock_interactions = [
-        {
-            "rxcui_1": "1191",
-            "rxcui_2": "3498",
-            "severity": "critical",
-            "description": "Aspirin and Warfarin increase bleeding risk."
-        }
-    ]
-    mocker.patch(
-        "routers.interaction.check_drug_interactions",
-        new_callable=AsyncMock,
-        return_value=mock_interactions
-    )
-
-    response = client.post(
-        "/medication/interactions",
-        json={"rxcuis": ["1191", "3498"]}
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data["interactions"]) == 1
-    assert data["interactions"][0]["severity"] == "critical"
-    assert data["interactions"][0]["rxcui_1"] == "1191"
-
-
-def test_interactions_endpoint_too_few_rxcuis():
-    response = client.post(
-        "/medication/interactions",
-        json={"rxcuis": ["1191"]}
-    )
-    assert response.status_code == 422  # Pydantic validation error: min_items=2
-
-
-# ---------------------------------------------------------------------------
 # Test Triage Chatbot Endpoint
 # ---------------------------------------------------------------------------
 

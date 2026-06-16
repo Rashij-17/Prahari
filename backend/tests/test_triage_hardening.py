@@ -82,9 +82,7 @@ async def test_assess_triage_chat_fallback_on_llm_malformation(mock_has_cred, mo
     # Setup mock clients to be active so we enter Tier 2/3
     with patch("services.triage_service.settings") as mock_settings:
         mock_settings.gemini_api_key = "mock_gemini_key"
-        mock_settings.gemini_model_name = "gemini-3.1-flash-lite"
         mock_settings.groq_api_key = "mock_groq_key"
-        mock_settings.groq_model_name = "llama-3.3-70b-versatile"
         
         # Scenario: Gemini returns completely malformed JSON that fails validation
         mock_gemini.side_effect = ValueError("Empty/Invalid response")

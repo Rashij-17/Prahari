@@ -34,9 +34,7 @@ class Settings(BaseSettings):
     
     # Vision & OCR Models configuration
     gemini_api_key: str = ""
-    gemini_model_name: str = "gemini-3.1-flash-lite"
     groq_api_key: str = ""
-    groq_model_name: str = "llama-4-scout"
 
     # Model config: reads from backend/.env
     model_config = SettingsConfigDict(

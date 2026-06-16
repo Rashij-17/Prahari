@@ -35,3 +35,4 @@ class InMemoryRateLimiter:
 limit_scan = InMemoryRateLimiter(requests_limit=10, window_seconds=60)
 limit_profile = InMemoryRateLimiter(requests_limit=10, window_seconds=60)
 limit_assess = InMemoryRateLimiter(requests_limit=10, window_seconds=60)
+limit_chat = InMemoryRateLimiter(requests_limit=30, window_seconds=60)

@@ -309,8 +309,48 @@ def _build_triage_prompt(evidence: list[dict], sex: str, age: int, text: Optiona
     # Format evidence nicely
     evidence_str = ""
     for item in evidence:
-        status = "Present" if item.get("choice_id") == "present" else "Absent" if item.get("choice_id") == "absent" else "Unknown"
+        choice = item.get("choice_id", "unknown")
+        if choice == "present":
+            status = "Present"
+        elif choice == "absent":
+            status = "Absent"
+        elif choice == "unknown":
+            status = "Unknown"
+        else:
+            status = f"'{choice}'"
         evidence_str += f"- Symptom/Condition ID: '{item['id']}' is {status}\n"
+        
+    # If we have gathered 5 or more evidence items, force a final triage assessment.
+    if len(evidence) >= 5:
+        prompt = f"""You are a clinical triage chatbot.
+Patient Context: Biological Sex: {sex}, Age: {age} years.
+{f'Initial symptoms reported by patient: "{text}"' if text else ""}
+Current Evidence Gathered So Far:
+{evidence_str}
+
+CRITICAL: You have gathered sufficient evidence (5 or more turns have occurred). You MUST complete the triage assessment now. Do not ask any more questions. Set 'should_stop': true, set 'question': null, and populate the 'triage_result' object.
+
+Return a JSON object matching this schema exactly:
+{{
+  "should_stop": true,
+  "evidence": [
+     // Include all incoming evidence items. Keep their exact id and choice_id formats.
+  ],
+  "question": null,
+  "triage_result": {{
+    "urgency_level": "critical" | "moderate" | "safe",
+    "urgency_label": "🚨 Seek Emergency Care Immediately" | "⚠️ See a Doctor Within 24 Hours" | "✅ Self-Care Recommended",
+    "urgency_color": "critical" | "moderate" | "safe",
+    "recommendation": "Detailed actionable clinical instructions. If critical, mention calling 112 / 102.",
+    "conditions": [
+      {{"name": "Condition Name", "probability": 0.45, "urgency": "critical" | "moderate" | "safe"}}
+    ],
+    "risk_factors": []
+  }}
+}}
+Ensure the output is valid JSON and matches this schema.
+"""
+        return prompt
         
     prompt = f"""You are a clinical triage chatbot.
 Patient Context: Biological Sex: {sex}, Age: {age} years.
@@ -487,12 +527,12 @@ def _sanitize_and_validate_triage_response(raw_data: dict) -> dict:
     return validated.model_dump()
 
 
-async def _run_gemini_triage(evidence: list[dict], sex: str, age: int, text: Optional[str] = None) -> dict:
+async def _run_gemini_triage(evidence: list[dict], sex: str, age: int, model_name: str, text: Optional[str] = None) -> dict:
     client = genai.Client(api_key=settings.gemini_api_key)
     prompt = _build_triage_prompt(evidence, sex, age, text)
     
     response = client.models.generate_content(
-        model=settings.gemini_model_name,
+        model=model_name,
         contents=prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
@@ -504,12 +544,12 @@ async def _run_gemini_triage(evidence: list[dict], sex: str, age: int, text: Opt
     raise ValueError("Empty response from Gemini")
 
 
-async def _run_groq_triage(evidence: list[dict], sex: str, age: int, text: Optional[str] = None) -> dict:
+async def _run_groq_triage(evidence: list[dict], sex: str, age: int, model_name: str, text: Optional[str] = None) -> dict:
     client = Groq(api_key=settings.groq_api_key)
     prompt = _build_triage_prompt(evidence, sex, age, text)
     
     response = client.chat.completions.create(
-        model=settings.groq_model_name,
+        model=model_name,
         messages=[
             {"role": "user", "content": prompt}
         ],
@@ -622,7 +662,7 @@ async def assess_triage_chat(
             if is_gemini_configured:
                 try:
                     logger.info("Attempting Triage Step: Gemini (%s)", model)
-                    raw_result = await _run_gemini_triage(current_evidence, sex, age, text)
+                    raw_result = await _run_gemini_triage(current_evidence, sex, age, model, text)
                     result = _sanitize_and_validate_triage_response(raw_result)
                     logger.info("Triage Step (Gemini) succeeded.")
                     
@@ -647,7 +687,7 @@ async def assess_triage_chat(
             if is_groq_configured:
                 try:
                     logger.info("Attempting Triage Step: Groq (%s)", model)
-                    raw_result = await _run_groq_triage(current_evidence, sex, age, text)
+                    raw_result = await _run_groq_triage(current_evidence, sex, age, model, text)
                     result = _sanitize_and_validate_triage_response(raw_result)
                     logger.info("Triage Step (Groq) succeeded.")
                     
