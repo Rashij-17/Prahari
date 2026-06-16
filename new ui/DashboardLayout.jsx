@@ -491,7 +491,7 @@ function Footer() {
             lineHeight: 1.7,
           }}>
             <p style={{ margin: '0 0 0.5rem', fontWeight: 600, color: 'var(--color-ink)' }}>
-              Medical Disclaimer:
+              Medical Disclaimer
             </p>
             <p style={{ margin: 0 }}>
               Prahari is an informational tool only and does not constitute medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional.{' '}

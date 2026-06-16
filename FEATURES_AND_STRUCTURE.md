@@ -13,6 +13,7 @@
 ## Table of Contents
 
 1. [Project Overview & Vision](#1-project-overview--vision)
+   - 1.4 [Architectural Hybrid Model: Local vs. Cloud API Division](#14-architectural-hybrid-model-local-vs-cloud-api-division)
 2. [Core Application Features (Functional Breakdown)](#2-core-application-features-functional-breakdown)
    - 2.1 [Visual Label Scanner](#21-visual-label-scanner)
    - 2.2 [Medication Demystification Engine](#22-medication-demystification-engine)
@@ -54,11 +55,26 @@ Medication non-adherence, misidentification of prescription labels, delayed tria
 - MedLens does **not** replace emergency services. All severe-risk triage results direct users immediately to emergency contact numbers.
 - MedLens does **not** store any personally identifiable information (PII), health history, or biometric data across sessions.
 
+### 1.4 Architectural Hybrid Model: Local vs. Cloud API Division
+
+To optimize for **data privacy, server costs, offline resiliency, and accuracy**, the current features in MedLens are split into a hybrid architecture:
+
+| Feature / Sub-System | Classification | Architecture Rationale |
+| :--- | :--- | :--- |
+| **Visual Label Scanner (Image Preprocessing & OCR)** | **Local-Preferred (ML)** | Processing images via client-side Canvas and backend **OpenCV/Tesseract** operates locally. This keeps patient camera captures private, ensures zero API costs, and allows the scanner to run locally/privately. |
+| **Medication Demystification Engine (RxNorm & openFDA Lookup)** | **API-Reliant** | Requires external APIs. The FDA and NLM databases of all approved chemical salts, brand names, and drug-drug interactions are hundreds of gigabytes, constantly updating. Mirroring this locally on a mobile client or cheap server is impractical and quickly goes out of date. |
+| **Symptom & Triage Analyzer (Infermedica Interface)** | **API-Reliant** | Requires external APIs. Triage diagnostic flows rely on Infermedica's curated, proprietary clinical probabilistic models and clinical graphs which are kept secure and hosted in their compliant cloud. |
+| **Geographic Specialist Directory (Google Places Search)** | **API-Reliant** | Requires external APIs. Querying real-time doctor listings, opening times, ratings, and addresses requires access to Google's dynamic global business directories. |
+
 ---
+
 
 ## 2. Core Application Features (Functional Breakdown)
 
-### 2.1 Visual Label Scanner
+### 2.1 Visual Label Scanner `[LOCAL PREFERRED — MACHINE LEARNING]`
+
+* **Deployment Preference**: **Local-Preferred**. The scanner processes images using client-side HTML5 canvas frame capture and runs image preprocessing (OpenCV) and character recognition (Tesseract OCR) locally on the backend server CPU.
+* **Why Local is Preferred**: Prescription bottles contain sensitive clinical and personal information. By keeping frame processing local, the system ensures HIPAA compliance (no images are sent to third-party cloud engines) and operates with zero API usage costs. In production, this can also be compiled to run entirely inside the user's browser using `tesseract.js` and OpenCV WebAssembly.
 
 The Visual Label Scanner is the primary entry point for medication identification. It transforms a physical pharmaceutical label into a structured, machine-readable drug profile through a sequential pipeline of camera acquisition, image enhancement, optical character recognition, and text refinement.
 
@@ -107,7 +123,10 @@ Raw OCR output is post-processed through the following refinement pipeline befor
 
 ---
 
-### 2.2 Medication Demystification Engine
+### 2.2 Medication Demystification Engine `[REQUIRES CLOUD API]`
+
+* **Deployment Preference**: **Cloud API-Reliant**. The engine queries the national RxNorm clinical drug terminology database and the openFDA drug label repository.
+* **Why API is Required**: The database of all global/US-approved drugs, chemical active moieties, brand names, and drug-drug interactions is hundreds of gigabytes in size and continuously updated. Storing and searching this dataset locally on a mobile client or cheap VM is inefficient, goes out of date quickly, and misses critical safety updates. The NLM RxNorm and openFDA REST endpoints serve as the single source of truth.
 
 This engine takes raw chemical or brand-name strings — whether sourced from the scanner or typed manually — and returns a comprehensive, patient-readable drug profile.
 
@@ -199,7 +218,10 @@ This model is serialised as JSON and returned to the React frontend for renderin
 
 ---
 
-### 2.3 Symptom & Triage Analyzer
+### 2.3 Symptom & Triage Analyzer `[REQUIRES CLOUD API]`
+
+* **Deployment Preference**: **Cloud API-Reliant** (with **`[LOCAL PREFERRED — ALGORITHM]`** pre-processing).
+* **Why API is Required**: Diagnosing symptoms and generating safety-critical triage guidelines requires a massive probabilistic diagnostic decision network. Infermedica has clinical graphs containing thousands of symptoms, conditions, risk factors, and their clinical conditional probabilities. Recreating this reasoning engine locally requires specialized, proprietary knowledge graphs. However, Prahari performs local preprocessing (language detection, regex-based negation handling, and entity parsing) before sending the request to the cloud.
 
 The Symptom & Triage Analyzer converts free-text symptom descriptions into structured triage assessments, urgency classifications, and medical specialty recommendations.
 
@@ -269,7 +291,10 @@ For MODERATE and ROUTINE triage outcomes, Infermedica's response includes `sugge
 
 ---
 
-### 2.4 Geographic Specialist Directory
+### 2.4 Geographic Specialist Directory `[REQUIRES CLOUD API]`
+
+* **Deployment Preference**: **Cloud API-Reliant** (with **`[LOCAL PREFERRED — ALGORITHM]`** map rendering fallback).
+* **Why API is Required**: Finding real-time addresses, open hours, and ratings of active clinics and pharmacies in a specific geographic radius requires access to Google's dynamic global business directory. Storing a local, static database of global hospital locations is not scalable or accurate enough for dynamic provider operations. However, Prahari handles maps client-side using OpenStreetMap/Leaflet to minimize rendering costs.
 
 The Geographic Specialist Directory provides a live, filterable map and list view of nearby healthcare providers, seeded either manually by the user or automatically from a triage recommendation.
 

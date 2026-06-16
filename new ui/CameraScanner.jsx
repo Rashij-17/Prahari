@@ -365,7 +365,7 @@ export default function CameraScanner() {
     <div style={{ maxWidth: '640px', margin: '0 auto' }}>
 
       <div className="page-header" style={{ border: 'none', paddingBottom: 0, marginBottom: '1.75rem' }}>
-        <h1>Visual label scanner</h1>
+        <h1>Visual Label Scanner</h1>
         <p>Point your camera at a medication label to identify the drug and retrieve its clinical profile.</p>
       </div>
 

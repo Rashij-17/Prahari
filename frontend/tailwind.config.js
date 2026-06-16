@@ -31,59 +31,76 @@ export default {
       // Source: FEATURES_AND_STRUCTURE.md § 4.2
       // ---------------------------------------------------------------
       colors: {
-        // --- Primary Brand: Sage Green ---
-        // Used for: CTAs, safe/routine indicators, progress fills
-        sage: {
-          DEFAULT: '#7A9E87',
-          light:   '#B8D4C0',
-          dark:    '#5C8069',
+        // --- Primary Brand: Forest Green ---
+        forest: {
+          DEFAULT: '#2D5A3D',
+          light:   '#4A9268',
+          dark:    '#1E3D29',
+          mid:     '#3D7A54',
         },
 
-        // --- Secondary Accent: Teal ---
-        // Used for: interactive elements, links, map markers, info alerts
-        teal: {
-          DEFAULT: '#2A7F8C',
-          dark:    '#1C5C66',
-          light:   '#4FAABA',
+        // --- Brand CTA: Amber ---
+        amber: {
+          DEFAULT: '#C67C2E',
+          dark:    '#9E5F1E',
+          light:   '#E09A4A',
         },
 
         // --- Surface / Background Colours ---
-        surface: {
-          DEFAULT: '#F7F5F0',  // Primary page background — warm off-white
-          card:    '#FFFFFF',  // Card and modal backgrounds
-          beige:   '#D4C5A9',  // Secondary surface; tag backgrounds; disabled states
-        },
+        paper:       '#FEFCF8',
+        white:       '#FFFFFF',
+        cream:       '#F4EFE6',
+        parchment:   '#E8E0D4',
 
-        // --- Text Colours ---
+        // --- Text ---
+        ink:         '#1A1714',
+        muted:       '#5E564E',
+        faint:       '#9E968E',
+        inverse:     '#FEFCF8',
+
+        // --- Legacy aliases / extensions ---
+        sage: {
+          DEFAULT: '#4A9268',
+          light:   '#7BB899',
+          dark:    '#1E3D29',
+        },
+        teal: {
+          DEFAULT: '#2D5A3D',
+          dark:    '#1E3D29',
+          light:   '#4A9268',
+        },
+        surface: {
+          DEFAULT: '#FEFCF8',
+          card:    '#FFFFFF',
+          beige:   '#E8E0D4',
+        },
         text: {
-          primary:   '#1A1A2E',  // Headings and primary body copy
-          secondary: '#5A5A72',  // Captions, labels, secondary metadata
-          inverse:   '#F7F5F0',  // Text on dark/coloured backgrounds
+          primary:   '#1A1714',
+          secondary: '#5E564E',
+          inverse:   '#FEFCF8',
         },
 
         // --- Alert / Urgency States ---
         alert: {
-          critical:    '#C0392B',  // T1 — Critical drug interaction, emergency triage
-          criticalBg:  '#FDECEA',
-          moderate:    '#D4860A',  // T2 — Moderate interaction, same-day appointment
-          moderateBg:  '#FDF3E0',
-          safe:        '#2E7D52',  // T3 — Safe/routine, self-care
-          safeBg:      '#E8F5EE',
+          critical:    '#B91C1C',
+          criticalBg:  '#FEF2F2',
+          moderate:    '#A16207',
+          moderateBg:  '#FFFBEB',
+          safe:        '#166534',
+          safeBg:      '#F0FDF4',
         },
 
-        // --- Borders & Focus ---
-        border:  '#E2DCCF',
-        focus:   '#2A7F8C',  // 3px focus ring, 2px offset
+        border:  '#DDD6CB',
+        focus:   '#2D5A3D',
 
         // --- Dark Mode Surface Overrides ---
-        // Used in conjunction with darkMode: 'class'
         dark: {
-          surface: '#12141A',
-          card:    '#1E2029',
-          beige:   '#2A2D38',
-          border:  '#2D303A',
-          textPrimary:   '#EDF0F5',
-          textSecondary: '#9099AB',
+          surface: '#1A1714',
+          card:    '#231F1B',
+          beige:   '#2A2520',
+          border:  '#3A332C',
+          textPrimary:   '#F0EBE4',
+          textSecondary: '#9E968E',
         },
       },
 
@@ -92,14 +109,9 @@ export default {
       // Source: FEATURES_AND_STRUCTURE.md § 4.3
       // ---------------------------------------------------------------
       fontFamily: {
-        // Display / Headings — DM Serif Display (imported via Google Fonts)
-        display: ['"DM Serif Display"', 'Georgia', 'serif'],
-
-        // Body & UI — Inter (imported via Google Fonts)
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-
-        // Drug names, RxCUI codes, chemical nomenclature
-        mono: ['"IBM Plex Mono"', 'Courier New', 'monospace'],
+        display: ['Fraunces', 'Georgia', 'serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
       },
 
       fontSize: {

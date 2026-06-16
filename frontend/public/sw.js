@@ -1,5 +1,5 @@
-const CACHE_NAME = 'prahari-static-v1';
-const API_CACHE_NAME = 'prahari-api-v1';
+const CACHE_NAME = 'prahari-static-v2';
+const API_CACHE_NAME = 'prahari-api-v2';
 
 const STATIC_ASSETS = [
   '/',
@@ -36,6 +36,12 @@ self.addEventListener('activate', (event) => {
 // Fetch Event: Implement Cache-First for assets, Network-First for API
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+
+  // Bypass service worker cache completely on localhost (development server)
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   // Check if it's an API request
   const isApiRequest = url.pathname.startsWith('/medication') || 
@@ -79,7 +85,7 @@ self.addEventListener('fetch', (event) => {
         })
     );
   } else {
-    // Cache-First Strategy for static assets
+    // Cache-First Strategy for static assets in production
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) {

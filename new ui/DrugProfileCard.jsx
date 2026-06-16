@@ -59,8 +59,8 @@ const Icons = {
 function UrgencyBadge({ level }) {
   const config = {
     safe:     { label: 'Low risk',           cls: 'chip-safe',     Icon: Icons.Check },
-    moderate: { label: 'Use Caution',        cls: 'chip-moderate', Icon: Icons.Alert },
-    critical: { label: 'Black Box Warning',  cls: 'chip-critical', Icon: Icons.Alert },
+    moderate: { label: 'Use caution',        cls: 'chip-moderate', Icon: Icons.Alert },
+    critical: { label: 'Black box warning',  cls: 'chip-critical', Icon: Icons.Alert },
   }
   const { label, cls, Icon } = config[level] || config.safe
 
@@ -211,8 +211,8 @@ export default function DrugProfileCard({ profile, onClose }) {
       </div>
 
       <div>
-        <ClinicalSection title="Indications & Usage" content={indications} defaultOpen={true} />
-        <ClinicalSection title="Dosage & Administration" content={dosage} defaultOpen={true} />
+        <ClinicalSection title="Indications & usage" content={indications} defaultOpen={true} />
+        <ClinicalSection title="Dosage & administration" content={dosage} defaultOpen={true} />
         <ClinicalSection title="Warnings" content={warnings} highlight={!!warnings} />
         <ClinicalSection title="Contraindications" content={contraindications} highlight={!!contraindications} />
         <ClinicalSection title="Adverse reactions" content={adverse_reactions} />

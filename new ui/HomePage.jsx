@@ -103,7 +103,6 @@ const FEATURES = [
     path: '/scanner',
     Icon: Icons.Scanner,
     status: 'Live',
-    cta: 'Open Scanner',
   },
   {
     num: '02',
@@ -113,7 +112,6 @@ const FEATURES = [
     path: '/medications',
     Icon: Icons.Pill,
     status: 'Live',
-    cta: 'Search Medications',
   },
   {
     num: '03',
@@ -123,7 +121,6 @@ const FEATURES = [
     path: '/triage',
     Icon: Icons.Pulse,
     status: 'Beta',
-    cta: 'Check Symptoms',
   },
   {
     num: '04',
@@ -133,7 +130,6 @@ const FEATURES = [
     path: '/directory',
     Icon: Icons.Pin,
     status: 'Live',
-    cta: 'Find Providers',
   },
 ]
 
@@ -185,7 +181,7 @@ function Hero() {
             color: 'var(--color-muted)',
             letterSpacing: '0.01em',
           }}>
-            Your Personal Health Guardian
+            Your personal health companion
           </span>
         </div>
 
@@ -225,7 +221,7 @@ function Hero() {
             <Icons.Arrow />
           </NavLink>
           <NavLink to="/triage" id="hero-cta-triage" className="btn-secondary">
-            Check Symptoms
+            Check symptoms
           </NavLink>
         </div>
       </div>
@@ -267,7 +263,7 @@ function Hero() {
 // Feature Row — magazine-style numbered list
 // ----------------------------------------------------------------
 function FeatureRow({ feature, isLast }) {
-  const { num, id, title, description, path, Icon, status, cta } = feature
+  const { num, id, title, description, path, Icon, status } = feature
 
   return (
     <NavLink
@@ -278,7 +274,7 @@ function FeatureRow({ feature, isLast }) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'auto auto 1fr auto auto',
+          gridTemplateColumns: 'auto auto 1fr auto',
           alignItems: 'center',
           gap: 'clamp(1rem, 3vw, 2rem)',
           padding: 'clamp(1.5rem, 3vw, 2rem) 0',
@@ -341,26 +337,6 @@ function FeatureRow({ feature, isLast }) {
           </p>
         </div>
 
-        {/* CTA Text */}
-        <div className="feature-row-cta" style={{
-          fontSize: '0.875rem',
-          fontWeight: 700,
-          color: 'var(--color-forest)',
-          fontFamily: 'var(--font-sans)',
-          whiteSpace: 'nowrap',
-          transition: 'var(--transition-fast)',
-        }}
-        ref={el => {
-          if (!el) return
-          const mq = window.matchMedia('(min-width: 640px)')
-          const update = e => { el.style.display = e.matches ? 'block' : 'none' }
-          update(mq)
-          mq.addEventListener('change', update)
-        }}
-        >
-          {cta}
-        </div>
-
         {/* Arrow */}
         <div className="feature-row-arrow" style={{
           width: '38px',
@@ -383,10 +359,6 @@ function FeatureRow({ feature, isLast }) {
           background: var(--color-forest);
           color: white;
           transform: scale(1.05);
-        }
-        .feature-row:hover .feature-row-cta {
-          color: var(--color-forest-dark);
-          transform: translateX(-3px);
         }
         .feature-row:hover .feature-row-arrow {
           background: var(--color-forest);
@@ -416,10 +388,8 @@ function TrustSources() {
             borderRadius: '12px',
             border: '1px solid var(--color-border)',
             background: 'var(--color-white)',
-          }}
-            className="trust-badge-container"
-          >
-            <div className="trust-badge-icon" style={{
+          }}>
+            <div style={{
               width: '38px',
               height: '38px',
               borderRadius: '9px',
@@ -439,12 +409,6 @@ function TrustSources() {
           </div>
         ))}
       </div>
-      <style>{`
-        .trust-badge-container:hover {
-          border-color: var(--color-forest) !important;
-          box-shadow: var(--shadow-teal) !important;
-        }
-      `}</style>
     </div>
   )
 }

@@ -18,37 +18,37 @@ import { assessSymptoms } from '../services/api.js'
 const URGENCY_CONFIG = {
   safe: {
     icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
         <polyline points="22 4 12 14.01 9 11.01" />
       </svg>
     ),
-    color: 'var(--color-alert-safe)',
-    bg: 'var(--color-alert-safe-bg)',
+    color: 'var(--color-safe)',
+    bg: 'var(--color-safe-bg)',
     cls: 'ribbon-safe'
   },
   moderate: {
     icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
         <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
         <line x1="12" y1="9" x2="12" y2="13" />
         <line x1="12" y1="17" x2="12.01" y2="17" />
       </svg>
     ),
-    color: 'var(--color-alert-moderate)',
-    bg: 'var(--color-alert-moderate-bg)',
+    color: 'var(--color-warning)',
+    bg: 'var(--color-warning-bg)',
     cls: 'ribbon-moderate'
   },
   critical: {
     icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         <line x1="12" y1="8" x2="12" y2="12"/>
         <line x1="12" y1="16" x2="12.01" y2="16"/>
       </svg>
     ),
-    color: 'var(--color-alert-critical)',
-    bg: 'var(--color-alert-critical-bg)',
+    color: 'var(--color-critical)',
+    bg: 'var(--color-critical-bg)',
     cls: 'ribbon-critical'
   },
 }
@@ -61,34 +61,43 @@ function UrgencyResult({ result, onReset }) {
       {/* Main urgency card */}
       <div
         className={`card ${cfg.cls}`}
-        style={{ backgroundColor: cfg.bg, padding: '1.5rem 1.5rem 1.5rem 1.75rem', marginBottom: '1rem' }}
+        style={{
+          backgroundColor: 'var(--color-white)',
+          padding: '1.5rem',
+          marginBottom: '1.25rem',
+          borderLeftWidth: '4px',
+          textAlign: 'left'
+        }}
         role="alert"
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', color: cfg.color }}>
-          {cfg.icon}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', marginBottom: '0.875rem', color: cfg.color }}>
+          <div style={{ display: 'flex', color: cfg.color }}>{cfg.icon}</div>
           <h2 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '1.4rem',
-            color: cfg.color,
+            fontFamily: 'var(--font-sans)',
+            fontSize: '1.25rem',
+            color: 'var(--color-ink)',
             margin: 0,
+            fontWeight: 700
           }}>
             {result.urgency_label}
           </h2>
         </div>
-        <p style={{ color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.7 }}>
+        <p style={{ color: 'var(--color-muted)', margin: 0, lineHeight: 1.6, fontSize: '0.9375rem' }}>
           {result.recommendation}
         </p>
       </div>
 
       {/* Mock notice */}
-      {result.is_mock && (
+      {result.is_mock && result.mock_notice && (
         <div style={{
-          backgroundColor: 'var(--color-beige)',
-          borderRadius: '8px',
-          padding: '0.75rem 1rem',
-          fontSize: '0.8rem',
-          color: 'var(--color-text-secondary)',
-          marginBottom: '1rem',
+          backgroundColor: 'var(--color-cream)',
+          borderRadius: '10px',
+          padding: '0.875rem 1.125rem',
+          fontSize: '0.825rem',
+          color: 'var(--color-muted)',
+          marginBottom: '1.25rem',
+          border: '1px solid var(--color-border)',
+          textAlign: 'left'
         }}>
           {result.mock_notice}
         </div>
@@ -96,37 +105,42 @@ function UrgencyResult({ result, onReset }) {
 
       {/* Top conditions */}
       {result.conditions?.length > 0 && (
-        <div style={{ marginBottom: '1.25rem' }}>
-          <h3 style={{ fontSize: '1rem', margin: '0 0 0.75rem', color: 'var(--color-text-primary)' }}>
+        <div style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
+          <h3 style={{ fontSize: '1rem', margin: '0 0 0.875rem', color: 'var(--color-ink)', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>
             Most Likely Conditions
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {result.conditions.map((c, i) => (
               <div key={i} className="card" style={{
-                padding: '0.75rem 1rem',
+                padding: '0.875rem 1.125rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                backgroundColor: 'var(--color-white)',
+                borderColor: 'var(--color-border)',
+                borderRadius: '10px',
+                transform: 'none',
+                boxShadow: 'var(--shadow-sm)'
               }}>
-                <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.9rem' }}>
+                <span style={{ fontWeight: 600, color: 'var(--color-ink)', fontSize: '0.9rem' }}>
                   {c.name}
                 </span>
-                <div style={{ textAlign: 'right' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <div style={{
-                    width: '100px',
+                    width: '80px',
                     height: '6px',
-                    backgroundColor: 'var(--color-border)',
-                    borderRadius: '3px',
+                    backgroundColor: 'var(--color-cream)',
+                    borderRadius: '99px',
                     overflow: 'hidden',
-                    marginBottom: '2px',
                   }}>
                     <div style={{
                       width: `${Math.round(c.probability * 100)}%`,
                       height: '100%',
-                      backgroundColor: 'var(--color-sage)',
+                      backgroundColor: 'var(--color-forest)',
+                      borderRadius: '99px'
                     }} />
                   </div>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
+                  <span style={{ fontSize: '0.785rem', color: 'var(--color-muted)', fontWeight: 600, minWidth: '32px', textAlign: 'right' }}>
                     {Math.round(c.probability * 100)}%
                   </span>
                 </div>
@@ -138,17 +152,18 @@ function UrgencyResult({ result, onReset }) {
 
       {/* Disclaimer */}
       <div style={{
-        fontSize: '0.75rem',
-        color: 'var(--color-text-secondary)',
+        fontSize: '0.775rem',
+        color: 'var(--color-muted)',
         lineHeight: 1.6,
         borderTop: '1px solid var(--color-border)',
-        paddingTop: '0.75rem',
-        margin: '0 0 1.25rem',
+        paddingTop: '0.875rem',
+        margin: '0 0 1.5rem',
         display: 'flex',
         alignItems: 'flex-start',
-        gap: '0.4rem',
+        gap: '0.5rem',
+        textAlign: 'left'
       }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, marginTop: '0.125rem' }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, marginTop: '0.125rem', color: 'var(--color-faint)' }}>
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="16" x2="12" y2="12" />
           <line x1="12" y1="8" x2="12.01" y2="8" />
@@ -159,21 +174,19 @@ function UrgencyResult({ result, onReset }) {
         </span>
       </div>
 
-      <button
-        id="triage-reset-btn"
-        className="btn-primary"
-        onClick={onReset}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: 'auto' }}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M4.8 3A2.4 2.4 0 1 0 9.6 3A2.4 2.4 0 1 0 4.8 3z"/>
-          <path d="M14.4 3A2.4 2.4 0 1 0 19.2 3A2.4 2.4 0 1 0 14.4 3z"/>
-          <path d="M7.2 5.4v4.2a4.8 4.8 0 0 0 9.6 0V5.4"/>
-          <path d="M12 9.6v5.4a3 3 0 0 0 6 0v-1.2"/>
-          <circle cx="18" cy="11.4" r="2"/>
-        </svg>
-        Assess New Symptoms
-      </button>
+      <div style={{ textAlign: 'left' }}>
+        <button
+          id="triage-reset-btn"
+          className="btn-primary-forest"
+          onClick={onReset}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: 'auto' }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-.73" />
+          </svg>
+          Assess New Symptoms
+        </button>
+      </div>
     </div>
   )
 }
@@ -223,11 +236,11 @@ export default function TriagePage() {
 
       {/* Heading */}
       {phase !== 'result' && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', color: 'var(--color-text-primary)', margin: '0 0 0.375rem' }}>
+        <div style={{ marginBottom: '1.75rem', textAlign: 'left' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--color-ink)', margin: '0 0 0.5rem' }}>
             Symptom Triage Analyzer
           </h1>
-          <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
+          <p style={{ color: 'var(--color-muted)', margin: 0, fontSize: '0.975rem', lineHeight: 1.6 }}>
             Describe your symptoms in plain language. Prahari will assess urgency and
             recommend your next step — self-care, doctor visit, or emergency.
           </p>
@@ -236,12 +249,12 @@ export default function TriagePage() {
 
       {/* === IDLE / FORM === */}
       {(phase === 'idle' || phase === 'error') && (
-        <div>
+        <div style={{ textAlign: 'left' }}>
           {/* Symptom text area */}
-          <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <label
               htmlFor="symptom-input"
-              style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-primary)', fontSize: '0.9rem' }}
+              style={{ display: 'block', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--color-ink)', fontSize: '0.9rem' }}
             >
               Describe your symptoms
             </label>
@@ -256,34 +269,34 @@ export default function TriagePage() {
                 padding: '0.875rem 1rem',
                 borderRadius: '10px',
                 border: '1.5px solid var(--color-border)',
-                backgroundColor: 'var(--color-surface-card)',
-                color: 'var(--color-text-primary)',
+                backgroundColor: 'var(--color-white)',
+                color: 'var(--color-ink)',
                 fontFamily: 'var(--font-sans)',
-                fontSize: '0.9rem',
+                fontSize: '0.9375rem',
                 resize: 'vertical',
                 outline: 'none',
                 boxSizing: 'border-box',
                 lineHeight: 1.6,
-                transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+                transition: 'var(--transition-fast)',
               }}
               onFocus={e => {
-                e.target.style.borderColor = 'var(--color-teal)';
-                e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+                e.target.style.borderColor = 'var(--color-forest)';
+                e.target.style.boxShadow = '0 0 0 3px var(--color-forest-glow)';
               }}
               onBlur={e => {
                 e.target.style.borderColor = 'var(--color-border)';
                 e.target.style.boxShadow = 'none';
               }}
             />
-            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.375rem 0 0' }}>
+            <p style={{ fontSize: '0.785rem', color: 'var(--color-muted)', margin: '0.375rem 0 0' }}>
               Include symptom duration, severity (1–10), and any relevant medical history.
             </p>
           </div>
 
           {/* Patient context */}
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '140px' }}>
-              <label htmlFor="sex-select" style={{ display: 'block', fontWeight: 600, marginBottom: '0.375rem', fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
+          <div style={{ display: 'flex', gap: '1.25rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '150px' }}>
+              <label htmlFor="sex-select" style={{ display: 'block', fontWeight: 700, marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-ink)' }}>
                 Biological sex
               </label>
               <select
@@ -292,19 +305,19 @@ export default function TriagePage() {
                 onChange={e => setSex(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.625rem 0.875rem',
-                  borderRadius: '8px',
+                  padding: '0.7rem 0.875rem',
+                  borderRadius: '9px',
                   border: '1.5px solid var(--color-border)',
-                  backgroundColor: 'var(--color-surface-card)',
-                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'var(--color-white)',
+                  color: 'var(--color-ink)',
                   fontFamily: 'var(--font-sans)',
-                  fontSize: '0.9rem',
+                  fontSize: '0.9375rem',
                   outline: 'none',
-                  transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+                  transition: 'var(--transition-fast)',
                 }}
                 onFocus={e => {
-                  e.target.style.borderColor = 'var(--color-teal)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+                  e.target.style.borderColor = 'var(--color-forest)';
+                  e.target.style.boxShadow = '0 0 0 3px var(--color-forest-glow)';
                 }}
                 onBlur={e => {
                   e.target.style.borderColor = 'var(--color-border)';
@@ -317,7 +330,7 @@ export default function TriagePage() {
             </div>
 
             <div style={{ flex: 1, minWidth: '120px' }}>
-              <label htmlFor="age-input" style={{ display: 'block', fontWeight: 600, marginBottom: '0.375rem', fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
+              <label htmlFor="age-input" style={{ display: 'block', fontWeight: 700, marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-ink)' }}>
                 Age
               </label>
               <input
@@ -328,19 +341,19 @@ export default function TriagePage() {
                 onChange={e => setAge(Number(e.target.value))}
                 style={{
                   width: '100%',
-                  padding: '0.625rem 0.875rem',
-                  borderRadius: '8px',
+                  padding: '0.7rem 0.875rem',
+                  borderRadius: '9px',
                   border: '1.5px solid var(--color-border)',
-                  backgroundColor: 'var(--color-surface-card)',
-                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'var(--color-white)',
+                  color: 'var(--color-ink)',
                   fontFamily: 'var(--font-sans)',
-                  fontSize: '0.9rem',
+                  fontSize: '0.9375rem',
                   outline: 'none',
-                  transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+                  transition: 'var(--transition-fast)',
                 }}
                 onFocus={e => {
-                  e.target.style.borderColor = 'var(--color-teal)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+                  e.target.style.borderColor = 'var(--color-forest)';
+                  e.target.style.boxShadow = '0 0 0 3px var(--color-forest-glow)';
                 }}
                 onBlur={e => {
                   e.target.style.borderColor = 'var(--color-border)';
@@ -351,45 +364,45 @@ export default function TriagePage() {
           </div>
 
           {/* Quick examples */}
-          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+          <p style={{ fontSize: '0.825rem', fontWeight: 600, color: 'var(--color-muted)', marginBottom: '0.625rem' }}>
             Try an example:
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.75rem' }}>
             {SYMPTOM_EXAMPLES.map((ex, i) => (
               <button
                 key={i}
                 onClick={() => setSymptoms(ex)}
                 style={{
                   textAlign: 'left',
-                  padding: '0.5rem 0.875rem',
-                  borderRadius: '8px',
+                  padding: '0.625rem 1rem',
+                  borderRadius: '9px',
                   border: '1px solid var(--color-border)',
-                  background: 'var(--color-surface-card)',
-                  color: 'var(--color-text-secondary)',
-                  fontSize: '0.8rem',
+                  background: 'var(--color-white)',
+                  color: 'var(--color-muted)',
+                  fontSize: '0.875rem',
                   cursor: 'pointer',
-                  lineHeight: 1.4,
+                  lineHeight: 1.45,
                   transition: 'var(--transition-fast)',
                   outline: 'none',
                 }}
                 onFocus={e => {
-                  e.target.style.borderColor = 'var(--color-teal)';
-                  e.target.style.color = 'var(--color-text-primary)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(42, 127, 140, 0.2)';
+                  e.target.style.borderColor = 'var(--color-forest)';
+                  e.target.style.color = 'var(--color-ink)';
+                  e.target.style.boxShadow = '0 0 0 3px var(--color-forest-glow)';
                 }}
                 onBlur={e => {
                   e.target.style.borderColor = 'var(--color-border)';
-                  e.target.style.color = 'var(--color-text-secondary)';
+                  e.target.style.color = 'var(--color-muted)';
                   e.target.style.boxShadow = 'none';
                 }}
                 onMouseEnter={e => {
-                  e.target.style.borderColor = 'var(--color-teal)';
-                  e.target.style.color = 'var(--color-text-primary)';
+                  e.target.style.borderColor = 'var(--color-forest)';
+                  e.target.style.color = 'var(--color-ink)';
                 }}
                 onMouseLeave={e => {
                   if (document.activeElement !== e.target) {
                     e.target.style.borderColor = 'var(--color-border)';
-                    e.target.style.color = 'var(--color-text-secondary)';
+                    e.target.style.color = 'var(--color-muted)';
                   }
                 }}
               >
@@ -400,8 +413,8 @@ export default function TriagePage() {
 
           {/* Error */}
           {phase === 'error' && (
-            <div className="card ribbon-moderate" style={{ padding: '1rem 1.25rem 1rem 1.5rem', marginBottom: '1.25rem' }}>
-              <p style={{ color: 'var(--color-alert-moderate)', margin: 0 }}>{error}</p>
+            <div className="card ribbon-moderate" style={{ padding: '0.875rem 1.125rem', marginBottom: '1.5rem', borderLeftWidth: '3px', backgroundColor: 'var(--color-warning-bg)' }}>
+              <p style={{ color: 'var(--color-warning)', margin: 0, fontSize: '0.9rem', fontWeight: 500 }}>{error}</p>
             </div>
           )}
 
@@ -418,7 +431,7 @@ export default function TriagePage() {
               width: 'auto'
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M4.8 3A2.4 2.4 0 1 0 9.6 3A2.4 2.4 0 1 0 4.8 3z"/>
               <path d="M14.4 3A2.4 2.4 0 1 0 19.2 3A2.4 2.4 0 1 0 14.4 3z"/>
               <path d="M7.2 5.4v4.2a4.8 4.8 0 0 0 9.6 0V5.4"/>
@@ -432,16 +445,16 @@ export default function TriagePage() {
 
       {/* === LOADING === */}
       {phase === 'loading' && (
-        <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-          <div className="pulse-ring" style={{ width: '56px', height: '56px', margin: '0 auto 1.25rem' }}>
-            <svg width="56" height="56" viewBox="0 0 32 32" fill="none">
+        <div style={{ textAlign: 'center', padding: '3.5rem 1rem' }}>
+          <div className="pulse-ring" style={{ width: '64px', height: '64px', margin: '0 auto 1.5rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
               <path d="M16 2L4 7v9c0 6.627 5.373 12 12 12s12-5.373 12-12V7L16 2z"
-                fill="var(--color-teal)" fillOpacity="0.2" stroke="var(--color-teal)" strokeWidth="1.5" />
-              <rect x="14" y="9" width="4" height="14" rx="1" fill="var(--color-sage)" />
-              <rect x="9" y="14" width="14" height="4" rx="1" fill="var(--color-sage)" />
+                fill="var(--color-forest-subtle)" stroke="var(--color-forest)" strokeWidth="1.75" />
+              <rect x="14" y="9" width="4" height="14" rx="1.5" fill="var(--color-forest)" />
+              <rect x="9" y="14" width="14" height="4" rx="1.5" fill="var(--color-forest)" />
             </svg>
           </div>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+          <p style={{ color: 'var(--color-muted)', fontSize: '0.9375rem', fontWeight: 500 }}>
             Analysing your symptoms…
           </p>
         </div>

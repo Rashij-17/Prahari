@@ -309,7 +309,7 @@ export default function MedicationsPage() {
           <p style={{ color: 'var(--color-muted)', margin: '0 0 1.25rem', fontSize: '0.875rem' }}>{error}</p>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button id="medication-retry-btn" className="btn-primary btn-sm-auto" onClick={() => handleSearch()}>Retry</button>
-            <button className="btn-secondary btn-sm-auto" onClick={() => { setPhase('idle'); setQuery('') }}>Clear Search</button>
+            <button className="btn-secondary btn-sm-auto" onClick={() => { setPhase('idle'); setQuery('') }}>Clear search</button>
           </div>
         </div>
       )}
