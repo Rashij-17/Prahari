@@ -199,18 +199,21 @@ def _normalise_triage(raw: dict) -> dict:
     _RECOMMENDATIONS = {
         "critical": (
             "Your symptoms suggest a potentially serious condition. "
-            "Please call emergency services (112/911) or go to the nearest "
-            "emergency room immediately. Do not wait or drive yourself."
+            "Please call the National Emergency Helpline (112) or Ambulance (102 / 108) "
+            "immediately, or visit the nearest hospital emergency department. "
+            "You can also reach the National Health Helpline at 1800-180-1104."
         ),
         "moderate": (
-            "Your symptoms warrant medical evaluation. Schedule an appointment "
-            "with a doctor within 24 hours. Monitor your symptoms and go to the "
-            "emergency room if they worsen rapidly."
+            "Your symptoms warrant medical evaluation. Please schedule an appointment "
+            "with a local doctor within 24 hours. For medical guidance, you can also "
+            "contact the National Health Helpline at 1800-180-1104. Monitor your symptoms "
+            "and seek immediate emergency care (112) if they worsen rapidly."
         ),
         "safe": (
-            "Your symptoms appear mild and can likely be managed at home. "
-            "Rest, stay hydrated, and monitor your condition. Consult a doctor "
-            "if symptoms persist for more than 3–5 days or worsen."
+            "Your symptoms appear mild and can likely be managed at home with self-care. "
+            "Rest, stay hydrated, and monitor your condition. For assistance, you can call "
+            "the National Health Helpline at 1800-180-1104. Consult a doctor if symptoms "
+            "persist or worsen."
         ),
     }
 

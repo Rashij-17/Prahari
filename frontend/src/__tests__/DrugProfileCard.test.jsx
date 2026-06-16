@@ -78,4 +78,29 @@ describe('DrugProfileCard Component', () => {
     fireEvent.click(screen.getByText("Indications & Usage"))
     fireEvent(details, new Event('toggle'))
   })
+
+  it('renders generic alternative cost savings card', () => {
+    const profile = {
+      brand_name: "Brand Drug",
+      generic_name: "Generic Drug",
+      price: 100.0,
+      pack_size_label: "strip of 10 tablets",
+      generic_alternative: {
+        generic_name: "Generic Substitute 100mg",
+        price: 20.0,
+        pack_size_label: "strip of 10 tablets",
+        brand_unit_price: 10.0,
+        generic_unit_price: 2.0,
+        savings_percentage: 80.0
+      }
+    }
+
+    render(<DrugProfileCard profile={profile} />)
+
+    expect(screen.getByText("Government Jan Aushadhi generic alternative available!")).toBeInTheDocument()
+    expect(screen.getByText("Generic Substitute 100mg")).toBeInTheDocument()
+    expect(screen.getByText(/80% Cost-Saver/i)).toBeInTheDocument()
+    expect(screen.getByText(/₹20.00/i)).toBeInTheDocument()
+  })
 })
+

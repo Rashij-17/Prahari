@@ -1,9 +1,4 @@
-/**
- * DrugProfileCard Component — v3.0 "Warm Rx"
- * =============================================
- * Renders a full clinical drug profile. Restyled with SVG icons,
- * forest/amber palette, warm paper surfaces.
- */
+import foodSafetyData from './food_drug_safety.json'
 
 // ---------------------------------------------------------------------------
 // Icons
@@ -123,13 +118,35 @@ export default function DrugProfileCard({ profile, onClose }) {
     brand_name, generic_name, manufacturer, route, rxcui, ndc,
     indications, dosage, warnings, boxed_warning, contraindications,
     adverse_reactions, drug_interactions, precautions, storage, description,
-    has_boxed_warning, urgency_level,
+    has_boxed_warning, urgency_level, price, pack_size_label, generic_alternative,
   } = profile
 
   const displayName  = brand_name || generic_name || 'Unknown Drug'
   const subName      = brand_name && generic_name ? generic_name : ''
   const routeLabel   = Array.isArray(route) ? route.join(', ') : route
   const primaryRxCUI = Array.isArray(rxcui) ? rxcui[0] : rxcui
+
+  // Food safety lookup logic
+  const getFoodWarning = () => {
+    if (!generic_name && !brand_name) return null;
+    const genericKey = generic_name ? generic_name.toLowerCase().trim() : '';
+    const brandKey = brand_name ? brand_name.toLowerCase().trim() : '';
+    let match = foodSafetyData[genericKey] || foodSafetyData[brandKey];
+    if (match) return match;
+    
+    const allKeys = Object.keys(foodSafetyData);
+    for (const key of allKeys) {
+      if (genericKey && (genericKey.startsWith(key) || genericKey.includes(key))) {
+        return foodSafetyData[key];
+      }
+      if (brandKey && (brandKey.startsWith(key) || brandKey.includes(key))) {
+        return foodSafetyData[key];
+      }
+    }
+    return null;
+  };
+
+  const foodWarning = getFoodWarning();
 
   return (
     <article className="card modal-enter" style={{ padding: '1.75rem', maxWidth: '680px', margin: '0 auto' }}
@@ -183,7 +200,83 @@ export default function DrugProfileCard({ profile, onClose }) {
             <Icons.Factory /> {manufacturer}
           </p>
         )}
+        {price > 0 && (
+          <div>
+            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--color-forest)', margin: '0.5rem 0 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 400, color: 'var(--color-muted)' }}>Price:</span> ₹{price.toFixed(2)} 
+              {pack_size_label && <span style={{ fontSize: '0.8125rem', fontWeight: 400, color: 'var(--color-faint)', marginLeft: '0.25rem' }}>({pack_size_label})</span>}
+            </p>
+            <p style={{ fontSize: '0.6875rem', color: 'var(--color-faint)', margin: '0.15rem 0 0', fontStyle: 'italic' }}>
+              * Prices are indicative and may vary depending on local pharmacy and batch dates.
+            </p>
+          </div>
+        )}
       </header>
+
+      {generic_alternative && (
+        <div 
+          className="card" 
+          style={{
+            borderLeft: '4px solid var(--color-forest)',
+            backgroundColor: 'var(--color-safe-bg)',
+            padding: '1.25rem 1.5rem',
+            borderRadius: '12px',
+            marginBottom: '1.25rem',
+            textAlign: 'left',
+            boxShadow: '0 4px 12px rgba(42, 127, 140, 0.08)'
+          }}
+          role="region"
+          aria-label="Jan Aushadhi generic alternative cost savings"
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.5rem' }}>
+            <div style={{ color: 'var(--color-forest)', display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontSize: '1.2rem' }}>💰</span>
+            </div>
+            <h4 style={{
+              fontFamily: 'var(--font-sans)',
+              fontWeight: 700,
+              fontSize: '0.9375rem',
+              color: 'var(--color-ink)',
+              margin: 0
+            }}>
+              Government Jan Aushadhi generic alternative available!
+            </h4>
+          </div>
+          <p style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.875rem',
+            color: 'var(--color-ink)',
+            fontWeight: 600,
+            margin: '0 0 0.35rem 0'
+          }}>
+            {generic_alternative.generic_name}
+          </p>
+          <p style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.85rem',
+            color: 'var(--color-muted)',
+            lineHeight: 1.6,
+            margin: 0
+          }}>
+            Private Brand Price: <span style={{ textDecoration: 'line-through' }}>₹{(price || 0).toFixed(2)}</span> ({pack_size_label})
+            <br />
+            Jan Aushadhi Price: <span style={{ fontWeight: 700, color: 'var(--color-forest)' }}>₹{generic_alternative.price.toFixed(2)}</span> ({generic_alternative.pack_size_label})
+            <br />
+            Unit Savings: <span style={{ color: 'var(--color-forest)', fontWeight: 700 }}>{generic_alternative.savings_percentage}% Cost-Saver</span> (₹{generic_alternative.generic_unit_price.toFixed(2)}/unit vs ₹{generic_alternative.brand_unit_price.toFixed(2)}/unit)
+          </p>
+          <p style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.75rem',
+            color: 'var(--color-faint)',
+            margin: '0.5rem 0 0 0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem'
+          }}>
+            📍 Find this at your nearest Jan Aushadhi Kendra pharmacy.
+          </p>
+        </div>
+      )}
 
       {has_boxed_warning && boxed_warning && (
         <div className="ribbon-critical" style={{
@@ -198,6 +291,58 @@ export default function DrugProfileCard({ profile, onClose }) {
           </h3>
           <p style={{ color: 'var(--color-critical)', margin: 0, fontSize: '0.875rem', lineHeight: 1.6 }}>
             {boxed_warning.slice(0, 500)}{boxed_warning.length > 500 ? '…' : ''}
+          </p>
+        </div>
+      )}
+
+      {foodWarning && (
+        <div 
+          className="card" 
+          style={{
+            borderLeft: `4px solid ${
+              foodWarning.severity === 'critical' ? 'var(--color-critical)' :
+              foodWarning.severity === 'moderate' ? 'var(--color-warning)' : 'var(--color-safe)'
+            }`,
+            backgroundColor: foodWarning.severity === 'critical' ? 'var(--color-critical-bg)' :
+                             foodWarning.severity === 'moderate' ? 'var(--color-warning-bg)' : 'var(--color-safe-bg)',
+            padding: '1.25rem 1.5rem',
+            borderRadius: '12px',
+            marginBottom: '1.25rem',
+            textAlign: 'left'
+          }}
+          role="alert"
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.5rem' }}>
+            <div style={{
+              color: foodWarning.severity === 'critical' ? 'var(--color-critical)' :
+                     foodWarning.severity === 'moderate' ? 'var(--color-warning)' : 'var(--color-safe)',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              {foodWarning.severity === 'safe' ? (
+                <Icons.Check style={{ width: '16px', height: '16px' }} />
+              ) : (
+                <Icons.Alert style={{ width: '16px', height: '16px' }} />
+              )}
+            </div>
+            <h4 style={{
+              fontFamily: 'var(--font-sans)',
+              fontWeight: 700,
+              fontSize: '0.9375rem',
+              color: 'var(--color-ink)',
+              margin: 0
+            }}>
+              Diet Safety Guard: Avoid with {foodWarning.food}
+            </h4>
+          </div>
+          <p style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.85rem',
+            color: 'var(--color-muted)',
+            lineHeight: 1.6,
+            margin: 0
+          }}>
+            {foodWarning.warning}
           </p>
         </div>
       )}

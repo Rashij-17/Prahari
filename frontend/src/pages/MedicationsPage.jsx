@@ -6,6 +6,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import DrugProfileCard from '../components/medication/DrugProfileCard.jsx'
 import { getMedicationProfile, searchMedications } from '../services/api.js'
+import foodSafetyData from '../components/medication/food_drug_safety.json'
 
 // ---------------------------------------------------------------------------
 // Icons
@@ -93,9 +94,40 @@ function DrugResultItem({ drug, onSelect }) {
   const [focused, setFocused] = useState(false)
   const active = hovered || focused
 
+  const hasDietWarning = () => {
+    if (!name && !brand) return false;
+    const genericKey = name ? name.toLowerCase().trim() : '';
+    const brandKey = brand ? brand.toLowerCase().trim() : '';
+    
+    if (foodSafetyData[genericKey] || foodSafetyData[brandKey]) return true;
+    
+    const cleanRegex = (str) => {
+      let s = str.replace(/\[.*?\]/g, '').trim().toLowerCase();
+      s = s.replace(/\b\d+(?:\.\d+)?\s*(?:mg|ml|%|g|mcg|units|iu|tab|cap|puff|dose)\b/gi, '');
+      s = s.replace(/\b\d+(?:\.\d+)?\b/g, '');
+      let match = s.match(/^[a-z]+/i);
+      return match ? match[0].trim() : s.trim();
+    };
+    
+    const cleanGen = cleanRegex(name);
+    const cleanBrand = cleanRegex(brand);
+    
+    if (foodSafetyData[cleanGen] || foodSafetyData[cleanBrand]) return true;
+    
+    for (const key of Object.keys(foodSafetyData)) {
+      if (cleanGen && (cleanGen.startsWith(key) || cleanGen.includes(key))) return true;
+      if (cleanBrand && (cleanBrand.startsWith(key) || cleanBrand.includes(key))) return true;
+    }
+    return false;
+  };
+
   return (
     <button
-      onClick={() => onSelect(name)}
+      onClick={() => {
+        const rxcuiStr = Array.isArray(drug.rxcui) ? drug.rxcui[0] : drug.rxcui;
+        const isLocal = typeof rxcuiStr === 'string' && rxcuiStr.startsWith('local_');
+        onSelect(isLocal ? (drug.brand_name || drug.name) : name);
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}
@@ -111,9 +143,30 @@ function DrugResultItem({ drug, onSelect }) {
       }}
     >
       <div>
-        <p style={{ margin: '0 0 0.2rem', fontWeight: 700, color: 'var(--color-ink)', fontSize: '0.9375rem', fontFamily: 'var(--font-sans)' }}>
-          {name}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
+          <p style={{ margin: 0, fontWeight: 700, color: 'var(--color-ink)', fontSize: '0.9375rem', fontFamily: 'var(--font-sans)' }}>
+            {name}
+          </p>
+          {hasDietWarning() && (
+            <span className="chip chip-moderate" style={{
+              fontSize: '0.65rem',
+              padding: '0.15rem 0.45rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.2rem',
+              borderRadius: '4px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.02em',
+              lineHeight: 1
+            }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ flexShrink: 0 }}>
+                <path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="10"/>
+              </svg>
+              Diet Warning
+            </span>
+          )}
+        </div>
         {brand && (
           <p style={{ margin: '0 0 0.2rem', color: 'var(--color-muted)', fontSize: '0.8125rem' }}>Brand: {brand}</p>
         )}
@@ -242,6 +295,35 @@ export default function MedicationsPage() {
                 {name}
               </button>
             ))}
+          </div>
+
+          {/* Diet Safety Guard Callout Box */}
+          <div style={{
+            margin: '0 0 2.25rem',
+            padding: '1.25rem 1.5rem',
+            borderRadius: '14px',
+            borderLeft: '4.5px solid var(--color-amber)',
+            backgroundColor: 'var(--color-amber-subtle)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.875rem',
+            textAlign: 'left'
+          }}>
+            <div style={{ color: 'var(--color-amber)', display: 'flex', flexShrink: 0, marginTop: '0.125rem' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ margin: '0 0 0.25rem', fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-ink)' }}>
+                Offline Diet Safety Guard Active
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--color-muted)', lineHeight: 1.55 }}>
+                Prahari now cross-references searches with a local database of 3,600+ entries to identify dietary contraindications (e.g., grapefruit warnings for <strong>Atorvastatin</strong>, spinach warnings for <strong>Warfarin</strong>).
+              </p>
+            </div>
           </div>
 
           <div className="grid-auto-fill">

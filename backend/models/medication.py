@@ -1,6 +1,15 @@
 from typing import Optional
 from pydantic import BaseModel
 
+class JanAushadhiAlternative(BaseModel):
+    generic_name: str
+    price: float
+    pack_size_label: str
+    brand_unit_price: float
+    generic_unit_price: float
+    savings_percentage: float
+
+
 class DrugProfile(BaseModel):
     """
     Full clinical drug profile returned by GET /medication/profile.
@@ -30,6 +39,14 @@ class DrugProfile(BaseModel):
     # Safety classification
     has_boxed_warning: bool = False
     urgency_level:     str = "safe"   # "safe" | "moderate" | "critical"
+
+    # Pricing & Packaging
+    price:             float = 0.0
+    pack_size_label:   str = ""
+
+    # Jan Aushadhi Generic Alternative
+    generic_alternative: Optional[JanAushadhiAlternative] = None
+
 
 
 class DrugSummary(BaseModel):

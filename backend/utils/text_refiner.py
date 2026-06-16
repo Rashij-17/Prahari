@@ -69,6 +69,7 @@ _STOP_WORDS: set[str] = {
     "under", "from", "with", "this", "that", "only", "once", "twice",
     "daily", "times", "take", "dose", "dosage", "adults", "children",
     "uses", "side", "effects", "indicated", "contraindicated",
+    "ip", "bp", "usp", "pharmacopoeia"
 }
 
 # ---------------------------------------------------------------------------

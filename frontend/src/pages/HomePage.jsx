@@ -89,6 +89,12 @@ const Icons = {
       <line x1="15" y1="6" x2="15" y2="21"/>
     </svg>
   ),
+  Cross: (p) => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}>
+      <path d="M19 10.5H13.5V5a1.5 1.5 0 0 0-3 0v5.5H5a1.5 1.5 0 0 0 0 3h5.5V19a1.5 1.5 0 0 0 3 0v-5.5H19a1.5 1.5 0 0 0 0-3z" />
+    </svg>
+  ),
 }
 
 // ----------------------------------------------------------------
@@ -109,7 +115,7 @@ const FEATURES = [
     num: '02',
     id: 'feature-medications',
     title: 'Drug Intelligence',
-    description: 'Search any medication to see active ingredients, dosage guidance, contraindications, and drug-to-drug interaction alerts.',
+    description: 'Search any medication to see active ingredients, dosage guidance, contraindications, and offline Diet Safety Guard warnings.',
     path: '/medications',
     Icon: Icons.Pill,
     status: 'Live',
@@ -134,6 +140,16 @@ const FEATURES = [
     Icon: Icons.Pin,
     status: 'Live',
     cta: 'Find Providers',
+  },
+  {
+    num: '05',
+    id: 'feature-firstaid',
+    title: 'Emergency First Aid',
+    description: 'Instant offline access to CPR checklists, choking relief instructions, and a visual/auditory compression metronome.',
+    path: '/triage?tab=firstaid',
+    Icon: Icons.Cross,
+    status: 'Offline',
+    cta: 'View First Aid Guides',
   },
 ]
 
@@ -503,6 +519,94 @@ function PrivacyBanner() {
 }
 
 // ----------------------------------------------------------------
+// Quick Alerts / Callouts
+// ----------------------------------------------------------------
+function DashboardCallouts() {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+      gap: '1.25rem',
+      margin: '2rem 0',
+      textAlign: 'left'
+    }}>
+      {/* First Aid Callout */}
+      <NavLink to="/triage?tab=firstaid" style={{ textDecoration: 'none', display: 'block' }}>
+        <div style={{
+          padding: '1.25rem 1.5rem',
+          borderRadius: '14px',
+          borderLeft: '4.5px solid var(--color-critical)',
+          backgroundColor: 'var(--color-critical-bg)',
+          height: '100%',
+          boxSizing: 'border-box',
+          transition: 'var(--transition-standard)',
+          cursor: 'pointer',
+        }}
+        className="callout-card-critical"
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', color: 'var(--color-critical)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <h4 style={{ margin: 0, fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--color-ink)' }}>
+              Emergency First Aid
+            </h4>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--color-muted)', lineHeight: 1.5 }}>
+            Access offline-first instructions for choking, severe bleeding, stroke, and a steady-tempo CPR metronome widget.
+          </p>
+        </div>
+      </NavLink>
+
+      {/* Diet Safety Callout */}
+      <NavLink to="/medications" style={{ textDecoration: 'none', display: 'block' }}>
+        <div style={{
+          padding: '1.25rem 1.5rem',
+          borderRadius: '14px',
+          borderLeft: '4.5px solid var(--color-amber)',
+          backgroundColor: 'var(--color-amber-subtle)',
+          height: '100%',
+          boxSizing: 'border-box',
+          transition: 'var(--transition-standard)',
+          cursor: 'pointer',
+        }}
+        className="callout-card-amber"
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', color: 'var(--color-amber)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <h4 style={{ margin: 0, fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '0.9375rem', color: 'var(--color-ink)' }}>
+              Diet Safety Guard
+            </h4>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--color-muted)', lineHeight: 1.5 }}>
+            Cross-references medications with a local database of 1,000+ entries to flag dietary warnings instantly.
+          </p>
+        </div>
+      </NavLink>
+
+      <style>{`
+        .callout-card-critical:hover {
+          border-color: var(--color-critical-border) !important;
+          box-shadow: 0 4px 14px rgba(185, 28, 28, 0.12) !important;
+          transform: translateY(-2px);
+        }
+        .callout-card-amber:hover {
+          border-color: var(--color-amber-light) !important;
+          box-shadow: var(--shadow-amber) !important;
+          transform: translateY(-2px);
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// ----------------------------------------------------------------
 // HomePage — default export
 // ----------------------------------------------------------------
 export default function HomePage() {
@@ -510,6 +614,7 @@ export default function HomePage() {
     <div>
       <Hero />
       <TrustSources />
+      <DashboardCallouts />
 
       <section aria-label="Application features" style={{ marginTop: '1rem' }}>
         <div className="section-label">What Prahari can do</div>
