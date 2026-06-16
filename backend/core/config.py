@@ -5,7 +5,7 @@ Manages environment variables via Pydantic Settings.
 All third-party API keys are loaded from a .env file — never hard-coded.
 
 Usage:
-    from backend.core.config import settings
+    from core.config import settings
     print(settings.infermedica_app_id)
 """
 
@@ -27,10 +27,16 @@ class Settings(BaseSettings):
     # Frontend Origin (for CORS)
     frontend_origin: str = "http://localhost:5173"
 
-    # External API Keys (populate via .env file — never commit values)
+    # External API Keys & Configurations
     infermedica_app_id: str = ""
     infermedica_app_key: str = ""
     google_places_api_key: str = ""
+    
+    # Vision & OCR Models configuration
+    gemini_api_key: str = ""
+    gemini_model_name: str = "gemini-3.1-flash-lite"
+    groq_api_key: str = ""
+    groq_model_name: str = "llama-4-scout"
 
     # Model config: reads from backend/.env
     model_config = SettingsConfigDict(

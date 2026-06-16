@@ -189,84 +189,7 @@ def parse_pack_size_units(pack_label: str) -> int:
 
 
 
-INGREDIENTS_CACHE: set[str] = set()
-
-def levenshtein_distance(s1: str, s2: str) -> int:
-    if len(s1) < len(s2):
-        return levenshtein_distance(s2, s1)
-    if len(s2) == 0:
-        return len(s1)
-    
-    previous_row = range(len(s2) + 1)
-    for i, c1 in enumerate(s1):
-        current_row = [i + 1]
-        for j, c2 in enumerate(s2):
-            insertions = previous_row[j + 1] + 1
-            deletions = current_row[j] + 1
-            substitutions = previous_row[j] + (c1 != c2)
-            current_row.append(min(insertions, deletions, substitutions))
-        previous_row = current_row
-        
-    return previous_row[-1]
-
-
-def load_ingredients():
-    global INGREDIENTS_CACHE
-    if INGREDIENTS_CACHE:
-        return
-    if not os.path.exists(DB_PATH):
-        return
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute("SELECT short_composition1, short_composition2 FROM medicines;")
-        rows = cursor.fetchall()
-        conn.close()
-        
-        for r in rows:
-            for comp in r:
-                if comp:
-                    clean = re.sub(r'\(.*?\)', '', comp).strip().lower()
-                    if clean:
-                        INGREDIENTS_CACHE.add(clean)
-    except Exception as e:
-        logger.error("Failed to preload ingredients list for fuzzy matching: %s", e)
-
-
-def fuzzy_correct_token(token: str) -> str:
-    load_ingredients()
-    t_lower = token.lower().strip()
-    if not t_lower:
-        return ""
-        
-    if t_lower in INGREDIENTS_CACHE:
-        return t_lower
-        
-    # Skip common clinical or search terms
-    stop_words = {"pain", "relief", "cough", "cold", "fever", "tablet", "tablets", "capsule", "capsules", "gel", "syrup", "drops"}
-    if t_lower in stop_words:
-        return t_lower
-        
-    best_match = None
-    min_dist = 999
-    
-    for ing in INGREDIENTS_CACHE:
-        dist = levenshtein_distance(t_lower, ing)
-        if dist < min_dist:
-            min_dist = dist
-            best_match = ing
-            
-    # Dynamic thresholds based on word length
-    if len(t_lower) <= 4:
-        max_allowed_dist = 1
-    elif len(t_lower) <= 7:
-        max_allowed_dist = 1
-    else:
-        max_allowed_dist = 2
-        
-    if min_dist <= max_allowed_dist:
-        return best_match
-    return t_lower
+from services.fuzzy_service import fuzzy_correct_drug_token
 
 
 def query_local_indian_db(q: str, limit: int = 8) -> list[DrugSummary]:
@@ -292,7 +215,7 @@ def query_local_indian_db(q: str, limit: int = 8) -> list[DrugSummary]:
         for t in tokens:
             t = t.strip()
             if t:
-                corrected = fuzzy_correct_token(t)
+                corrected = fuzzy_correct_drug_token(t)
                 corrected_tokens.append(corrected)
                 
         if not corrected_tokens:

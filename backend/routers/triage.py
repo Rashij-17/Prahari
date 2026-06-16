@@ -13,8 +13,8 @@ import logging
 from fastapi import APIRouter, HTTPException, Depends
 
 from middleware.rate_limiter import limit_assess
-from models.triage import TriageRequest, TriageResponse
-from services.triage_service import assess_symptoms
+from models.triage import TriageRequest, TriageResponse, TriageChatRequest, TriageChatResponse
+from services.triage_service import assess_symptoms, assess_triage_chat
 
 logger = logging.getLogger(__name__)
 
@@ -51,3 +51,27 @@ async def assess_triage(body: TriageRequest) -> TriageResponse:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.post(
+    "/chat",
+    response_model=TriageChatResponse,
+    dependencies=[Depends(limit_assess)],
+    summary="Multi-turn triage chat endpoint",
+    description="Provides follow-up questions or final triage outcomes in a conversational symptom check loop.",
+)
+async def assess_chat(body: TriageChatRequest) -> TriageChatResponse:
+    try:
+        evidence_list = [item.model_dump() for item in body.evidence]
+        
+        result = await assess_triage_chat(
+            evidence=evidence_list,
+            sex=body.sex,
+            age=body.age,
+            text=body.text,
+        )
+        return TriageChatResponse(**result)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Triage chat failed: {exc}") from exc

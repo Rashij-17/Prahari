@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class FramePayload(BaseModel):
     """
@@ -28,3 +28,17 @@ class OCRResult(BaseModel):
     word_count: int
     psm_used: int
     processing_note: str
+
+
+class DecipheredDrug(BaseModel):
+    brand_name: str = Field(description="The brand name of the drug, e.g., Crocin, Lipitor")
+    generic_name: str = Field(description="The generic/chemical name of the drug, e.g., Paracetamol, Atorvastatin")
+    dosage_strength: str = Field(description="Dosage strength, e.g., 500mg, 10mg")
+    frequency: str = Field(description="How often to take it, e.g., once daily, twice a day, TDS")
+    instructions: str = Field(description="Any specific instructions, e.g., after food, at bedtime")
+
+
+class DecipheredPrescription(BaseModel):
+    drugs: list[DecipheredDrug] = Field(description="List of drugs deciphered from the prescription")
+    patient_notes: str = Field(description="Any additional instructions or general notes written on the prescription")
+

@@ -97,3 +97,29 @@ export const assessSymptoms = (payload) =>
 /** Searches for nearby healthcare providers. */
 export const searchProviders = (payload) =>
   apiFetch('/directory/search', { method: 'POST', body: JSON.stringify(payload) })
+
+// ---------------------------------------------------------------
+// Phase 2 — Interactions, Triage Chat & Multimodal OCR
+// ---------------------------------------------------------------
+
+/** Checks pairwise interactions for a list of RxCUIs. */
+export const checkDrugInteractions = (rxcuis) =>
+  apiFetch('/medication/interactions', {
+    method: 'POST',
+    body: JSON.stringify({ rxcuis }),
+  })
+
+/** Submits a Base64 image frame for Gemini/Groq/Tesseract multimodal OCR. */
+export const processMultimodalFrame = (base64Image) =>
+  apiFetch('/scan/process-multimodal', {
+    method: 'POST',
+    body: JSON.stringify({ image: base64Image }),
+  })
+
+/** Submits triage chat conversation evidence for next question / result. */
+export const assessTriageChat = (evidence, sex, age, text) =>
+  apiFetch('/triage/chat', {
+    method: 'POST',
+    body: JSON.stringify({ evidence, sex, age, text }),
+  })
+

@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Literal, Optional
 
 class TriageRequest(BaseModel):
     """Symptom triage input from the user."""
@@ -22,3 +23,41 @@ class TriageResponse(BaseModel):
     risk_factors:   list[str] = []
     is_mock:        bool = False
     mock_notice:    str  = ""
+
+
+class EvidenceItem(BaseModel):
+    id: str
+    choice_id: str  # "present" | "absent" | "unknown"
+    source: str = "initial"
+
+
+class TriageChatRequest(BaseModel):
+    evidence: list[EvidenceItem]
+    sex: str = "male"
+    age: int = 30
+    text: str | None = None
+
+
+class ChatChoice(BaseModel):
+    id: str
+    label: str
+
+
+class ChatQuestionItem(BaseModel):
+    id: str
+    name: str
+    choices: list[ChatChoice] = Field(default_factory=list)
+
+
+class ChatQuestion(BaseModel):
+    type: Literal["single", "group_single", "group_multiple"]
+    text: str
+    items: list[ChatQuestionItem]
+
+
+class TriageChatResponse(BaseModel):
+    should_stop: bool
+    evidence: list[EvidenceItem]
+    question: Optional[ChatQuestion] = None
+    triage_result: Optional[TriageResponse] = None
+

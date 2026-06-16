@@ -330,7 +330,19 @@ def process_image_frame(b64_image: str) -> dict:
     word_count = len(raw_text.split())
 
     # Step 8: Refine the raw OCR output → extract top drug name candidates
-    candidates = refine_ocr_output(raw_text)
+    raw_candidates = refine_ocr_output(raw_text)
+
+    # Apply centralized spelling correction on each candidate
+    from services.fuzzy_service import fuzzy_correct_drug_token
+    corrected = []
+    seen = set()
+    for c in raw_candidates:
+        corr_c = fuzzy_correct_drug_token(c)
+        if corr_c.lower() not in seen:
+            seen.add(corr_c.lower())
+            corrected.append(corr_c)
+
+    candidates = corrected
 
     # Build a processing note for transparency
     if word_count == 0:

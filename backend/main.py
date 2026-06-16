@@ -87,9 +87,10 @@ from routers import vision
 app.include_router(vision.router, prefix="/scan", tags=["Vision"])
 
 # Phase 4 — Medication Intelligence
-from routers import medication
+from routers import medication, interaction
 
 app.include_router(medication.router, prefix="/medication", tags=["Medication"])
+app.include_router(interaction.router, prefix="/medication", tags=["Medication"])
 
 # Phase 5 — Symptom Triage + Provider Directory
 from routers import triage, directory

@@ -22,6 +22,7 @@ import CameraScanner from './components/scanner/CameraScanner.jsx'
 import MedicationsPage from './pages/MedicationsPage.jsx'
 import TriagePage from './pages/TriagePage.jsx'
 import DirectoryPage from './pages/DirectoryPage.jsx'
+import InteractionPage from './pages/InteractionPage.jsx'
 
 /**
  * Premium, network-aware offline banner component.
@@ -106,6 +107,9 @@ export default function App() {
 
         {/* Medication Intelligence — Phase 4 ✅ */}
         <Route path="/medications" element={<MedicationsPage />} />
+
+        {/* Drug Interactions — Phase 2 */}
+        <Route path="/interactions" element={<InteractionPage />} />
 
         {/* Symptom Triage — Phase 5 ✅ */}
         <Route path="/triage" element={<TriagePage />} />

@@ -8,7 +8,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { processFrame } from '../../services/api.js'
+import { processFrame, processMultimodalFrame, searchMedications } from '../../services/api.js'
 
 const MAX_WIDTH  = 1920
 const MAX_HEIGHT = 1080
@@ -244,6 +244,137 @@ function OCRResultsPanel({ result, onReset, onCandidateClick }) {
   )
 }
 
+function AIMultimodalResultsPanel({ result, onReset, onCandidateClick, onAddToMatrix, addingMap }) {
+  const { drugs, patient_notes } = result
+
+  return (
+    <div className="modal-enter" style={{ textAlign: 'left' }}>
+      <div className="ribbon-moderate" style={{
+        backgroundColor: 'var(--color-warning-bg)', borderRadius: '10px',
+        padding: '0.875rem 1rem 0.875rem 1.25rem', marginBottom: '1.25rem',
+        fontSize: '0.8125rem', color: 'var(--color-warning)', lineHeight: 1.55,
+        display: 'flex', gap: '0.625rem', alignItems: 'flex-start',
+      }}>
+        <Icons.Alert style={{ flexShrink: 0, marginTop: '1px' }} />
+        <span><strong>Clinical verification required:</strong> Prescription OCR transcriptions can contain errors. Please verify these drugs and instructions against the original physical paper before proceeding.</span>
+      </div>
+
+      <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <span className="chip chip-safe">AI Decryption Complete</span>
+        <span className="chip chip-info">{drugs?.length || 0} medications identified</span>
+      </div>
+
+      <div style={{ marginBottom: '1.75rem' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--color-ink)', margin: '0 0 1rem' }}>
+          Deciphered Prescription Items
+        </h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {drugs && drugs.map((drug, idx) => {
+            const addingState = addingMap[idx] || 'idle'
+            const isBrandAndGenericSame = drug.brand_name && drug.generic_name && (drug.brand_name.toLowerCase().trim() === drug.generic_name.toLowerCase().trim())
+            
+            return (
+              <div
+                key={idx} 
+                className="card ribbon-safe"
+                style={{ 
+                  padding: '1.25rem 1.5rem', 
+                  backgroundColor: 'var(--color-white)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                  <div>
+                    <h4 style={{ margin: '0 0 0.15rem', fontFamily: 'var(--font-sans)', fontSize: '1.05rem', fontWeight: 700, color: 'var(--color-ink)' }}>
+                      {drug.brand_name || "Unknown Brand"}
+                    </h4>
+                    {drug.generic_name && !isBrandAndGenericSame && (
+                      <p style={{ margin: 0, fontSize: '0.825rem', color: 'var(--color-muted)', fontStyle: 'italic' }}>
+                        Generic: {drug.generic_name}
+                      </p>
+                    )}
+                  </div>
+                  <span className="chip chip-info" style={{ fontSize: '0.75rem' }}>Item #{idx + 1}</span>
+                </div>
+
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '1fr 1fr', 
+                  gap: '0.75rem', 
+                  fontSize: '0.825rem', 
+                  backgroundColor: 'var(--color-cream)', 
+                  padding: '0.75rem 1rem', 
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-border)'
+                }}>
+                  <div>
+                    <span style={{ color: 'var(--color-muted)', display: 'block', fontSize: '0.7rem', fontWeight: 600 }}>DOSAGE</span>
+                    <span style={{ color: 'var(--color-ink)', fontWeight: 600 }}>{drug.dosage_strength || "N/A"}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--color-muted)', display: 'block', fontSize: '0.7rem', fontWeight: 600 }}>FREQUENCY</span>
+                    <span style={{ color: 'var(--color-ink)', fontWeight: 600 }}>{drug.frequency || "N/A"}</span>
+                  </div>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <span style={{ color: 'var(--color-muted)', display: 'block', fontSize: '0.7rem', fontWeight: 600 }}>INSTRUCTIONS</span>
+                    <span style={{ color: 'var(--color-ink)' }}>{drug.instructions || "No custom instructions"}</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                  <button 
+                    className="btn-ghost" 
+                    style={{ flex: 1, fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}
+                    onClick={() => onCandidateClick(drug.brand_name || drug.generic_name)}
+                  >
+                    Lookup Profile
+                  </button>
+                  <button 
+                    className={addingState === 'added' ? "btn-primary" : "btn-outline"}
+                    style={{ 
+                      flex: 1, 
+                      fontSize: '0.8rem', 
+                      padding: '0.4rem 0.75rem',
+                      borderColor: addingState === 'added' ? 'transparent' : 'var(--color-border-strong)',
+                      backgroundColor: addingState === 'added' ? 'var(--color-safe-bg)' : undefined,
+                      color: addingState === 'added' ? 'var(--color-safe)' : undefined,
+                    }}
+                    disabled={addingState === 'loading' || addingState === 'added'}
+                    onClick={() => onAddToMatrix(drug, idx)}
+                  >
+                    {addingState === 'loading' && "Adding..."}
+                    {addingState === 'added' && "✓ Added to Matrix"}
+                    {addingState === 'error' && "Retry Add"}
+                    {addingState === 'idle' && "Add to Matrix"}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {patient_notes && (
+        <div className="card" style={{ marginBottom: '1.75rem', padding: '1.25rem', backgroundColor: 'var(--color-parchment)' }}>
+          <h4 style={{ margin: '0 0 0.5rem', fontFamily: 'var(--font-sans)', fontSize: '0.875rem', fontWeight: 700, color: 'var(--color-ink)', letterSpacing: '0.03em' }}>
+            PATIENT NOTES & RECOMMENDATIONS
+          </h4>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-muted)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+            {patient_notes}
+          </p>
+        </div>
+      )}
+
+      <button className="btn-primary" id="scanner-reset-btn" onClick={onReset} style={{ width: '100%' }}>
+        Scan another prescription
+      </button>
+    </div>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
@@ -256,6 +387,8 @@ export default function CameraScanner() {
   const [ocrResult, setOcrResult] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [capturedDataUrl, setCapturedDataUrl] = useState(null)
+  const [enableAIScan, setEnableAIScan] = useState(false)
+  const [addingMap, setAddingMap] = useState({})
 
   const videoRef  = useRef(null)
   const canvasRef = useRef(null)
@@ -300,6 +433,43 @@ export default function CameraScanner() {
     return () => clearInterval(interval)
   }, [])
 
+  const handleAddToMatrix = useCallback(async (drug, idx) => {
+    setAddingMap(prev => ({ ...prev, [idx]: 'loading' }))
+    try {
+      const searchName = drug.brand_name || drug.generic_name
+      if (!searchName) {
+        throw new Error("No name available to search.")
+      }
+      const response = await searchMedications(searchName, 1)
+      const results = response.results || []
+      const match = results.find(r => r.rxcui)
+      
+      if (!match) {
+        throw new Error("No RxCUI found for this medication.")
+      }
+      
+      const rxcuiVal = Array.isArray(match.rxcui) ? match.rxcui[0] : match.rxcui
+      const medToAdd = {
+        name: match.generic_name || match.name || match.brand_name || searchName,
+        rxcui: rxcuiVal,
+        brand: match.brand_name
+      }
+      
+      // Add to localStorage
+      const cabinet = JSON.parse(localStorage.getItem('medicine_cabinet') || '[]')
+      if (!cabinet.some(item => item.rxcui === medToAdd.rxcui)) {
+        cabinet.push(medToAdd)
+        localStorage.setItem('medicine_cabinet', JSON.stringify(cabinet))
+      }
+      
+      setAddingMap(prev => ({ ...prev, [idx]: 'added' }))
+    } catch (err) {
+      console.error("Failed to add medication to matrix:", err)
+      setAddingMap(prev => ({ ...prev, [idx]: 'error' }))
+      alert(`Could not resolve RxCUI for ${drug.brand_name || drug.generic_name}. You can search for it manually in the Interactions Matrix.`)
+    }
+  }, [])
+
   const captureAndProcess = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) return
     setPhase('capturing')
@@ -322,7 +492,7 @@ export default function CameraScanner() {
     const stopAnimation = animateStatus()
 
     try {
-      const result = await processFrame(dataUrl)
+      const result = enableAIScan ? await processMultimodalFrame(dataUrl) : await processFrame(dataUrl)
       stopAnimation()
       setOcrResult(result)
       setPhase('results')
@@ -331,14 +501,14 @@ export default function CameraScanner() {
       setErrorMessage(err.message || 'Could not reach the OCR service. Check your connection and try again.')
       setPhase('error')
     }
-  }, [stopStream, animateStatus])
+  }, [stopStream, animateStatus, enableAIScan])
 
   const handleFileUpload = useCallback(async (dataUrl) => {
     setCapturedDataUrl(dataUrl)
     setPhase('processing')
     const stopAnimation = animateStatus()
     try {
-      const result = await processFrame(dataUrl)
+      const result = enableAIScan ? await processMultimodalFrame(dataUrl) : await processFrame(dataUrl)
       stopAnimation()
       setOcrResult(result)
       setPhase('results')
@@ -347,13 +517,14 @@ export default function CameraScanner() {
       setErrorMessage(err.message || 'OCR processing failed. Please try again.')
       setPhase('error')
     }
-  }, [animateStatus])
+  }, [animateStatus, enableAIScan])
 
   const reset = useCallback(() => {
     stopStream()
     setOcrResult(null)
     setErrorMessage('')
     setCapturedDataUrl(null)
+    setAddingMap({})
     setPhase('idle')
   }, [stopStream])
 
@@ -388,6 +559,68 @@ export default function CameraScanner() {
           <button id="scanner-start-btn" className="btn-primary" onClick={startCamera}>
             Start camera
           </button>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.75rem',
+            marginTop: '1.5rem',
+            padding: '0.75rem 1rem',
+            backgroundColor: 'var(--color-parchment)',
+            borderRadius: '10px',
+            border: '1px solid var(--color-border)',
+            maxWidth: '320px',
+            margin: '1.5rem auto 0',
+          }}>
+            <label style={{
+              position: 'relative',
+              display: 'inline-block',
+              width: '42px',
+              height: '24px',
+              flexShrink: 0,
+              cursor: 'pointer',
+            }}>
+              <input
+                type="checkbox"
+                checked={enableAIScan}
+                onChange={(e) => setEnableAIScan(e.target.checked)}
+                style={{ opacity: 0, width: 0, height: 0 }}
+                id="ai-scan-toggle"
+              />
+              <span style={{
+                position: 'absolute',
+                cursor: 'pointer',
+                inset: 0,
+                backgroundColor: enableAIScan ? 'var(--color-forest)' : 'var(--color-border)',
+                transition: '0.3s',
+                borderRadius: '24px',
+              }}>
+                <span style={{
+                  position: 'absolute',
+                  content: '""',
+                  height: '18px',
+                  width: '18px',
+                  left: enableAIScan ? '20px' : '4px',
+                  bottom: '3px',
+                  backgroundColor: 'var(--color-white)',
+                  transition: '0.3s',
+                  borderRadius: '50%',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                }} />
+              </span>
+            </label>
+            <span style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              color: 'var(--color-ink)',
+              textAlign: 'left',
+              userSelect: 'none',
+            }}>
+              Enable AI Scan (Prescriptions / Handwriting)
+            </span>
+          </div>
         </div>
       )}
 
@@ -441,7 +674,17 @@ export default function CameraScanner() {
       )}
 
       {phase === 'results' && ocrResult && (
-        <OCRResultsPanel result={ocrResult} onReset={reset} onCandidateClick={handleCandidateClick} />
+        ocrResult.drugs ? (
+          <AIMultimodalResultsPanel 
+            result={ocrResult} 
+            onReset={reset} 
+            onCandidateClick={handleCandidateClick} 
+            onAddToMatrix={handleAddToMatrix}
+            addingMap={addingMap}
+          />
+        ) : (
+          <OCRResultsPanel result={ocrResult} onReset={reset} onCandidateClick={handleCandidateClick} />
+        )
       )}
 
       {phase === 'upload' && (

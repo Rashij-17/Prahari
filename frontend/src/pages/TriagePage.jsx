@@ -11,6 +11,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { assessSymptoms } from '../services/api.js'
+import TriageChatbot from '../components/triage/TriageChatbot.jsx'
 
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -578,7 +579,25 @@ export default function TriagePage() {
             cursor: 'pointer'
           }}
         >
-          Symptom Triage
+          Quick Triage
+        </button>
+        <button
+          onClick={() => setSearchParams({ tab: 'chat' })}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '0.75rem 0.25rem',
+            fontSize: '0.9375rem',
+            fontWeight: activeTab === 'chat' ? 700 : 500,
+            color: activeTab === 'chat' ? 'var(--color-forest)' : 'var(--color-muted)',
+            borderBottom: activeTab === 'chat' ? '2.5px solid var(--color-forest)' : '2.5px solid transparent',
+            marginBottom: '-1.5px',
+            transition: 'var(--transition-fast)',
+            outline: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Conversational Chat
         </button>
         <button
           onClick={() => setSearchParams({ tab: 'firstaid' })}
@@ -833,6 +852,18 @@ export default function TriagePage() {
             <UrgencyResult result={result} onReset={reset} />
           )}
         </>
+      ) : activeTab === 'chat' ? (
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ marginBottom: '1.75rem' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', color: 'var(--color-ink)', margin: '0 0 0.5rem' }}>
+              Conversational Triage Chatbot
+            </h1>
+            <p style={{ color: 'var(--color-muted)', margin: 0, fontSize: '0.975rem', lineHeight: 1.6 }}>
+              Engage in a multi-turn dialogue. The assistant will ask follow-up questions to hone in on the clinical assessment.
+            </p>
+          </div>
+          <TriageChatbot />
+        </div>
       ) : (
         <>
           {/* First Aid Guides tab */}

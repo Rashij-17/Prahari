@@ -16,8 +16,9 @@ Source: FEATURES_AND_STRUCTURE.md §2.1.3, §2.1.4 and IMPLEMENTATION_PLAN.md Ph
 from fastapi import APIRouter, HTTPException, Depends
 
 from middleware.rate_limiter import limit_scan
-from models.vision import FramePayload, OCRResult
+from models.vision import FramePayload, OCRResult, DecipheredPrescription
 from services.ocr_service import process_image_frame
+from services.multimodal_ocr_service import decipher_prescription
 
 # ---------------------------------------------------------------------------
 # Router Definition
@@ -77,3 +78,27 @@ async def process_frame(payload: FramePayload) -> OCRResult:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except RuntimeError as exc:
         raise HTTPException(status_code=500, detail=f"OCR processing failed: {exc}") from exc
+
+
+@router.post(
+    "/process-multimodal",
+    response_model=DecipheredPrescription,
+    dependencies=[Depends(limit_scan)],
+    summary="Process a prescription image using multimodal AI",
+    description=(
+        "Receives a Base64 JPEG prescription image, runs it through the "
+        "3-tier fallback OCR pipeline (Gemini -> Groq -> Tesseract), "
+        "and returns a structured list of deciphered drugs and notes."
+    ),
+)
+async def process_prescription_multimodal(payload: FramePayload) -> DecipheredPrescription:
+    if not payload.image:
+        raise HTTPException(status_code=400, detail="Image payload is empty.")
+
+    try:
+        result = decipher_prescription(payload.image)
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Multimodal OCR processing failed: {exc}") from exc
