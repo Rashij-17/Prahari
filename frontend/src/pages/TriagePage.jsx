@@ -525,12 +525,63 @@ export default function TriagePage() {
   const activeTab = searchParams.get('tab') || 'triage'
   const [expandedGuide, setExpandedGuide] = useState(null)
 
-  const [phase,    setPhase]    = useState('idle')
-  const [symptoms, setSymptoms] = useState('')
-  const [sex,      setSex]      = useState('male')
-  const [age,      setAge]      = useState(30)
-  const [result,   setResult]   = useState(null)
-  const [error,    setError]    = useState('')
+  const [phase,    setPhase]    = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_triage_state')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return parsed.phase === 'loading' ? 'idle' : (parsed.phase ?? 'idle')
+      }
+    } catch (e) {}
+    return 'idle'
+  })
+  const [symptoms, setSymptoms] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_triage_state')
+      return saved ? (JSON.parse(saved).symptoms ?? '') : ''
+    } catch (e) { return '' }
+  })
+  const [sex,      setSex]      = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_triage_state')
+      return saved ? (JSON.parse(saved).sex ?? 'male') : 'male'
+    } catch (e) { return 'male' }
+  })
+  const [age,      setAge]      = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_triage_state')
+      return saved ? (JSON.parse(saved).age ?? 30) : 30
+    } catch (e) { return 30 }
+  })
+  const [result,   setResult]   = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_triage_state')
+      return saved ? (JSON.parse(saved).result ?? null) : null
+    } catch (e) { return null }
+  })
+  const [error,    setError]    = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_triage_state')
+      return saved ? (JSON.parse(saved).error ?? '') : ''
+    } catch (e) { return '' }
+  })
+
+  // Sync state to localStorage
+  useEffect(() => {
+    try {
+      const stateToSave = {
+        phase,
+        symptoms,
+        sex,
+        age,
+        result,
+        error,
+      }
+      localStorage.setItem('prahari_triage_state', JSON.stringify(stateToSave))
+    } catch (e) {
+      console.error('Failed to save triage state to localStorage:', e)
+    }
+  }, [phase, symptoms, sex, age, result, error])
 
   const handleAssess = async () => {
     if (symptoms.trim().length < 5) return
@@ -551,6 +602,12 @@ export default function TriagePage() {
     setResult(null)
     setSymptoms('')
     setPhase('idle')
+    setError('')
+    try {
+      localStorage.removeItem('prahari_triage_state')
+    } catch (e) {
+      console.error('Failed to clear triage state from localStorage:', e)
+    }
   }
 
   return (

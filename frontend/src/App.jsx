@@ -22,6 +22,9 @@ import CameraScanner from './components/scanner/CameraScanner.jsx'
 import MedicationsPage from './pages/MedicationsPage.jsx'
 import TriagePage from './pages/TriagePage.jsx'
 import DirectoryPage from './pages/DirectoryPage.jsx'
+import TranscribePage from './pages/TranscribePage.jsx'
+import LoginPage from './pages/LoginPage.jsx'
+import { useAuth } from './hooks/useAuth.jsx'
 
 /**
  * Premium, network-aware offline banner component.
@@ -94,6 +97,30 @@ function OfflineBanner() {
 }
 
 export default function App() {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        backgroundColor: 'var(--color-cream)',
+        color: 'var(--color-forest)',
+        fontFamily: 'var(--font-sans)',
+      }}>
+        <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+          Loading Prahari...
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <LoginPage />
+  }
+
   return (
     <DashboardLayout>
       <OfflineBanner />
@@ -103,6 +130,9 @@ export default function App() {
 
         {/* Scanner — Phase 3 ✅ */}
         <Route path="/scanner" element={<CameraScanner />} />
+
+        {/* Consultation Transcriber — Phase 3 ✅ */}
+        <Route path="/transcribe" element={<TranscribePage />} />
 
         {/* Medication Intelligence — Phase 4 ✅ */}
         <Route path="/medications" element={<MedicationsPage />} />

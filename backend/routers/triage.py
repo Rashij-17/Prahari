@@ -10,11 +10,12 @@ Source: FEATURES_AND_STRUCTURE.md §2.3 (Triage)
 
 import logging
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
 
 from middleware.rate_limiter import limit_assess, limit_chat
 from models.triage import TriageRequest, TriageResponse, TriageChatRequest, TriageChatResponse
 from services.triage_service import assess_symptoms, assess_triage_chat
+from services.transcription_service import transcribe_and_parse_audio
 
 logger = logging.getLogger(__name__)
 
@@ -75,3 +76,19 @@ async def assess_chat(body: TriageChatRequest) -> TriageChatResponse:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Triage chat failed: {exc}") from exc
+
+
+@router.post(
+    "/transcribe",
+    summary="Transcribe clinical consultation audio and extract entities",
+    description="Accepts an audio file upload, transcribes it using Whisper/Gemini/Simulator, and returns structured drugs, appointments, and warnings."
+)
+async def transcribe_audio(file: UploadFile = File(...)):
+    logger.info("Transcription request received for file: %s", file.filename)
+    try:
+        file_bytes = await file.read()
+        result = transcribe_and_parse_audio(file_bytes, file.filename)
+        return result
+    except Exception as exc:
+        logger.error("Audio transcription endpoint failed: %s", exc)
+        raise HTTPException(status_code=500, detail=f"Audio transcription failed: {str(exc)}")

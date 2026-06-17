@@ -177,27 +177,27 @@ function TriageChatResult({ result, onReset }) {
 // Main Chatbot Component
 // ---------------------------------------------------------------------------
 export default function TriageChatbot() {
-  // Config states (loaded from sessionStorage if present to survive tab changes)
-  const [sex, setSex] = useState(() => sessionStorage.getItem('prahari_chat_sex') || 'male')
+  // Config states (loaded from localStorage if present to survive tab changes)
+  const [sex, setSex] = useState(() => localStorage.getItem('prahari_chat_sex') || 'male')
   const [age, setAge] = useState(() => {
-    const val = sessionStorage.getItem('prahari_chat_age')
+    const val = localStorage.getItem('prahari_chat_age')
     return val ? Number(val) : 30
   })
-  const [started, setStarted] = useState(() => sessionStorage.getItem('prahari_chat_started') === 'true')
-  const [initialText, setInitialText] = useState(() => sessionStorage.getItem('prahari_chat_initialText') || '')
+  const [started, setStarted] = useState(() => localStorage.getItem('prahari_chat_started') === 'true')
+  const [initialText, setInitialText] = useState(() => localStorage.getItem('prahari_chat_initialText') || '')
 
   // Conversation state
   const [messages, setMessages] = useState(() => {
-    const val = sessionStorage.getItem('prahari_chat_messages')
+    const val = localStorage.getItem('prahari_chat_messages')
     return val ? JSON.parse(val) : []
   })
   const [evidence, setEvidence] = useState(() => {
-    const val = sessionStorage.getItem('prahari_chat_evidence')
+    const val = localStorage.getItem('prahari_chat_evidence')
     return val ? JSON.parse(val) : []
   })
   const [loading, setLoading] = useState(false)
   const [triageResult, setTriageResult] = useState(() => {
-    const val = sessionStorage.getItem('prahari_chat_triageResult')
+    const val = localStorage.getItem('prahari_chat_triageResult')
     return val ? JSON.parse(val) : null
   })
   
@@ -206,36 +206,36 @@ export default function TriageChatbot() {
 
   const chatEndRef = useRef(null)
 
-  // Persist states to sessionStorage
+  // Persist states to localStorage
   useEffect(() => {
-    sessionStorage.setItem('prahari_chat_sex', sex)
+    localStorage.setItem('prahari_chat_sex', sex)
   }, [sex])
 
   useEffect(() => {
-    sessionStorage.setItem('prahari_chat_age', age.toString())
+    localStorage.setItem('prahari_chat_age', age.toString())
   }, [age])
 
   useEffect(() => {
-    sessionStorage.setItem('prahari_chat_started', started.toString())
+    localStorage.setItem('prahari_chat_started', started.toString())
   }, [started])
 
   useEffect(() => {
-    sessionStorage.setItem('prahari_chat_initialText', initialText)
+    localStorage.setItem('prahari_chat_initialText', initialText)
   }, [initialText])
 
   useEffect(() => {
-    sessionStorage.setItem('prahari_chat_messages', JSON.stringify(messages))
+    localStorage.setItem('prahari_chat_messages', JSON.stringify(messages))
   }, [messages])
 
   useEffect(() => {
-    sessionStorage.setItem('prahari_chat_evidence', JSON.stringify(evidence))
+    localStorage.setItem('prahari_chat_evidence', JSON.stringify(evidence))
   }, [evidence])
 
   useEffect(() => {
     if (triageResult) {
-      sessionStorage.setItem('prahari_chat_triageResult', JSON.stringify(triageResult))
+      localStorage.setItem('prahari_chat_triageResult', JSON.stringify(triageResult))
     } else {
-      sessionStorage.removeItem('prahari_chat_triageResult')
+      localStorage.removeItem('prahari_chat_triageResult')
     }
   }, [triageResult])
 
@@ -441,12 +441,12 @@ export default function TriageChatbot() {
 
   // Reset conversation to initial state
   const resetAll = () => {
-    // Clear session storage values
-    sessionStorage.removeItem('prahari_chat_started')
-    sessionStorage.removeItem('prahari_chat_initialText')
-    sessionStorage.removeItem('prahari_chat_messages')
-    sessionStorage.removeItem('prahari_chat_evidence')
-    sessionStorage.removeItem('prahari_chat_triageResult')
+    // Clear local storage values
+    localStorage.removeItem('prahari_chat_started')
+    localStorage.removeItem('prahari_chat_initialText')
+    localStorage.removeItem('prahari_chat_messages')
+    localStorage.removeItem('prahari_chat_evidence')
+    localStorage.removeItem('prahari_chat_triageResult')
 
     // Reset state values
     setMessages([])

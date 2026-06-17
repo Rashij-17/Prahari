@@ -8,12 +8,18 @@ This manual details the testing suite configuration, test directory layout, and 
 
 | Scope | Tooling | Run Command |
 | :--- | :--- | :--- |
-| **Backend Unit & Routes** | *(planned)* `pytest` + `pytest-asyncio` | *(not set up yet)* |
-| **Backend Coverage** | *(planned)* `pytest-cov` | *(not set up yet)* |
-| **Frontend Unit** | *(planned)* `Vitest` + React Testing Library | *(not set up yet)* |
-| **Frontend Coverage** | *(planned)* `Vitest` coverage | *(not set up yet)* |
+| **Backend Unit & Routes** | `pytest` + `pytest-asyncio` + `pytest-mock` | `cd backend; $env:PYTHONPATH="."; .\venv\Scripts\pytest` |
+| **Backend Coverage** | `pytest-cov` | `cd backend; $env:PYTHONPATH="."; .\venv\Scripts\pytest --cov=.` |
+| **Frontend Unit** | `Vitest` + React Testing Library + `jsdom` | `cd frontend; npm run test` |
+| **Frontend Coverage** | `@vitest/coverage-v8` | `cd frontend; npm run coverage` |
 
 ---
+
+## 1.2 Test State Isolation & Best Practices
+
+*   **Frontend State Pollution Prevention:** In [setupTests.js](file:///d:/Prahari/frontend/src/setupTests.js), a global `beforeEach` hook clears `localStorage` and `sessionStorage` before every test run. This prevents persistent route and component state (e.g. scanner settings, chatbot logs) from bleeding across test cases.
+*   **Failsafe API Mocking:** All external endpoints (openFDA, Infermedica, Google Places, RxNorm) are mocked using standard testing spies to isolate tests from network variance and key configuration errors.
+*   **Volatile Test Databases:** Database operations are verified against process-local SQLite instances to preserve developer workspaces.
 
 ## 2. Backend Test Suites (Code Samples)
 

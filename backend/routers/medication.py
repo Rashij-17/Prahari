@@ -24,8 +24,12 @@ from typing import Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException, Query, Depends
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from middleware.rate_limiter import limit_profile
+from utils.auth import get_current_user
+from models.db import get_db, DBMedicineCabinet, DBAppointment
 from models.medication import DrugProfile, DrugSummary, MedicationSearchResponse
 from services.rxnorm_service import (
     resolve_name_to_rxcui,
@@ -789,3 +793,163 @@ async def search_medications(
         total=len(final_results),
         source="combined"
     )
+
+
+# ===========================================================================
+# Phase 3 — Supabase Database Sync Request Schemas & Endpoints
+# ===========================================================================
+
+class CabinetItemSync(BaseModel):
+    brand_name: str
+    generic_name: str = ""
+    dosage_strength: str = ""
+    frequency: str = ""
+    instructions: str = ""
+
+
+class AppointmentSync(BaseModel):
+    title: str
+    date: str
+    time: str = ""
+    notes: str = ""
+
+
+# --- Cabinet Sync Endpoints ---
+
+@router.get("/cabinet", summary="Get user's synced medicine cabinet")
+async def get_cabinet(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    items = db.query(DBMedicineCabinet).filter(DBMedicineCabinet.user_id == current_user.id).all()
+    return [{
+        "id": item.id,
+        "brand_name": item.brand_name,
+        "generic_name": item.generic_name,
+        "dosage_strength": item.dosage_strength,
+        "frequency": item.frequency,
+        "instructions": item.instructions,
+        "created_at": item.created_at
+    } for item in items]
+
+
+@router.post("/cabinet", summary="Add or update item in medicine cabinet")
+async def sync_cabinet_item(
+    payload: CabinetItemSync,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Check if item with same brand name already exists for user
+    item = db.query(DBMedicineCabinet).filter(
+        DBMedicineCabinet.user_id == current_user.id,
+        DBMedicineCabinet.brand_name == payload.brand_name
+    ).first()
+    
+    if item:
+        # Update
+        item.generic_name = payload.generic_name
+        item.dosage_strength = payload.dosage_strength
+        item.frequency = payload.frequency
+        item.instructions = payload.instructions
+    else:
+        # Create
+        item = DBMedicineCabinet(
+            user_id=current_user.id,
+            brand_name=payload.brand_name,
+            generic_name=payload.generic_name,
+            dosage_strength=payload.dosage_strength,
+            frequency=payload.frequency,
+            instructions=payload.instructions
+        )
+        db.add(item)
+        
+    db.commit()
+    db.refresh(item)
+    return {"status": "success", "id": item.id}
+
+
+@router.delete("/cabinet/{item_id}", summary="Delete item from medicine cabinet")
+async def delete_cabinet_item(
+    item_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    item = db.query(DBMedicineCabinet).filter(
+        DBMedicineCabinet.id == item_id,
+        DBMedicineCabinet.user_id == current_user.id
+    ).first()
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Medication not found in cabinet")
+        
+    db.delete(item)
+    db.commit()
+    return {"status": "success"}
+
+
+# --- Appointment Sync Endpoints ---
+
+@router.get("/appointments", summary="Get user's synced appointments")
+async def get_appointments(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    items = db.query(DBAppointment).filter(DBAppointment.user_id == current_user.id).all()
+    return [{
+        "id": item.id,
+        "title": item.title,
+        "date": item.date,
+        "time": item.time,
+        "notes": item.notes,
+        "created_at": item.created_at
+    } for item in items]
+
+
+@router.post("/appointments", summary="Add or update appointment")
+async def sync_appointment(
+    payload: AppointmentSync,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Check if appointment with same title and date exists for user
+    item = db.query(DBAppointment).filter(
+        DBAppointment.user_id == current_user.id,
+        DBAppointment.title == payload.title,
+        DBAppointment.date == payload.date
+    ).first()
+    
+    if item:
+        item.time = payload.time
+        item.notes = payload.notes
+    else:
+        item = DBAppointment(
+            user_id=current_user.id,
+            title=payload.title,
+            date=payload.date,
+            time=payload.time,
+            notes=payload.notes
+        )
+        db.add(item)
+        
+    db.commit()
+    db.refresh(item)
+    return {"status": "success", "id": item.id}
+
+
+@router.delete("/appointments/{appointment_id}", summary="Delete appointment")
+async def delete_appointment(
+    appointment_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    item = db.query(DBAppointment).filter(
+        DBAppointment.id == appointment_id,
+        DBAppointment.user_id == current_user.id
+    ).first()
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+        
+    db.delete(item)
+    db.commit()
+    return {"status": "success"}

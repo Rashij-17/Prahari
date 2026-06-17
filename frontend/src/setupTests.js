@@ -28,3 +28,9 @@ window.matchMedia = window.matchMedia || function() {
     dispatchEvent: vi.fn(),
   }
 }
+
+// Clear mock storage before every test to ensure state isolation
+beforeEach(() => {
+  localStorage.clear()
+  sessionStorage.clear()
+})

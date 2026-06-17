@@ -1,6 +1,25 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
+
+vi.mock('../hooks/useAuth.jsx', () => ({
+  useAuth: () => ({
+    user: {
+      id: 'mock_user_12345',
+      email: 'demo-patient@prahari.org',
+      user_metadata: {
+        full_name: 'Demo Patient',
+        avatar_url: 'https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=Prahari'
+      }
+    },
+    token: 'mock-token',
+    loading: false,
+    loginWithGoogle: vi.fn(),
+    logout: vi.fn(),
+    isDemo: true
+  })
+}))
+
 import DashboardLayout from '../components/layout/DashboardLayout.jsx'
 
 describe('DashboardLayout Component Unit Tests', () => {

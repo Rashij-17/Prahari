@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { searchProviders } from '../services/api.js'
 
 // ---------------------------------------------------------------------------
@@ -141,13 +141,70 @@ const SPECIALTIES = [
 ]
 
 export default function DirectoryPage() {
-  const [phase,     setPhase]     = useState('idle')
-  const [results,   setResults]   = useState([])
-  const [specialty, setSpecialty] = useState('')
-  const [radius,    setRadius]    = useState(5)
-  const [error,     setError]     = useState('')
-  const [isMock,    setIsMock]    = useState(false)
-  const [mockNote,  setMockNote]  = useState('')
+  const [phase,     setPhase]     = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_directory_state')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return (parsed.phase === 'locating' || parsed.phase === 'loading') ? 'idle' : (parsed.phase ?? 'idle')
+      }
+    } catch (e) {}
+    return 'idle'
+  })
+  const [results,   setResults]   = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_directory_state')
+      return saved ? (JSON.parse(saved).results ?? []) : []
+    } catch (e) { return [] }
+  })
+  const [specialty, setSpecialty] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_directory_state')
+      return saved ? (JSON.parse(saved).specialty ?? '') : ''
+    } catch (e) { return '' }
+  })
+  const [radius,    setRadius]    = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_directory_state')
+      return saved ? (JSON.parse(saved).radius ?? 5) : 5
+    } catch (e) { return 5 }
+  })
+  const [error,     setError]     = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_directory_state')
+      return saved ? (JSON.parse(saved).error ?? '') : ''
+    } catch (e) { return '' }
+  })
+  const [isMock,    setIsMock]    = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_directory_state')
+      return saved ? (JSON.parse(saved).isMock ?? false) : false
+    } catch (e) { return false }
+  })
+  const [mockNote,  setMockNote]  = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_directory_state')
+      return saved ? (JSON.parse(saved).mockNote ?? '') : ''
+    } catch (e) { return '' }
+  })
+
+  // Sync state to localStorage
+  useEffect(() => {
+    try {
+      const stateToSave = {
+        phase,
+        results,
+        specialty,
+        radius,
+        error,
+        isMock,
+        mockNote,
+      }
+      localStorage.setItem('prahari_directory_state', JSON.stringify(stateToSave))
+    } catch (e) {
+      console.error('Failed to save directory state to localStorage:', e)
+    }
+  }, [phase, results, specialty, radius, error, isMock, mockNote])
 
   const locateAndSearch = () => {
     setPhase('locating')
@@ -190,6 +247,12 @@ export default function DirectoryPage() {
   const reset = () => {
     setResults([])
     setPhase('idle')
+    setError('')
+    try {
+      localStorage.removeItem('prahari_directory_state')
+    } catch (e) {
+      console.error('Failed to clear directory state from localStorage:', e)
+    }
   }
 
   return (

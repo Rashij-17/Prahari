@@ -117,3 +117,157 @@ Parses free-text symptom logs and returns triage urgency tiers.
       "is_mock": false
     }
     ```
+
+---
+
+## 4. Cabinet & Appointment Sync Endpoints
+
+All endpoints in this section require a valid Supabase authentication token sent via the `Authorization: Bearer <token>` header.
+
+### 4.1 GET `/medication/cabinet`
+Retrieves all items stored in the authenticated user's medicine cabinet. 
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    [
+      {
+        "id": 1,
+        "user_id": "supabase-uid-1234",
+        "brand_name": "Base64_Encrypted_Brand==",
+        "generic_name": "Base64_Encrypted_Generic==",
+        "dosage_strength": "Base64_Encrypted_Dosage==",
+        "frequency": "Base64_Encrypted_Frequency==",
+        "instructions": "Base64_Encrypted_Instructions==",
+        "created_at": "2026-06-17T18:00:00Z"
+      }
+    ]
+    ```
+
+### 4.2 POST `/medication/cabinet`
+Adds a new medicine cabinet item or updates an existing one.
+*   **Request Body (JSON):**
+    ```json
+    {
+      "id": 1,
+      "brand_name": "Base64_Encrypted_Brand==",
+      "generic_name": "Base64_Encrypted_Generic==",
+      "dosage_strength": "Base64_Encrypted_Dosage==",
+      "frequency": "Base64_Encrypted_Frequency==",
+      "instructions": "Base64_Encrypted_Instructions=="
+    }
+    ```
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "id": 1,
+      "user_id": "supabase-uid-1234",
+      "brand_name": "Base64_Encrypted_Brand==",
+      "generic_name": "Base64_Encrypted_Generic==",
+      "dosage_strength": "Base64_Encrypted_Dosage==",
+      "frequency": "Base64_Encrypted_Frequency==",
+      "instructions": "Base64_Encrypted_Instructions==",
+      "created_at": "2026-06-17T18:00:00Z"
+    }
+    ```
+
+### 4.3 DELETE `/medication/cabinet/{item_id}`
+Removes a medicine item from the cabinet.
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "status": "success",
+      "message": "Item deleted"
+    }
+    ```
+
+### 4.4 GET `/medication/appointments`
+Retrieves all appointments for the authenticated user.
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    [
+      {
+        "id": 1,
+        "user_id": "supabase-uid-1234",
+        "title": "Base64_Encrypted_Title==",
+        "date": "2026-07-15",
+        "time": "Base64_Encrypted_Time==",
+        "notes": "Base64_Encrypted_Notes==",
+        "created_at": "2026-06-17T18:00:00Z"
+      }
+    ]
+    ```
+
+### 4.5 POST `/medication/appointments`
+Creates or updates an appointment.
+*   **Request Body (JSON):**
+    ```json
+    {
+      "id": 1,
+      "title": "Base64_Encrypted_Title==",
+      "date": "2026-07-15",
+      "time": "Base64_Encrypted_Time==",
+      "notes": "Base64_Encrypted_Notes=="
+    }
+    ```
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "id": 1,
+      "user_id": "supabase-uid-1234",
+      "title": "Base64_Encrypted_Title==",
+      "date": "2026-07-15",
+      "time": "Base64_Encrypted_Time==",
+      "notes": "Base64_Encrypted_Notes==",
+      "created_at": "2026-06-17T18:00:00Z"
+    }
+    ```
+
+### 4.6 DELETE `/medication/appointments/{appointment_id}`
+Deletes an appointment.
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "status": "success",
+      "message": "Appointment deleted"
+    }
+    ```
+
+---
+
+## 5. Audio Transcription & Dictation Endpoints
+
+### 5.1 POST `/triage/transcribe`
+Uploads raw audio data of a doctor's consultation or medical explanation. The audio is converted to standard WAV format via backend ffmpeg transcoding, transcribed via a 3-tier fallback chain (Groq Whisper-v3 $\rightarrow$ Gemini Flash Lite Audio $\rightarrow$ Simulator), and then parsed into structured clinical entities using Gemini LLM.
+
+*   **Request (Multipart Form-Data):**
+    *   `file` (file): Audio file (MP3, WAV, M4A, WEBM, etc.)
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "transcript": "Hello Mr. Sharma... I am prescribing you Metformin 500mg...",
+      "confidence": 1.0,
+      "is_incomplete": false,
+      "medications": [
+        {
+          "brand_name": "Metformin",
+          "generic_name": "Metformin Hydrochloride",
+          "strength": "500mg",
+          "frequency": "twice daily after meals",
+          "duration": "30 days",
+          "needs_spelling_correction": false,
+          "spelling_suggestion": ""
+        }
+      ],
+      "appointments": [
+        {
+          "title": "Follow-up appointment",
+          "date": "2026-07-15",
+          "time": "10:00 AM",
+          "notes": "blood check"
+        }
+      ],
+      "warnings": [
+        "Avoid eating high-sugar foods or drinking alcohol."
+      ]
+    }
+    ```
+

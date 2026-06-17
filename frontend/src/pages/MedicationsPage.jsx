@@ -201,12 +201,57 @@ export default function MedicationsPage() {
   const [searchParams] = useSearchParams()
   const searchParam = searchParams.get('search')
 
-  const [phase, setPhase] = useState('idle')
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
-  const [profile, setProfile] = useState(null)
-  const [error, setError] = useState('')
+  const [phase, setPhase] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_medications_state')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return parsed.phase === 'loading' ? 'idle' : (parsed.phase ?? 'idle')
+      }
+    } catch (e) {}
+    return 'idle'
+  })
+  const [query, setQuery] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_medications_state')
+      return saved ? (JSON.parse(saved).query ?? '') : ''
+    } catch (e) { return '' }
+  })
+  const [results, setResults] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_medications_state')
+      return saved ? (JSON.parse(saved).results ?? []) : []
+    } catch (e) { return [] }
+  })
+  const [profile, setProfile] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_medications_state')
+      return saved ? (JSON.parse(saved).profile ?? null) : null
+    } catch (e) { return null }
+  })
+  const [error, setError] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_medications_state')
+      return saved ? (JSON.parse(saved).error ?? '') : ''
+    } catch (e) { return '' }
+  })
   const inputRef = useRef(null)
+
+  // Sync state to localStorage
+  useEffect(() => {
+    try {
+      const stateToSave = {
+        phase,
+        query,
+        results,
+        profile,
+        error,
+      }
+      localStorage.setItem('prahari_medications_state', JSON.stringify(stateToSave))
+    } catch (e) {
+      console.error('Failed to save medications state to localStorage:', e)
+    }
+  }, [phase, query, results, profile, error])
 
   const handleSearch = useCallback(async (searchQuery) => {
     const q = (searchQuery || query).trim()
@@ -356,7 +401,25 @@ export default function MedicationsPage() {
 
       {phase === 'results' && (
         <div className="fade-in-up">
-          <div className="section-label">{results.length} result{results.length !== 1 ? 's' : ''} for "{query}"</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div className="section-label" style={{ margin: 0 }}>{results.length} result{results.length !== 1 ? 's' : ''} for "{query}"</div>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                setQuery('')
+                setResults([])
+                setProfile(null)
+                setPhase('idle')
+                setError('')
+                try {
+                  localStorage.removeItem('prahari_medications_state')
+                } catch (e) {}
+              }}
+              style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem', borderRadius: '6px' }}
+            >
+              Reset Search
+            </button>
+          </div>
           {results.length === 0 ? (
             <div className="card" style={{ padding: '2.75rem', textAlign: 'center' }}>
               <div style={{
@@ -391,7 +454,16 @@ export default function MedicationsPage() {
           <p style={{ color: 'var(--color-muted)', margin: '0 0 1.25rem', fontSize: '0.875rem' }}>{error}</p>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button id="medication-retry-btn" className="btn-primary btn-sm-auto" onClick={() => handleSearch()}>Retry</button>
-            <button className="btn-secondary btn-sm-auto" onClick={() => { setPhase('idle'); setQuery('') }}>Clear Search</button>
+            <button className="btn-secondary btn-sm-auto" onClick={() => {
+              setPhase('idle')
+              setQuery('')
+              setResults([])
+              setProfile(null)
+              setError('')
+              try {
+                localStorage.removeItem('prahari_medications_state')
+              } catch (e) {}
+            }}>Clear Search</button>
           </div>
         </div>
       )}

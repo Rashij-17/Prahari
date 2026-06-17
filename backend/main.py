@@ -80,6 +80,10 @@ async def health_check() -> dict:
 # ---------------------------------------------------------------------------
 # Router Registration
 # ---------------------------------------------------------------------------
+# Phase 3 — Database Initialization
+from models.db import init_db
+init_db()
+
 # Phase 3 — Vision / OCR
 # Running from inside /backend, so imports are relative (no 'backend.' prefix)
 from routers import vision

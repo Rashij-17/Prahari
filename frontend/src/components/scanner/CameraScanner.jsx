@@ -382,13 +382,65 @@ function AIMultimodalResultsPanel({ result, onReset, onCandidateClick, onAddToMa
 export default function CameraScanner() {
   const navigate = useNavigate()
 
-  const [phase, setPhase] = useState('idle')
+  const [phase, setPhase] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_scanner_state')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // If the saved phase was camera/capturing/processing, revert to 'idle'
+        return (parsed.phase === 'camera' || parsed.phase === 'capturing' || parsed.phase === 'processing') ? 'idle' : (parsed.phase ?? 'idle')
+      }
+    } catch (e) {}
+    return 'idle'
+  })
   const [statusText, setStatusText] = useState('Reading label…')
-  const [ocrResult, setOcrResult] = useState(null)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [capturedDataUrl, setCapturedDataUrl] = useState(null)
-  const [enableAIScan, setEnableAIScan] = useState(false)
-  const [addingMap, setAddingMap] = useState({})
+  const [ocrResult, setOcrResult] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_scanner_state')
+      return saved ? (JSON.parse(saved).ocrResult ?? null) : null
+    } catch (e) { return null }
+  })
+  const [errorMessage, setErrorMessage] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_scanner_state')
+      return saved ? (JSON.parse(saved).errorMessage ?? '') : ''
+    } catch (e) { return '' }
+  })
+  const [capturedDataUrl, setCapturedDataUrl] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_scanner_state')
+      return saved ? (JSON.parse(saved).capturedDataUrl ?? null) : null
+    } catch (e) { return null }
+  })
+  const [enableAIScan, setEnableAIScan] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_scanner_state')
+      return saved ? (JSON.parse(saved).enableAIScan ?? false) : false
+    } catch (e) { return false }
+  })
+  const [addingMap, setAddingMap] = useState(() => {
+    try {
+      const saved = localStorage.getItem('prahari_scanner_state')
+      return saved ? (JSON.parse(saved).addingMap ?? {}) : {}
+    } catch (e) { return {} }
+  })
+
+  // Sync state to localStorage
+  useEffect(() => {
+    try {
+      const stateToSave = {
+        phase,
+        ocrResult,
+        capturedDataUrl,
+        enableAIScan,
+        errorMessage,
+        addingMap,
+      }
+      localStorage.setItem('prahari_scanner_state', JSON.stringify(stateToSave))
+    } catch (e) {
+      console.error('Failed to save scanner state to localStorage:', e)
+    }
+  }, [phase, ocrResult, capturedDataUrl, enableAIScan, errorMessage, addingMap])
 
   const videoRef  = useRef(null)
   const canvasRef = useRef(null)
@@ -526,6 +578,11 @@ export default function CameraScanner() {
     setCapturedDataUrl(null)
     setAddingMap({})
     setPhase('idle')
+    try {
+      localStorage.removeItem('prahari_scanner_state')
+    } catch (e) {
+      console.error('Failed to clear scanner state from localStorage:', e)
+    }
   }, [stopStream])
 
   const handleCandidateClick = useCallback((candidateName) => {
@@ -556,9 +613,49 @@ export default function CameraScanner() {
           <p style={{ color: 'var(--color-muted)', margin: '0 0 1.75rem', fontSize: '0.9375rem' }}>
             Prahari will request camera access. Point at the label and press capture.
           </p>
-          <button id="scanner-start-btn" className="btn-primary" onClick={startCamera}>
-            Start camera
-          </button>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.875rem', flexWrap: 'wrap', maxWidth: '380px', margin: '0 auto' }}>
+            <button id="scanner-start-btn" className="btn-primary" onClick={startCamera} style={{ flex: '1 1 auto', margin: 0 }}>
+              Start camera
+            </button>
+            
+            <input
+              type="file"
+              id="label-image-upload-idle"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = (evt) => handleFileUpload(evt.target.result)
+                reader.readAsDataURL(file)
+              }}
+              style={{ display: 'none' }}
+            />
+            <label
+              htmlFor="label-image-upload-idle"
+              className="btn-outline"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                cursor: 'pointer',
+                margin: 0,
+                padding: '0.625rem 1.25rem',
+                flex: '1 1 auto',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                borderRadius: '12px',
+                border: '1.5px solid var(--color-border-strong)',
+                backgroundColor: 'var(--color-white)',
+                color: 'var(--color-ink)',
+                transition: 'var(--transition-standard)'
+              }}
+            >
+              <Icons.Upload style={{ width: '18px', height: '18px' }} />
+              Upload image
+            </label>
+          </div>
           
           <div style={{
             display: 'flex',

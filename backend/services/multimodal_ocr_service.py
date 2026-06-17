@@ -18,8 +18,45 @@ from core.config import settings
 from models.vision import DecipheredDrug, DecipheredPrescription
 from services.ocr_service import process_image_frame
 
+import cv2
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
+
+def _preprocess_handwriting(b64_image: str) -> str:
+    """
+    Decodes a base64 image, applies OpenCV image preprocessing for cursive/handwritten clinical text
+    (Grayscaling, Bilateral Filtering to preserve edges, CLAHE to enhance local contrast),
+    and returns a base64-encoded JPEG image string.
+    """
+    image_bytes, _ = _get_image_bytes_and_clean_b64(b64_image)
+    np_arr = np.frombuffer(image_bytes, dtype=np.uint8)
+    img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    if img is None:
+        logger.warning("OpenCV failed to decode base64 image. Proceeding with original image.")
+        return b64_image
+
+    # 1. Convert to Grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # 2. Apply Bilateral Filtering to reduce noise while keeping stroke edges sharp
+    filtered = cv2.bilateralFilter(gray, 9, 75, 75)
+
+    # 3. Apply Contrast Limited Adaptive Histogram Equalization (CLAHE) for thin/faded ink strokes
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    enhanced = clahe.apply(filtered)
+
+    # 4. Re-encode to JPEG
+    _, encoded_img = cv2.imencode('.jpg', enhanced)
+    processed_bytes = encoded_img.tobytes()
+    processed_b64 = base64.b64encode(processed_bytes).decode('utf-8')
+
+    # Re-attach original data URI prefix if it was present
+    if "," in b64_image:
+        prefix = b64_image.split(",", 1)[0]
+        return f"{prefix},{processed_b64}"
+    return processed_b64
 
 
 def _get_image_bytes_and_clean_b64(b64_string: str) -> tuple[bytes, str]:
@@ -41,6 +78,13 @@ def decipher_prescription(b64_image: str) -> dict:
     Decipher prescription from base64 image using a dynamic fallback pipeline.
     Iterates through OCR_FALLBACK_CHAIN defined in core/models.py.
     """
+    # Apply OpenCV preprocessing to optimize image for cursive handwriting
+    try:
+        logger.info("Applying OpenCV preprocessing (Grayscale + CLAHE + Bilateral Filtering) to prescription image...")
+        b64_image = _preprocess_handwriting(b64_image)
+    except Exception as exc:
+        logger.error("Failed to preprocess handwriting image: %s", exc)
+
     last_error = None
     
     for step in OCR_FALLBACK_CHAIN:

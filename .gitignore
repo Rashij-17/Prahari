@@ -53,3 +53,8 @@ site/
 
 # --- Tesseract (binary — not needed in repo) ---
 *.traineddata
+
+# --- Local databases and test media ---
+backend/prahari.db
+*.wav
+*.png

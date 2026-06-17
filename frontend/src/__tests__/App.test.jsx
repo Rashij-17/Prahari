@@ -19,6 +19,24 @@ vi.mock('../pages/DirectoryPage.jsx', () => ({
   default: () => <div>Mocked DirectoryPage</div>
 }))
 
+vi.mock('../hooks/useAuth.jsx', () => ({
+  useAuth: () => ({
+    user: {
+      id: 'mock_user_12345',
+      email: 'demo-patient@prahari.org',
+      user_metadata: {
+        full_name: 'Demo Patient',
+        avatar_url: 'https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=Prahari'
+      }
+    },
+    token: 'mock-token',
+    loading: false,
+    loginWithGoogle: vi.fn(),
+    logout: vi.fn(),
+    isDemo: true
+  })
+}))
+
 import App from '../App.jsx'
 
 describe('App Router Integration Tests', () => {

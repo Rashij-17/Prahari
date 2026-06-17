@@ -15,6 +15,10 @@ Create a `.env` file in the `frontend/` root directory:
 
 # Base URL pointing to the FastAPI backend service
 VITE_API_BASE_URL=http://localhost:8000
+
+# Supabase Authentication & Sync Configuration (Optional for local mockup mode)
+VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key-here
 ```
 
 ### 1.1 Client Variables Specification
@@ -22,6 +26,8 @@ VITE_API_BASE_URL=http://localhost:8000
 | Variable Name | Purpose | Example Value (Dev) | Example Value (Prod) |
 | :--- | :--- | :--- | :--- |
 | `VITE_API_BASE_URL` | Base endpoint path where the API client makes requests. | `http://localhost:8000` | `https://prahari-api.onrender.com` |
+| `VITE_SUPABASE_URL` | Supabase project endpoint for auth and syncing. | `https://project.supabase.co` | `https://prod.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous public key. | `eyJhbGciOi...` | `eyJhbGciOi...` |
 
 ---
 
@@ -38,13 +44,21 @@ PORT=8000
 FRONTEND_ORIGIN=http://localhost:5173
 
 # ─── INFERMEDICA Symptom Triage ─────────────────────────────────────────────
-# Register for a developer account at infermedica.com
 INFERMEDICA_APP_ID=your_infermedica_id_here
 INFERMEDICA_APP_KEY=your_infermedica_key_here
 
 # ─── GOOGLE PLACES Specialist Directory ──────────────────────────────────────
-# Enable "Places API" on Google Cloud Console
 GOOGLE_PLACES_API_KEY=your_google_places_key_here
+
+# ─── LLM / SPEECH & VISION SERVICES ─────────────────────────────────────────
+GEMINI_API_KEY=your_gemini_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
+
+# ─── DATABASE & AUTHENTICATION ──────────────────────────────────────────────
+# Relational DB connection string (defaults to local sqlite if unset)
+# DATABASE_URL=postgresql://user:password@host:port/dbname
+SUPABASE_JWT_SECRET=your_supabase_jwt_secret_here
+SUPABASE_URL=https://your-supabase-project.supabase.co
 ```
 
 ### 2.1 Backend Variables Grid
@@ -57,6 +71,11 @@ GOOGLE_PLACES_API_KEY=your_google_places_key_here
 | `INFERMEDICA_APP_ID` | Services | Application ID for the Infermedica NLP engine. | `""` | String value | If empty, triage routes fall back to mock preview payloads. |
 | `INFERMEDICA_APP_KEY` | Services | Application Key for the Infermedica NLP engine. | `""` | String value | If empty, triage routes fall back to mock preview payloads. |
 | `GOOGLE_PLACES_API_KEY` | Services | Google Cloud API key with Places API enabled. | `""` | String value | If empty, provider directory routes fall back to mock coordinates. |
+| `GEMINI_API_KEY` | Services | API key for Gemini models (multimodal OCR + transcript parsing). | `""` | String value | If empty, OCR & transcription use fallbacks or local mock simulation. |
+| `GROQ_API_KEY` | Services | API key for Groq models (Whisper-v3 speech-to-text). | `""` | String value | If empty, falls back to Gemini Audio or local simulator. |
+| `DATABASE_URL` | Storage | SQL database URL for cabinet and appointment sync. | `sqlite:///./prahari.db` | RFC 3986 connection URL | If invalid, database connection fails at boot. |
+| `SUPABASE_JWT_SECRET` | Security | JWT signing secret to verify bearer tokens. | `""` | String value | If empty or invalid, user session verification fails. |
+| `SUPABASE_URL` | Security | Supabase URL matching the client configuration. | `""` | Fully qualified URL | If misconfigured, Supabase sync routes cannot authenticate correctly. |
 
 ---
 

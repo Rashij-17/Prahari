@@ -124,7 +124,9 @@ See [`frontend/src/index.css`](frontend/src/index.css) for the authoritative tok
 | **Doctor Directory** | 🟢 **100% Functional** | Google Places (with fallback mocks) + rate limiting | Geo-sorted lists, map links, responsive layouts |
 | **Label Scanner** | 🟢 **100% Functional** | OpenCV Preprocess + Tesseract + refiners | Camera preview, frame capture + click-to-search handoff |
 | **PWA & Offline** | 🟢 **100% Functional** | Service Worker caching and network status handlers | Offline warning banner + install prompt |
-| **Test Coverage** | 🟢 **100% Functional** | Pytest-cov branch threshold checks (86% coverage) | Vitest thresholds configuration (97% coverage) |
+| **Dictation Transcriber** | 🟢 **100% Functional** | FFmpeg WAV transcoding + Whisper-v3/Gemini audio parsing | Web recording & audio file upload + clinical Pydantic parser |
+| **Secure Sync (E2EE)** | 🟢 **100% Functional** | Supabase JWT OAuth + SQLite/PostgreSQL sync | AES-GCM 256-bit E2EE cabinet & calendar, local resets |
+| **Test Coverage** | 🟢 **100% Functional** | Pytest-cov branch threshold checks (78.9% coverage) | Vitest thresholds configuration (52/52 tests passing) |
 
 ---
 
@@ -224,6 +226,14 @@ INFERMEDICA_APP_KEY=your_key
 
 # Google Places API key (Doctor Directory)
 GOOGLE_PLACES_API_KEY=your_google_places_api_key
+
+# Gemini & Groq APIs (OCR & Audio Transcription)
+GEMINI_API_KEY=your_gemini_key
+GROQ_API_KEY=your_groq_key
+
+# Supabase Auth Settings (Cabinet/Appointment Sync)
+SUPABASE_JWT_SECRET=your_jwt_secret
+SUPABASE_URL=https://your-project.supabase.co
 
 # App Environment Settings
 DEBUG=true

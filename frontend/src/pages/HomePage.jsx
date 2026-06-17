@@ -95,6 +95,14 @@ const Icons = {
       <path d="M19 10.5H13.5V5a1.5 1.5 0 0 0-3 0v5.5H5a1.5 1.5 0 0 0 0 3h5.5V19a1.5 1.5 0 0 0 3 0v-5.5H19a1.5 1.5 0 0 0 0-3z" />
     </svg>
   ),
+  Mic: (p) => (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}>
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+      <line x1="12" x2="12" y1="19" y2="22"/>
+    </svg>
+  ),
 }
 
 // ----------------------------------------------------------------
@@ -103,6 +111,16 @@ const Icons = {
 const FEATURES = [
   {
     num: '01',
+    id: 'feature-transcribe',
+    title: 'Consultation Transcriber',
+    description: 'Record conversations during clinic visits. Our Whisper + Gemini model transcribes visits and extracts medications and calendar schedules.',
+    path: '/transcribe',
+    Icon: Icons.Mic,
+    status: 'Live',
+    cta: 'Record Consultation',
+  },
+  {
+    num: '02',
     id: 'feature-scanner',
     title: 'Visual Label Scanner',
     description: 'Photograph any medication label. Our vision pipeline reads the text and instantly cross-references it against openFDA and RxNorm.',
@@ -112,7 +130,7 @@ const FEATURES = [
     cta: 'Open Scanner',
   },
   {
-    num: '02',
+    num: '03',
     id: 'feature-medications',
     title: 'Drug Intelligence',
     description: 'Search any medication to see active ingredients, dosage guidance, contraindications, and offline Diet Safety Guard warnings.',
@@ -122,7 +140,7 @@ const FEATURES = [
     cta: 'Search Medications',
   },
   {
-    num: '03',
+    num: '04',
     id: 'feature-triage',
     title: 'Symptom Triage',
     description: 'Describe symptoms in plain language. Our system evaluates urgency and recommends a next step — from self-care to emergency action.',
@@ -132,7 +150,7 @@ const FEATURES = [
     cta: 'Check Symptoms',
   },
   {
-    num: '04',
+    num: '05',
     id: 'feature-directory',
     title: 'Doctor Directory',
     description: 'Find nearby clinics, hospitals, and specialists sorted by distance. Filter by specialty, availability, and open status.',
@@ -142,7 +160,7 @@ const FEATURES = [
     cta: 'Find Providers',
   },
   {
-    num: '05',
+    num: '06',
     id: 'feature-firstaid',
     title: 'Emergency First Aid',
     description: 'Instant offline access to CPR checklists, choking relief instructions, and a visual/auditory compression metronome.',

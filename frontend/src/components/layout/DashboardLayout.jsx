@@ -11,6 +11,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import ThemeToggle from '../ui/ThemeToggle.jsx'
+import { useAuth } from '../../hooks/useAuth.jsx'
 
 // ----------------------------------------------------------------
 // SVG Icon Set — consistent 24px, 1.75px stroke, rounded caps
@@ -74,6 +75,29 @@ const Icons = {
       <path d="M9 12h6M12 9v6"/>
     </svg>
   ),
+  Mic: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+      <line x1="12" x2="12" y1="19" y2="22"/>
+    </svg>
+  ),
+  LogOut: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  ),
+  User: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
 }
 
 // ----------------------------------------------------------------
@@ -82,6 +106,7 @@ const Icons = {
 const NAV_ITEMS = [
   { id: 'home',        label: 'Home',        path: '/', exact: true, Icon: Icons.Home },
   { id: 'scanner',     label: 'Scanner',     path: '/scanner',     Icon: Icons.Scanner },
+  { id: 'transcribe',  label: 'Transcriber', path: '/transcribe',  Icon: Icons.Mic },
   { id: 'medications', label: 'Medications', path: '/medications', Icon: Icons.Pill },
   { id: 'triage',      label: 'Triage',      path: '/triage',      Icon: Icons.Heartbeat },
   { id: 'directory',   label: 'Directory',   path: '/directory',   Icon: Icons.MapPin },
@@ -150,7 +175,7 @@ function PrahariLogo({ onClick, size = 'default' }) {
 // ----------------------------------------------------------------
 // Mobile Drawer
 // ----------------------------------------------------------------
-function MobileDrawer({ isOpen, onClose }) {
+function MobileDrawer({ isOpen, onClose, user, logout }) {
   const location = useLocation()
   useEffect(() => { onClose() }, [location.pathname])
   useEffect(() => {
@@ -256,6 +281,88 @@ function MobileDrawer({ isOpen, onClose }) {
           ))}
         </nav>
 
+        {/* User Profile Card for Mobile */}
+        {user && (
+          <div style={{
+            padding: '1rem 1.5rem',
+            borderTop: '1px solid var(--color-border)',
+            backgroundColor: 'var(--color-cream)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+          }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--color-forest-subtle)',
+              border: '1.5px solid var(--color-forest)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+            }}>
+              {user.user_metadata?.avatar_url ? (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt={user.user_metadata.full_name || 'User Avatar'}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <Icons.User />
+              )}
+            </div>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              minWidth: 0,
+              lineHeight: 1.2,
+            }}>
+              <span style={{
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                color: 'var(--color-ink)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {user.user_metadata?.full_name || 'User'}
+              </span>
+              <span style={{
+                fontSize: '0.75rem',
+                color: 'var(--color-muted)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {user.email}
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                logout()
+                onClose()
+              }}
+              aria-label="Sign Out"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                border: 'none',
+                backgroundColor: 'transparent',
+                color: 'var(--color-muted)',
+                cursor: 'pointer',
+              }}
+            >
+              <Icons.LogOut />
+            </button>
+          </div>
+        )}
+
         {/* Drawer footer */}
         <div style={{
           padding: '1rem 1.5rem',
@@ -277,7 +384,7 @@ function MobileDrawer({ isOpen, onClose }) {
 // ----------------------------------------------------------------
 // Top Navigation Bar
 // ----------------------------------------------------------------
-function TopNav({ scrolled, onMenuClick, menuOpen }) {
+function TopNav({ scrolled, onMenuClick, menuOpen, user, logout }) {
   return (
     <header
       id="main-nav"
@@ -332,8 +439,112 @@ function TopNav({ scrolled, onMenuClick, menuOpen }) {
         </nav>
 
         {/* Right controls */}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <ThemeToggle />
+
+          {/* User Profile Info & Sign Out */}
+          {user && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.25rem 0.5rem 0.25rem 0.75rem',
+              borderRadius: '12px',
+              backgroundColor: 'var(--color-cream)',
+              border: '1px solid var(--color-border)',
+              transition: 'all 0.2s ease',
+            }}>
+              {/* User info on desktop */}
+              <div style={{
+                display: 'none',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                lineHeight: '1.2',
+              }} ref={el => {
+                if (!el) return
+                const mq = window.matchMedia('(min-width: 768px)')
+                const update = e => { el.style.display = e.matches ? 'flex' : 'none' }
+                update(mq)
+                mq.addEventListener('change', update)
+              }}>
+                <span style={{
+                  fontSize: '0.8125rem',
+                  fontWeight: '600',
+                  color: 'var(--color-ink)',
+                }}>
+                  {user.user_metadata?.full_name || 'User'}
+                </span>
+                <span style={{
+                  fontSize: '0.6875rem',
+                  color: 'var(--color-muted)',
+                  maxWidth: '120px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {user.email}
+                </span>
+              </div>
+
+              {/* User Avatar */}
+              <div style={{
+                position: 'relative',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--color-forest-subtle)',
+                border: '1.5px solid var(--color-forest)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                boxShadow: 'var(--shadow-sm)',
+              }}>
+                {user.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt={user.user_metadata.full_name || 'User Avatar'}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                ) : (
+                  <Icons.User />
+                )}
+              </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={logout}
+                title="Sign Out"
+                aria-label="Sign Out"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  color: 'var(--color-muted)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#ef4444';
+                  e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.08)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--color-muted)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <Icons.LogOut />
+              </button>
+            </div>
+          )}
 
           {/* Hamburger — mobile only */}
           <div ref={el => {
@@ -535,6 +746,7 @@ function Footer() {
 // Main Export
 // ----------------------------------------------------------------
 export default function DashboardLayout({ children }) {
+  const { user, logout } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -556,9 +768,11 @@ export default function DashboardLayout({ children }) {
         scrolled={scrolled}
         onMenuClick={() => setMenuOpen(o => !o)}
         menuOpen={menuOpen}
+        user={user}
+        logout={logout}
       />
 
-      <MobileDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} user={user} logout={logout} />
 
       <main
         id="main-content"

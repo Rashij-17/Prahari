@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     groq_api_key: str = ""
 
+    # Database & Supabase Auth configuration
+    database_url: str = "sqlite:///./prahari.db"
+    supabase_jwt_secret: str = ""
+    supabase_url: str = ""
+
     # Model config: reads from backend/.env
     model_config = SettingsConfigDict(
         env_file=".env",
