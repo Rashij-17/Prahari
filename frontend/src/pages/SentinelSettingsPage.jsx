@@ -27,6 +27,7 @@ export default function SentinelSettingsPage() {
   const [caregivers, setCaregivers] = useState([])
   const [cgName, setCgName] = useState('')
   const [cgPhone, setCgPhone] = useState('')
+  const [countryCode, setCountryCode] = useState('+91')
   const [cgEmail, setCgEmail] = useState('')
   const [cgNotify, setCgNotify] = useState('all')
   const [cgLoading, setCgLoading] = useState(false)
@@ -192,7 +193,17 @@ export default function SentinelSettingsPage() {
 
     try {
       const encName = await encryptText(cgName.trim(), encryptionSeed, true)
-      const encPhone = await encryptText(cgPhone.trim(), encryptionSeed, false)
+      
+      let rawPhone = cgPhone.trim()
+      let fullPhone = rawPhone
+      if (rawPhone && !rawPhone.startsWith('+')) {
+        if (rawPhone.startsWith('0')) {
+          rawPhone = rawPhone.substring(1)
+        }
+        fullPhone = `${countryCode}${rawPhone}`
+      }
+      
+      const encPhone = await encryptText(fullPhone, encryptionSeed, false)
       const encEmail = await encryptText(cgEmail.trim(), encryptionSeed, false)
       const encNotify = await encryptText(cgNotify, encryptionSeed, false)
 
@@ -443,13 +454,43 @@ export default function SentinelSettingsPage() {
                 style={{ padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1.5px solid var(--color-mint-border)', fontSize: '0.9rem' }}
               />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <input
-                  type="tel"
-                  placeholder="Phone (e.g. +9199999999)"
-                  value={cgPhone}
-                  onChange={(e) => setCgPhone(e.target.value)}
-                  style={{ padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1.5px solid var(--color-mint-border)', fontSize: '0.9rem' }}
-                />
+                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    style={{
+                      padding: '0.5rem 0.25rem',
+                      borderRadius: '8px',
+                      border: '1.5px solid var(--color-mint-border)',
+                      fontSize: '0.85rem',
+                      backgroundColor: 'white',
+                      color: 'var(--color-charcoal)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="+91">🇮🇳 +91</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+61">🇦🇺 +61</option>
+                    <option value="+65">🇸🇬 +65</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+971">🇦🇪 +971</option>
+                  </select>
+                  <input
+                    type="tel"
+                    placeholder="Phone"
+                    value={cgPhone}
+                    onChange={(e) => setCgPhone(e.target.value)}
+                    style={{
+                      flex: 1,
+                      minWidth: '0',
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: '8px',
+                      border: '1.5px solid var(--color-mint-border)',
+                      fontSize: '0.9rem'
+                    }}
+                  />
+                </div>
                 <input
                   type="email"
                   placeholder="Email Address"
