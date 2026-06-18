@@ -40,12 +40,23 @@ def get_current_user(
                 
                 if alg == "HS256" and has_hs256_secret:
                     # Decode and verify token using the symmetric secret
-                    payload = jwt.decode(
-                        token,
-                        secret,
-                        algorithms=["HS256"],
-                        audience="authenticated"
-                    )
+                    # Try base64-decoded secret first (standard for Supabase), fall back to raw string
+                    try:
+                        import base64
+                        decoded_secret = base64.b64decode(secret)
+                        payload = jwt.decode(
+                            token,
+                            decoded_secret,
+                            algorithms=["HS256"],
+                            audience="authenticated"
+                        )
+                    except (jwt.InvalidSignatureError, Exception):
+                        payload = jwt.decode(
+                            token,
+                            secret,
+                            algorithms=["HS256"],
+                            audience="authenticated"
+                        )
                 elif alg in ["ES256", "RS256"] and settings.supabase_url:
                     # Decode and verify token using the JWKS endpoint
                     jwks_client = get_jwks_client(settings.supabase_url)

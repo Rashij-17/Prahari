@@ -10,6 +10,7 @@ Usage:
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field, AliasChoices
 
 
 class Settings(BaseSettings):
@@ -44,12 +45,13 @@ class Settings(BaseSettings):
     # Twilio Alerts Configuration
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
-    twilio_phone_number: str = ""
+    twilio_phone_number: str = Field("", validation_alias=AliasChoices("twilio_phone_number", "twilio_from_number"))
 
     # Web Push VAPID Configuration
     vapid_private_key: str = ""
     vapid_public_key: str = ""
-    vapid_claims_email: str = ""
+    vapid_claims_email: str = Field("", validation_alias=AliasChoices("vapid_claims_email", "vapid_mailto"))
+
 
     # Model config: reads from backend/.env
     model_config = SettingsConfigDict(
