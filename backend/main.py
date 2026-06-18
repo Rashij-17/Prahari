@@ -50,15 +50,36 @@ app.add_middleware(
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+def clean_error_value(v):
+    if isinstance(v, bytes):
+        return v.decode("utf-8", errors="ignore")
+    elif isinstance(v, dict):
+        return {k: clean_error_value(val) for k, val in v.items()}
+    elif isinstance(v, list):
+        return [clean_error_value(val) for val in v]
+    return v
+
+def clean_validation_errors(errors):
+    cleaned = []
+    for err in errors:
+        c_err = dict(err)
+        if "input" in c_err:
+            c_err["input"] = clean_error_value(c_err["input"])
+        cleaned.append(c_err)
+    return cleaned
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
+    errors = exc.errors()
     print("--- DETAILED VALIDATION ERROR ---")
-    print(exc.errors())
+    print(errors)
     print("---------------------------------")
+    cleaned_errors = clean_validation_errors(errors)
     return JSONResponse(
         status_code=422,
-        content={"detail": exc.errors()}
+        content={"detail": cleaned_errors}
     )
+
 
 
 # ---------------------------------------------------------------------------

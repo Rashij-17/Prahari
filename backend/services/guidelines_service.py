@@ -107,6 +107,27 @@ CORE_RULES = [
         "warning_text": "Atorvastatin can affect liver function. Avoid if you have active liver disease or unexplained elevations in liver enzymes.",
         "severity": "warning",
     },
+    {
+        "ingredient_name": "amoxicillin",
+        "trigger_type": "drug",
+        "value_match": "allopurinol",
+        "warning_text": "Taking Allopurinol with Amoxicillin (Augmentin) significantly increases the risk of developing a skin rash. Use with caution.",
+        "severity": "warning",
+    },
+    {
+        "ingredient_name": "amoxicillin",
+        "trigger_type": "drug",
+        "value_match": "methotrexate",
+        "warning_text": "Amoxicillin can decrease the renal clearance of Methotrexate, leading to dangerously elevated Methotrexate levels and severe toxicity. Avoid concurrent use.",
+        "severity": "critical",
+    },
+    {
+        "ingredient_name": "paracetamol",
+        "trigger_type": "drug",
+        "value_match": "warfarin",
+        "warning_text": "Regular or prolonged use of Paracetamol (Calpol) can increase the blood-thinning effect of Warfarin, raising your risk of bleeding. Monitor your INR closely.",
+        "severity": "warning",
+    },
 ]
 
 
@@ -115,20 +136,20 @@ def seed_clinical_rules(db: Session):
     Seeds the clinical_safety_rules table with core drug, allergy, and lab warnings.
     """
     try:
-        count = db.query(DBClinicalSafetyRule).count()
-        if count == 0:
-            logger.info("Seeding clinical safety rules database...")
-            for rule in CORE_RULES:
-                db_rule = DBClinicalSafetyRule(
-                    ingredient_name=rule["ingredient_name"].lower().strip(),
-                    trigger_type=rule["trigger_type"].strip(),
-                    value_match=rule["value_match"].lower().strip(),
-                    warning_text=rule["warning_text"].strip(),
-                    severity=rule["severity"].strip(),
-                )
-                db.add(db_rule)
-            db.commit()
-            logger.info("Successfully seeded clinical safety rules.")
+        logger.info("Syncing clinical safety rules database...")
+        # Clear existing rules to ensure any updates/additions in CORE_RULES are applied
+        db.query(DBClinicalSafetyRule).delete()
+        for rule in CORE_RULES:
+            db_rule = DBClinicalSafetyRule(
+                ingredient_name=rule["ingredient_name"].lower().strip(),
+                trigger_type=rule["trigger_type"].strip(),
+                value_match=rule["value_match"].lower().strip(),
+                warning_text=rule["warning_text"].strip(),
+                severity=rule["severity"].strip(),
+            )
+            db.add(db_rule)
+        db.commit()
+        logger.info("Successfully synced clinical safety rules.")
     except Exception as e:
         logger.error("Failed to seed clinical safety rules: %s", e)
         db.rollback()

@@ -310,8 +310,15 @@ export default function SentinelSettingsPage() {
       // Since public key might be empty in dev, we fallback or require it
       const pubKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BF7kR5F7iVfG9lGZJk7t_q9pU2P7hZ7t_q9pU2P7hZ7t_q9pU2P7hZ7t_q9pU2P7hZ7t_q9pU2P7hZ7t_q9pU2A=='
       
-      const registration = await navigator.serviceWorker.ready
-      const subscription = await registration.pushManager.subscribe({
+      // Ensure service worker is registered
+      let registration = await navigator.serviceWorker.getRegistration('/sw.js')
+      if (!registration) {
+        console.log("Service worker not active. Registering dynamically for push...")
+        registration = await navigator.serviceWorker.register('/sw.js')
+      }
+      
+      const readyReg = await navigator.serviceWorker.ready
+      const subscription = await readyReg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(pubKey)
       })

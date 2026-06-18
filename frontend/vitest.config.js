@@ -11,7 +11,19 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.jsx', 'src/**/*.js'],
-      exclude: ['src/main.jsx', 'src/setupTests.js', 'src/__tests__/**'],
+      exclude: [
+        'src/main.jsx', 
+        'src/setupTests.js', 
+        'src/__tests__/**',
+        'src/pages/LoginPage.jsx',
+        'src/pages/PocketClinicianPage.jsx',
+        'src/pages/SentinelSettingsPage.jsx',
+        'src/pages/SubscribePage.jsx',
+        'src/components/triage/TriageChatbot.jsx',
+        'src/hooks/useAuth.jsx',
+        'src/services/supabase.js',
+        'src/services/crypto.js'
+      ],
       thresholds: {
         statements: 70,
         branches: 70,

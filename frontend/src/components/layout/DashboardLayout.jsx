@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import ThemeToggle from '../ui/ThemeToggle.jsx'
 import { useAuth } from '../../hooks/useAuth.jsx'
+import { decryptText } from '../../services/crypto'
 
 // ----------------------------------------------------------------
 // SVG Icon Set — consistent 24px, 1.75px stroke, rounded caps

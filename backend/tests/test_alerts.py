@@ -1,5 +1,6 @@
 import pytest
 import jwt
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -61,7 +62,11 @@ def setup_db():
     Base.metadata.drop_all(bind=engine)
 
 
-def test_escalate_alert_console_fallback(caplog):
+@patch("routers.alerts.smtplib.SMTP")
+def test_escalate_alert_console_fallback(mock_smtp, caplog):
+    # Set dummy SMTP credentials to trigger the SMTP send path
+    settings.smtp_username = "test@gmail.com"
+    settings.smtp_password = "test_password_123"
     client = TestClient(app)
     token = get_test_token()
     headers = {"Authorization": f"Bearer {token}"}
@@ -87,10 +92,10 @@ def test_escalate_alert_console_fallback(caplog):
     )
     assert res.status_code == 200
     data = res.json()
-    # Since VAPID keys and Twilio are missing in testing env, it flags is_mock = True
+    # Since VAPID keys are missing in testing env, it flags is_mock = True
     assert data["is_mock"] is True
-    # SMS count should be 0 (fail) or 1 (mock success is tracked but fails actually to send, wait!
-    # In alerts.py: if Twilio is missing, send_local_sms returns False, so sms_sent_count remains 0).
+    # SMS count should be 0 as SMS is mock only
+    # In alerts.py: mock SMS returns False, so sms_sent_count remains 0.
     assert data["sms_sent_count"] == 0
     # Push count should be 0 (fail due to missing VAPID keys)
     assert data["push_sent_count"] == 0

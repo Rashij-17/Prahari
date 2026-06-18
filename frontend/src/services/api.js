@@ -17,12 +17,13 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
  * @returns {Promise<any>} Parsed JSON response
  */
 async function apiFetch(endpoint, options = {}) {
+  const { headers, ...restOptions } = options;
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     headers: {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...headers,
     },
-    ...options,
+    ...restOptions,
   })
 
   if (!response.ok) {

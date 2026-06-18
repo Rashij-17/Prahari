@@ -42,15 +42,18 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str = ""
     supabase_url: str = ""
 
-    # Twilio Alerts Configuration
-    twilio_account_sid: str = ""
-    twilio_auth_token: str = ""
-    twilio_phone_number: str = Field("", validation_alias=AliasChoices("twilio_phone_number", "twilio_from_number"))
+
 
     # Web Push VAPID Configuration
     vapid_private_key: str = ""
     vapid_public_key: str = ""
     vapid_claims_email: str = Field("", validation_alias=AliasChoices("vapid_claims_email", "vapid_mailto"))
+
+    # SMTP Email Integration (Gmail)
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
 
 
     # Model config: reads from backend/.env
@@ -58,6 +61,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
 

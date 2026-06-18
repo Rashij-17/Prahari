@@ -805,6 +805,8 @@ class CabinetItemSync(BaseModel):
     dosage_strength: str = ""
     frequency: str = ""
     instructions: str = ""
+    reminder_time: Optional[str] = None
+    is_high_priority: Optional[bool] = None
 
 
 class AppointmentSync(BaseModel):
@@ -829,6 +831,8 @@ async def get_cabinet(
         "dosage_strength": item.dosage_strength,
         "frequency": item.frequency,
         "instructions": item.instructions,
+        "reminder_time": item.reminder_time,
+        "is_high_priority": item.is_high_priority,
         "created_at": item.created_at
     } for item in items]
 
@@ -851,6 +855,10 @@ async def sync_cabinet_item(
         item.dosage_strength = payload.dosage_strength
         item.frequency = payload.frequency
         item.instructions = payload.instructions
+        if payload.reminder_time is not None:
+            item.reminder_time = payload.reminder_time
+        if payload.is_high_priority is not None:
+            item.is_high_priority = payload.is_high_priority
     else:
         # Create
         item = DBMedicineCabinet(
@@ -859,7 +867,9 @@ async def sync_cabinet_item(
             generic_name=payload.generic_name,
             dosage_strength=payload.dosage_strength,
             frequency=payload.frequency,
-            instructions=payload.instructions
+            instructions=payload.instructions,
+            reminder_time=payload.reminder_time,
+            is_high_priority=payload.is_high_priority
         )
         db.add(item)
         

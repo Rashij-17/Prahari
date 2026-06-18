@@ -3,6 +3,38 @@ import { useAuth } from '../hooks/useAuth'
 import { decryptText } from '../services/crypto'
 import { getUserProfile, clinicianChat } from '../services/api'
 
+const formatMessageTextHtml = (text) => {
+  if (!text) return { __html: '' };
+  let safeText = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+  // Bold (**text**) - constrained to a single line to prevent layout leakage
+  safeText = safeText.replace(/\*\*([^\n]+?)\*\*/g, '<strong>$1</strong>');
+  
+  // Headings (e.g. ### Heading)
+  safeText = safeText.replace(/^###\s+(.+)$/gm, '<strong style="font-size: 1.1em; display: block; margin-top: 0.5rem; color: var(--color-forest);">$1</strong>');
+  safeText = safeText.replace(/^##\s+(.+)$/gm, '<strong style="font-size: 1.25em; display: block; margin-top: 0.75rem; color: var(--color-forest);">$1</strong>');
+  safeText = safeText.replace(/^#\s+(.+)$/gm, '<strong style="font-size: 1.4em; display: block; margin-top: 1rem; color: var(--color-forest);">$1</strong>');
+
+  // Horizontal rules (a single asterisk on a line, possibly with whitespace)
+  safeText = safeText.replace(/^\*\s*$/gm, '<hr style="border: 0; border-top: 1.5px dashed var(--color-mint-border); margin: 0.75rem 0;" />');
+  
+  // Bullet points (* Item)
+  safeText = safeText.replace(/^\*\s+/gm, '• ');
+  
+  // Italics (*text*) - constrained to a single line to prevent layout leakage
+  safeText = safeText.replace(/\*([^\*\n]+?)\*/g, '<em>$1</em>');
+  
+  // Newlines to line breaks
+  safeText = safeText.replace(/\n/g, '<br />');
+  
+  return { __html: safeText };
+};
+
 export default function PocketClinicianPage() {
   const { user, token } = useAuth()
   const encryptionSeed = user?.id || 'demo-fallback-seed'
@@ -99,6 +131,7 @@ export default function PocketClinicianPage() {
 
     setLoading(true)
     setShowAiButton(false)
+    setIsEmergency(false)
 
     // Add user message to UI
     let updatedMessages = [...messages]
@@ -173,8 +206,8 @@ export default function PocketClinicianPage() {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '1fr lg:300px',
-      height: 'calc(100vh - 120px)',
+      gridTemplateColumns: '1fr 300px',
+      height: 'calc(100vh - 140px)',
       gap: '1.5rem',
       fontFamily: 'var(--font-sans)',
       padding: '1rem 1.5rem'
@@ -238,7 +271,7 @@ export default function PocketClinicianPage() {
           alignItems: 'center',
           gap: '0.5rem'
         }}>
-          <span>⚠️ **Disclaimer:** Informational AI tool. Not a replacement for direct medical consultations.</span>
+          <span>⚠️ <strong>Disclaimer:</strong> Informational AI tool. Not a replacement for direct medical consultations.</span>
         </div>
 
         {/* Emergency Triage Overlay Card */}
@@ -251,14 +284,45 @@ export default function PocketClinicianPage() {
             borderRadius: '12px',
             color: 'var(--color-alert-critical)',
             boxShadow: 'var(--shadow-md)',
-            animation: 'pulseBorder 2s infinite'
+            animation: 'pulseBorder 2s infinite',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            alignItems: 'flex-start'
           }}>
-            <h3 style={{ margin: '0 0 0.5rem 0', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: 0, fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               🚨 EMERGENCY GUIDANCE DISPATCHED
             </h3>
             <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: '1.5' }}>
-              If you or the patient are experiencing chest pain, slurred speech, or breathing difficulties, please call **112** or go to the nearest emergency ward immediately. Do not wait for a chat response.
+              If you or the patient are experiencing chest pain, slurred speech, or breathing difficulties, please call <strong>112</strong> or go to the nearest emergency ward immediately. Do not wait for a chat response.
             </p>
+            <button
+              onClick={() => {
+                const initial = [
+                  {
+                    role: 'model',
+                    text: 'Hello! I am Prahari’s Pocket Clinician. I can analyze safety warnings for your medications, allergies, and health conditions. How can I help you today?'
+                  }
+                ]
+                setMessages(initial)
+                localStorage.removeItem('prahari_clinician_messages')
+                setShowAiButton(false)
+                setIsEmergency(false)
+              }}
+              style={{
+                padding: '0.5rem 1rem',
+                fontSize: '0.8rem',
+                fontWeight: '700',
+                color: 'white',
+                background: 'var(--color-alert-critical)',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            >
+              🔄 Clear & Start Next Chat
+            </button>
           </div>
         )}
 
@@ -314,7 +378,7 @@ export default function PocketClinicianPage() {
                 borderTopRightRadius: msg.role === 'user' ? '4px' : '16px',
                 borderTopLeftRadius: msg.role === 'user' ? '16px' : '4px'
               }}>
-                {msg.text}
+                <div dangerouslySetInnerHTML={formatMessageTextHtml(msg.text)} />
 
                 {/* Local safety warning fallback detailed scan button injection */}
                 {msg.role === 'model' && index === messages.length - 1 && showAiButton && (
