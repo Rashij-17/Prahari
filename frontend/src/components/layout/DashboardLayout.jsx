@@ -108,8 +108,10 @@ const NAV_ITEMS = [
   { id: 'scanner',     label: 'Scanner',     path: '/scanner',     Icon: Icons.Scanner },
   { id: 'transcribe',  label: 'Transcriber', path: '/transcribe',  Icon: Icons.Mic },
   { id: 'medications', label: 'Medications', path: '/medications', Icon: Icons.Pill },
+  { id: 'clinician',   label: 'AI Doctor',   path: '/clinician',   Icon: Icons.Heartbeat },
   { id: 'triage',      label: 'Triage',      path: '/triage',      Icon: Icons.Heartbeat },
   { id: 'directory',   label: 'Directory',   path: '/directory',   Icon: Icons.MapPin },
+  { id: 'profile',     label: 'Sentinel',    path: '/profile',     Icon: Icons.User },
 ]
 
 // ----------------------------------------------------------------
@@ -587,7 +589,7 @@ function TopNav({ scrolled, onMenuClick, menuOpen, user, logout }) {
 // ----------------------------------------------------------------
 function BottomTabs() {
   const location = useLocation()
-  const tabItems = NAV_ITEMS.filter(i => i.id !== 'home')
+  const tabItems = NAV_ITEMS.filter(i => ['scanner', 'medications', 'clinician', 'triage', 'profile'].includes(i.id))
 
   return (
     <nav
@@ -745,16 +747,259 @@ function Footer() {
 // ----------------------------------------------------------------
 // Main Export
 // ----------------------------------------------------------------
+// ----------------------------------------------------------------
+// Web Audio Alarm Synthesizer Setup
+// ----------------------------------------------------------------
+let audioCtx = null
+let alarmInterval = null
+
+const startAlarmSound = () => {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    audioCtx = new AudioContextClass()
+    
+    let isBeep = true
+    alarmInterval = setInterval(() => {
+      if (!audioCtx) return
+      if (isBeep) {
+        const osc = audioCtx.createOscillator()
+        const gain = audioCtx.createGain()
+        osc.type = 'sawtooth'
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.15)
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.18)
+        osc.connect(gain)
+        gain.connect(audioCtx.destination)
+        osc.start()
+        osc.stop(audioCtx.currentTime + 0.2)
+      }
+      isBeep = !isBeep
+    }, 250)
+  } catch (err) {
+    console.error('AudioContext alarm generation failed:', err)
+  }
+}
+
+const stopAlarmSound = () => {
+  if (alarmInterval) {
+    clearInterval(alarmInterval)
+    alarmInterval = null
+  }
+  if (audioCtx) {
+    audioCtx.close()
+    audioCtx = null
+  }
+}
+
 export default function DashboardLayout({ children }) {
-  const { user, logout } = useAuth()
+  const { user, token, logout } = useAuth()
+  const encryptionSeed = user?.id || 'demo-fallback-seed'
+
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+
+  // Guardian Sentinel tracking states
+  const [lastActivity, setLastActivity] = useState(Date.now())
+  const [sensorAlert, setSensorAlert] = useState(false)
+  const [alarmActive, setAlarmActive] = useState(false)
+  const [alarmSeconds, setAlarmSeconds] = useState(60)
+  const [alarmMed, setAlarmMed] = useState(null)
+  const [accelPermissionDenied, setAccelPermissionDenied] = useState(false)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // 1. Accelerometer motion & web user activity listeners
+  useEffect(() => {
+    const handleMotion = (e) => {
+      const acc = e.accelerationIncludingGravity || e.acceleration
+      if (acc) {
+        const total = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z)
+        // If movement force delta from gravity is substantial (> 0.8)
+        if (Math.abs(total - 9.8) > 0.8) {
+          setLastActivity(Date.now())
+        }
+      }
+    }
+
+    const handleInteraction = () => {
+      setLastActivity(Date.now())
+    }
+
+    window.addEventListener('devicemotion', handleMotion)
+    window.addEventListener('click', handleInteraction)
+    window.addEventListener('scroll', handleInteraction)
+    window.addEventListener('keypress', handleInteraction)
+
+    // Request iOS motion permission if needed
+    if (window.DeviceMotionEvent && typeof window.DeviceMotionEvent.requestPermission === 'function') {
+      window.DeviceMotionEvent.requestPermission()
+        .then(permissionState => {
+          if (permissionState !== 'granted') {
+            setAccelPermissionDenied(true)
+          }
+        })
+        .catch(() => {
+          setAccelPermissionDenied(true)
+        })
+    }
+
+    return () => {
+      window.removeEventListener('devicemotion', handleMotion)
+      window.removeEventListener('click', handleInteraction)
+      window.removeEventListener('scroll', handleInteraction)
+      window.removeEventListener('keypress', handleInteraction)
+    }
+  }, [])
+
+  // 2. Background Reminder Checking Loop (Runs every 5 seconds)
+  useEffect(() => {
+    if (localStorage.getItem('prahari_sentinel_enabled') !== 'true') return
+
+    const interval = setInterval(async () => {
+      const now = new Date()
+      const currentHrs = String(now.getHours()).padStart(2, '0')
+      const currentMins = String(now.getMinutes()).padStart(2, '0')
+      const currentTimeStr = `${currentHrs}:${currentMins}`
+      
+      const todayStr = now.toISOString().split('T')[0]
+      const checkedOff = JSON.parse(localStorage.getItem('prahari_checked_off_meds') || '{}')
+      const todayChecked = checkedOff[todayStr] || {}
+
+      const isDemoMode = localStorage.getItem('prahari_sentinel_demo_mode') === 'true'
+      const inactivityThreshold = isDemoMode ? 15 * 1000 : 2 * 60 * 60 * 1000 // 15s vs 2hrs
+
+      try {
+        const cabinetRes = await fetch('http://localhost:8000/medication/cabinet', {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        })
+        if (!cabinetRes.ok) return
+        const cabinet = await cabinetRes.json()
+
+        for (const item of cabinet) {
+          if (!item.reminder_time || !item.is_high_priority) continue
+          if (todayChecked[item.id]) continue
+
+          // Parse reminder time
+          const [remH, remM] = item.reminder_time.split(':').map(Number)
+          const remTime = new Date()
+          remTime.setHours(remH, remM, 0, 0)
+
+          const timeElapsed = Date.now() - remTime.getTime()
+          const isPastReminder = timeElapsed >= 0
+          const inactiveDuration = Date.now() - lastActivity
+
+          // Trigger warning if medication is missed and phone has been static
+          if (isPastReminder && inactiveDuration >= inactivityThreshold && !alarmActive) {
+            setAlarmActive(true)
+            setAlarmMed(item)
+            setAlarmSeconds(60)
+            startAlarmSound()
+
+            // Try to trigger PWA native push notification
+            if (Notification.permission === 'granted') {
+              new Notification("🚨 Prahari Inactivity Watcher 🚨", {
+                body: "No activity detected. Medication reminder missed.",
+                icon: "/assets/icon-192.png"
+              })
+            }
+            break
+          }
+        }
+      } catch (err) {
+        console.error("Medication alarm checker loop failed:", err)
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [token, lastActivity, alarmActive])
+
+  // 3. Countdown timer loop for active alarms
+  useEffect(() => {
+    let timer = null
+    if (alarmActive && alarmSeconds > 0) {
+      timer = setInterval(() => {
+        setAlarmSeconds(s => s - 1)
+      }, 1000)
+    } else if (alarmActive && alarmSeconds === 0) {
+      // Escalation trigger!
+      handleEscalateAlert()
+    }
+    return () => clearInterval(timer)
+  }, [alarmActive, alarmSeconds])
+
+  const handleDismissAlarm = () => {
+    stopAlarmSound()
+    setAlarmActive(false)
+
+    if (alarmMed) {
+      const todayStr = new Date().toISOString().split('T')[0]
+      const checkedOff = JSON.parse(localStorage.getItem('prahari_checked_off_meds') || '{}')
+      if (!checkedOff[todayStr]) checkedOff[todayStr] = {}
+      checkedOff[todayStr][alarmMed.id] = true
+      localStorage.setItem('prahari_checked_off_meds', JSON.stringify(checkedOff))
+    }
+  }
+
+  const handleEscalateAlert = async () => {
+    stopAlarmSound()
+    setAlarmActive(false)
+    if (!alarmMed) return
+
+    // Resolve brand name
+    let decBrand = "Medication"
+    try {
+      const decText = await decryptText(alarmMed.brand_name, encryptionSeed)
+      decBrand = decText || "Medication"
+    } catch {}
+
+    // Fetch decrypted caregivers to escalate to Twilio
+    let decCgList = []
+    try {
+      const cgRes = await fetch('http://localhost:8000/clinician/caregivers', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      })
+      if (cgRes.ok) {
+        const cgList = await cgRes.json()
+        for (const cg of cgList) {
+          const decName = await decryptText(cg.name, encryptionSeed)
+          const decPhone = await decryptText(cg.phone, encryptionSeed)
+          const decEmail = await decryptText(cg.email, encryptionSeed)
+          decCgList.push({
+            name: decName,
+            phone: decPhone,
+            email: decEmail
+          })
+        }
+      }
+    } catch (err) {
+      console.error("Caregiver E2EE circle decryption failed:", err)
+    }
+
+    try {
+      await fetch('http://localhost:8000/alerts/escalate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          missed_medication_name: decBrand,
+          patient_name: user?.user_metadata?.full_name || "Demo Patient",
+          patient_email: user?.email || "demo-patient@prahari.org",
+          inactivity_duration_minutes: localStorage.getItem('prahari_sentinel_demo_mode') === 'true' ? 0.25 : 120,
+          decrypted_caregiver_circle: decCgList
+        })
+      })
+      alert("🚨 emergency Sentinel alert triggered! SMS/Push notifications sent to caregiver circle. 🚨")
+    } catch (err) {
+      console.error("Alert escalation dispatcher failed:", err)
+    }
+  }
 
   return (
     <div style={{
@@ -774,6 +1019,21 @@ export default function DashboardLayout({ children }) {
 
       <MobileDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} user={user} logout={logout} />
 
+      {/* Accelerometer Sandbox Denied Warning Banner */}
+      {localStorage.getItem('prahari_sentinel_enabled') === 'true' && accelPermissionDenied && (
+        <div style={{
+          backgroundColor: 'var(--color-alert-moderate-bg)',
+          borderBottom: '1px solid var(--color-alert-moderate-border)',
+          color: 'var(--color-alert-moderate)',
+          padding: '0.5rem 1rem',
+          fontSize: '0.8rem',
+          textAlign: 'center',
+          fontWeight: '600'
+        }}>
+          ⚠️ Accelerometer permissions disabled. Falling back to active browser click/scroll activity checking.
+        </div>
+      )}
+
       <main
         id="main-content"
         role="main"
@@ -791,6 +1051,69 @@ export default function DashboardLayout({ children }) {
           {children}
         </div>
       </main>
+
+      {/* Alarm Warning Fullscreen Overlay Modal */}
+      {alarmActive && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(194, 75, 60, 0.95)',
+          zIndex: 1000,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          fontFamily: 'var(--font-sans)',
+          textAlign: 'center',
+          padding: '2rem'
+        }}>
+          <div style={{
+            fontSize: '5rem',
+            animation: 'pulse 1.2s infinite'
+          }}>
+            🚨
+          </div>
+          
+          <h2 style={{ fontSize: '2rem', fontWeight: '800', margin: '1rem 0' }}>
+            PRAHARI INACTIVITY ALARM
+          </h2>
+          
+          <p style={{ fontSize: '1.1rem', maxWidth: '500px', lineHeight: '1.6', margin: '0 0 2rem 0' }}>
+            Missed medication reminder detected with zero device motion. Caregivers will be notified in:
+          </p>
+
+          <div style={{
+            fontSize: '4rem',
+            fontWeight: '900',
+            background: 'rgba(0,0,0,0.25)',
+            padding: '1rem 2rem',
+            borderRadius: '16px',
+            marginBottom: '2.5rem',
+            fontFamily: 'monospace'
+          }}>
+            {alarmSeconds}s
+          </div>
+
+          <button
+            onClick={handleDismissAlarm}
+            style={{
+              backgroundColor: 'white',
+              color: 'var(--color-alert-critical)',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '1rem 2.5rem',
+              fontSize: '1.2rem',
+              fontWeight: '800',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-md)',
+              transition: 'transform 0.1s'
+            }}
+          >
+            ✅ I AM OKAY (DISMISS)
+          </button>
+        </div>
+      )}
 
       <Footer />
       <BottomTabs />

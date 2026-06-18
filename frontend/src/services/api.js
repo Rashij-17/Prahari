@@ -123,3 +123,72 @@ export const assessTriageChat = (evidence, sex, age, text) =>
     body: JSON.stringify({ evidence, sex, age, text }),
   })
 
+// ---------------------------------------------------------------
+// Phase 4 — Contextual AI & Caregiver Alerts
+// ---------------------------------------------------------------
+
+/** Gets the user's encrypted medical profile (allergies, labs). */
+export const getUserProfile = (token) =>
+  apiFetch('/clinician/profile', {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+  })
+
+/** Updates the user's encrypted medical profile. */
+export const updateUserProfile = (token, allergies, labResults) =>
+  apiFetch('/clinician/profile', {
+    method: 'POST',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    body: JSON.stringify({ allergies, lab_results: labResults }),
+  })
+
+/** Gets the caregiver circle. */
+export const getCaregivers = (token) =>
+  apiFetch('/clinician/caregivers', {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+  })
+
+/** Adds or updates a caregiver. */
+export const addOrUpdateCaregiver = (token, caregiver) =>
+  apiFetch('/clinician/caregivers', {
+    method: 'POST',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    body: JSON.stringify(caregiver),
+  })
+
+/** Deletes a caregiver. */
+export const deleteCaregiver = (token, caregiverId) =>
+  apiFetch(`/clinician/caregivers/${caregiverId}`, {
+    method: 'DELETE',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+  })
+
+/** Registers PWA browser push subscription. */
+export const registerPushSubscription = (token, subscription) =>
+  apiFetch('/clinician/push-subscription', {
+    method: 'POST',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    body: JSON.stringify(subscription),
+  })
+
+/** Pocket Clinician chat endpoint. */
+export const clinicianChat = (token, query, history, runAiScan, allergies, labs) =>
+  apiFetch('/clinician/chat', {
+    method: 'POST',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    body: JSON.stringify({
+      query,
+      history,
+      run_ai_scan: runAiScan,
+      decrypted_allergies: allergies,
+      decrypted_labs: labs
+    }),
+  })
+
+/** Escalate inactivity alert to caregiver circle. */
+export const escalateAlert = (token, payload) =>
+  apiFetch('/alerts/escalate', {
+    method: 'POST',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    body: JSON.stringify(payload),
+  })
+

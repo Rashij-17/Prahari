@@ -81,8 +81,14 @@ async def health_check() -> dict:
 # Router Registration
 # ---------------------------------------------------------------------------
 # Phase 3 — Database Initialization
-from models.db import init_db
+from models.db import init_db, SessionLocal
+from services.guidelines_service import seed_clinical_rules
 init_db()
+db_session = SessionLocal()
+try:
+    seed_clinical_rules(db_session)
+finally:
+    db_session.close()
 
 # Phase 3 — Vision / OCR
 # Running from inside /backend, so imports are relative (no 'backend.' prefix)
@@ -100,6 +106,11 @@ from routers import triage, directory
 
 app.include_router(triage.router, prefix="/triage",    tags=["Triage"],    include_in_schema=True)
 app.include_router(directory.router, prefix="/directory", tags=["Directory"], include_in_schema=True)
+
+# Phase 4 — Contextual AI & Caregiver Alerts
+from routers import clinician, alerts
+app.include_router(clinician.router, prefix="/clinician", tags=["Clinician"], include_in_schema=True)
+app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"], include_in_schema=True)
 
 # ---------------------------------------------------------------------------
 # Development Entry Point

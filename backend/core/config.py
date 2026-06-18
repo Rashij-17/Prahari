@@ -41,6 +41,16 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str = ""
     supabase_url: str = ""
 
+    # Twilio Alerts Configuration
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_phone_number: str = ""
+
+    # Web Push VAPID Configuration
+    vapid_private_key: str = ""
+    vapid_public_key: str = ""
+    vapid_claims_email: str = ""
+
     # Model config: reads from backend/.env
     model_config = SettingsConfigDict(
         env_file=".env",

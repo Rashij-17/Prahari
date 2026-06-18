@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from core.config import settings
@@ -24,10 +24,14 @@ class User(Base):
 
     id = Column(String, primary_key=True, index=True)  # Supabase UID ("sub" claim)
     email = Column(String, unique=True, index=True, nullable=False)
+    allergies = Column(String, default="")             # Base64 encrypted string of JSON
+    lab_results = Column(String, default="")           # Base64 encrypted string of JSON/text
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     medications = relationship("DBMedicineCabinet", back_populates="user", cascade="all, delete-orphan")
     appointments = relationship("DBAppointment", back_populates="user", cascade="all, delete-orphan")
+    caregivers = relationship("DBCaregiver", back_populates="user", cascade="all, delete-orphan")
+    push_subscriptions = relationship("DBWebPushSubscription", back_populates="user", cascade="all, delete-orphan")
 
 
 class DBMedicineCabinet(Base):
@@ -40,9 +44,50 @@ class DBMedicineCabinet(Base):
     dosage_strength = Column(String, default="")
     frequency = Column(String, default="")
     instructions = Column(String, default="")
+    reminder_time = Column(String, default="")         # e.g., "09:00"
+    is_high_priority = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     user = relationship("User", back_populates="medications")
+
+
+class DBCaregiver(Base):
+    __tablename__ = "caregivers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String, nullable=False)              # Encrypted
+    phone = Column(String, default="")                 # Encrypted
+    email = Column(String, default="")                 # Encrypted
+    notification_type = Column(String, default="all")  # Encrypted (e.g. "push", "sms", "email", "all")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    user = relationship("User", back_populates="caregivers")
+
+
+class DBClinicalSafetyRule(Base):
+    __tablename__ = "clinical_safety_rules"
+
+    id = Column(Integer, primary_key=True, index=True)
+    ingredient_name = Column(String, nullable=False, index=True) # generic name in lowercase
+    trigger_type = Column(String, nullable=False)                # "drug", "allergy", "lab"
+    value_match = Column(String, nullable=False)                 # ingredient/allergen/lab name conflicting
+    warning_text = Column(String, nullable=False)                # unencrypted text warning details
+    severity = Column(String, default="warning")                 # "warning", "critical"
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+class DBWebPushSubscription(Base):
+    __tablename__ = "web_push_subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    endpoint = Column(String, nullable=False)
+    keys_p256dh = Column(String, nullable=False)
+    keys_auth = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    user = relationship("User", back_populates="push_subscriptions")
 
 
 class DBAppointment(Base):

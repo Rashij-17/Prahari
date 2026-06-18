@@ -24,6 +24,8 @@ import TriagePage from './pages/TriagePage.jsx'
 import DirectoryPage from './pages/DirectoryPage.jsx'
 import TranscribePage from './pages/TranscribePage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
+import SentinelSettingsPage from './pages/SentinelSettingsPage.jsx'
+import PocketClinicianPage from './pages/PocketClinicianPage.jsx'
 import { useAuth } from './hooks/useAuth.jsx'
 
 /**
@@ -137,6 +139,11 @@ export default function App() {
         {/* Medication Intelligence — Phase 4 ✅ */}
         <Route path="/medications" element={<MedicationsPage />} />
 
+        {/* Clinician Chat — Phase 4 ✅ */}
+        <Route path="/clinician" element={<PocketClinicianPage />} />
+
+        {/* Sentinel Settings — Phase 4 ✅ */}
+        <Route path="/profile" element={<SentinelSettingsPage />} />
 
         {/* Symptom Triage — Phase 5 ✅ */}
         <Route path="/triage" element={<TriagePage />} />

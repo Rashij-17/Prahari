@@ -1,12 +1,27 @@
 import pytest
 from fastapi.testclient import TestClient
 import jwt
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
 from main import app
+from models.db import Base, get_db, User
 from unittest.mock import patch
+from core.config import settings
 
 client = TestClient(app)
 
-from core.config import settings
+# Setup in-memory SQLite for testing
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test_transcription.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def override_get_db():
+    try:
+        db = TestingSessionLocal()
+        yield db
+    finally:
+        db.close()
 
 # Generate a mock token for testing
 def get_test_token(user_id="test_user_999", email="test@example.com"):
@@ -19,6 +34,27 @@ def get_test_token(user_id="test_user_999", email="test@example.com"):
     if secret == "your_supabase_jwt_secret":
         secret = "dummy_secret_not_used_in_test"
     return jwt.encode(payload, secret, algorithm="HS256")
+
+@pytest.fixture(autouse=True)
+def setup_db():
+    Base.metadata.create_all(bind=engine)
+    db = TestingSessionLocal()
+    # Add mock user
+    user = User(
+        id="test_user_999",
+        email="test@example.com",
+        allergies="",
+        lab_results=""
+    )
+    db.add(user)
+    db.commit()
+    
+    # Register overrides
+    app.dependency_overrides[get_db] = override_get_db
+    yield
+    # Cleanup overrides and database
+    app.dependency_overrides.pop(get_db, None)
+    Base.metadata.drop_all(bind=engine)
 
 
 def test_transcribe_audio_endpoint_fallback():
