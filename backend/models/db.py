@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Boolean, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from core.config import settings
@@ -113,6 +113,35 @@ def get_db():
         db.close()
 
 
-# Initialize database tables
+# Initialize database tables and run schema alterations
 def init_db():
     Base.metadata.create_all(bind=engine)
+    
+    # Run safe schema migrations for pre-existing tables
+    db = SessionLocal()
+    try:
+        # 1. users table
+        for column in ["allergies", "lab_results"]:
+            try:
+                db.execute(text(f"ALTER TABLE users ADD COLUMN {column} VARCHAR DEFAULT ''"))
+                db.commit()
+                print(f"Migration: Column '{column}' added to 'users' table.")
+            except Exception:
+                db.rollback()
+
+        # 2. medicine_cabinet table
+        try:
+            db.execute(text("ALTER TABLE medicine_cabinet ADD COLUMN reminder_time VARCHAR DEFAULT ''"))
+            db.commit()
+            print("Migration: Column 'reminder_time' added to 'medicine_cabinet' table.")
+        except Exception:
+            db.rollback()
+
+        try:
+            db.execute(text("ALTER TABLE medicine_cabinet ADD COLUMN is_high_priority BOOLEAN DEFAULT FALSE"))
+            db.commit()
+            print("Migration: Column 'is_high_priority' added to 'medicine_cabinet' table.")
+        except Exception:
+            db.rollback()
+    finally:
+        db.close()

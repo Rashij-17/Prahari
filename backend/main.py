@@ -47,6 +47,20 @@ app.add_middleware(
     allow_headers=["*"],           # Allow all headers
 )
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    print("--- DETAILED VALIDATION ERROR ---")
+    print(exc.errors())
+    print("---------------------------------")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()}
+    )
+
+
 # ---------------------------------------------------------------------------
 # Core Routes
 # ---------------------------------------------------------------------------

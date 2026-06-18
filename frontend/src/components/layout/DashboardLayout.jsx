@@ -806,6 +806,7 @@ export default function DashboardLayout({ children }) {
   const [alarmSeconds, setAlarmSeconds] = useState(60)
   const [alarmMed, setAlarmMed] = useState(null)
   const [accelPermissionDenied, setAccelPermissionDenied] = useState(false)
+  const [cabinetItems, setCabinetItems] = useState([])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -856,7 +857,31 @@ export default function DashboardLayout({ children }) {
     }
   }, [])
 
-  // 2. Background Reminder Checking Loop (Runs every 5 seconds)
+  // 2. Fetch cabinet items on mount/token change and refresh every 30 seconds
+  useEffect(() => {
+    if (localStorage.getItem('prahari_sentinel_enabled') !== 'true') return
+    if (!token) return
+
+    const fetchCabinet = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/medication/cabinet', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setCabinetItems(data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch cabinet items in DashboardLayout:", err)
+      }
+    }
+
+    fetchCabinet()
+    const interval = setInterval(fetchCabinet, 30000)
+    return () => clearInterval(interval)
+  }, [token])
+
+  // 3. Background Reminder Checking Loop (Runs every 5 seconds against cached state)
   useEffect(() => {
     if (localStorage.getItem('prahari_sentinel_enabled') !== 'true') return
 
@@ -873,50 +898,40 @@ export default function DashboardLayout({ children }) {
       const isDemoMode = localStorage.getItem('prahari_sentinel_demo_mode') === 'true'
       const inactivityThreshold = isDemoMode ? 15 * 1000 : 2 * 60 * 60 * 1000 // 15s vs 2hrs
 
-      try {
-        const cabinetRes = await fetch('http://localhost:8000/medication/cabinet', {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-        })
-        if (!cabinetRes.ok) return
-        const cabinet = await cabinetRes.json()
+      for (const item of cabinetItems) {
+        if (!item.reminder_time || !item.is_high_priority) continue
+        if (todayChecked[item.id]) continue
 
-        for (const item of cabinet) {
-          if (!item.reminder_time || !item.is_high_priority) continue
-          if (todayChecked[item.id]) continue
+        // Parse reminder time
+        const [remH, remM] = item.reminder_time.split(':').map(Number)
+        const remTime = new Date()
+        remTime.setHours(remH, remM, 0, 0)
 
-          // Parse reminder time
-          const [remH, remM] = item.reminder_time.split(':').map(Number)
-          const remTime = new Date()
-          remTime.setHours(remH, remM, 0, 0)
+        const timeElapsed = Date.now() - remTime.getTime()
+        const isPastReminder = timeElapsed >= 0
+        const inactiveDuration = Date.now() - lastActivity
 
-          const timeElapsed = Date.now() - remTime.getTime()
-          const isPastReminder = timeElapsed >= 0
-          const inactiveDuration = Date.now() - lastActivity
+        // Trigger warning if medication is missed and phone has been static
+        if (isPastReminder && inactiveDuration >= inactivityThreshold && !alarmActive) {
+          setAlarmActive(true)
+          setAlarmMed(item)
+          setAlarmSeconds(60)
+          startAlarmSound()
 
-          // Trigger warning if medication is missed and phone has been static
-          if (isPastReminder && inactiveDuration >= inactivityThreshold && !alarmActive) {
-            setAlarmActive(true)
-            setAlarmMed(item)
-            setAlarmSeconds(60)
-            startAlarmSound()
-
-            // Try to trigger PWA native push notification
-            if (Notification.permission === 'granted') {
-              new Notification("🚨 Prahari Inactivity Watcher 🚨", {
-                body: "No activity detected. Medication reminder missed.",
-                icon: "/assets/icon-192.png"
-              })
-            }
-            break
+          // Try to trigger PWA native push notification
+          if (Notification.permission === 'granted') {
+            new Notification("🚨 Prahari Inactivity Watcher 🚨", {
+              body: "No activity detected. Medication reminder missed.",
+              icon: "/assets/icon-192.png"
+            })
           }
+          break
         }
-      } catch (err) {
-        console.error("Medication alarm checker loop failed:", err)
       }
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [token, lastActivity, alarmActive])
+  }, [cabinetItems, lastActivity, alarmActive])
 
   // 3. Countdown timer loop for active alarms
   useEffect(() => {
