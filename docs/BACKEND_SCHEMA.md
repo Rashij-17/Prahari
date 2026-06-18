@@ -271,3 +271,179 @@ Uploads raw audio data of a doctor's consultation or medical explanation. The au
     }
     ```
 
+---
+
+## 6. Clinician & Health Profile Endpoints
+
+All clinician endpoints require a valid Supabase authentication token sent via the `Authorization: Bearer <token>` header.
+
+### 6.1 GET `/clinician/profile`
+Retrieves the unencrypted health profile (allergies and lab results).
+
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "allergies": "Base64_Encrypted_Allergies_JSON==",
+      "lab_results": "Base64_Encrypted_Labs_JSON=="
+    }
+    ```
+
+### 6.2 POST `/clinician/profile`
+Saves/updates the encrypted health profile.
+
+*   **Request Body (JSON):**
+    ```json
+    {
+      "allergies": "Base64_Encrypted_Allergies_JSON==",
+      "lab_results": "Base64_Encrypted_Labs_JSON=="
+    }
+    ```
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "status": "success",
+      "message": "Health profile updated successfully"
+    }
+    ```
+
+### 6.3 GET `/clinician/caregivers`
+Retrieves all caregiver circle contacts.
+
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    [
+      {
+        "id": 1,
+        "name": "Base64_Encrypted_Name==",
+        "phone": "Base64_Encrypted_Phone==",
+        "email": "Base64_Encrypted_Email==",
+        "notification_type": "all"
+      }
+    ]
+    ```
+
+### 6.4 POST `/clinician/caregivers`
+Adds or updates a caregiver contact.
+
+*   **Request Body (JSON):**
+    ```json
+    {
+      "id": null,
+      "name": "Base64_Encrypted_Name==",
+      "phone": "Base64_Encrypted_Phone==",
+      "email": "Base64_Encrypted_Email==",
+      "notification_type": "all"
+    }
+    ```
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "id": 1,
+      "user_id": "supabase-uid-1234",
+      "name": "Base64_Encrypted_Name==",
+      "phone": "Base64_Encrypted_Phone==",
+      "email": "Base64_Encrypted_Email==",
+      "notification_type": "all",
+      "created_at": "2026-06-18T12:00:00Z"
+    }
+    ```
+
+### 6.5 DELETE `/clinician/caregivers/{caregiver_id}`
+Deletes a caregiver contact.
+
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "status": "success",
+      "message": "Caregiver deleted"
+    }
+    ```
+
+### 6.6 POST `/clinician/chat`
+Checks for safety rules and processes natural language clinical chat.
+
+*   **Request Body (JSON):**
+    ```json
+    {
+      "query": "Can I take ibuprofen with my medicine?",
+      "history": [],
+      "run_ai_scan": true,
+      "decrypted_allergies": ["penicillin"],
+      "decrypted_labs": ["Creatinine: High"]
+    }
+    ```
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "response": "Clinical chat assistant response...",
+      "safety_warnings": [
+        {
+          "rule_type": "drug_interaction",
+          "ingredient_name": "warfarin",
+          "value_match": "ibuprofen",
+          "warning_text": "Warfarin and Ibuprofen increase bleeding risk.",
+          "severity": "critical"
+        }
+      ],
+      "is_emergency": false
+    }
+    ```
+
+---
+
+## 7. Alert Escalation Endpoints
+
+### 7.1 POST `/alerts/escalate`
+Triggers physical inactivity alerts or missed medication escalations to caregivers.
+
+*   **Request Body (JSON):**
+    ```json
+    {
+      "missed_medication_name": "Warfarin 5mg",
+      "patient_name": "John Doe",
+      "patient_email": "patient@prahari.org",
+      "inactivity_duration_minutes": 120,
+      "decrypted_caregiver_circle": [
+        {
+          "name": "Son",
+          "phone": "+919999999999",
+          "email": "son@example.com",
+          "notification_type": "all"
+        }
+      ]
+    }
+    ```
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "status": "success",
+      "is_mock": true,
+      "sms_sent_count": 0,
+      "push_sent_count": 0,
+      "email_sent_count": 1,
+      "details": "Alerts dispatched successfully via fallback logging."
+    }
+    ```
+
+### 7.2 POST `/alerts/push-subscription`
+Saves web push registration tokens for caregivers or devices.
+
+*   **Request Body (JSON):**
+    ```json
+    {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/token...",
+      "keys": {
+        "p256dh": "keys-p256dh-string",
+        "auth": "keys-auth-string"
+      }
+    }
+    ```
+*   **Response Body (JSON - `200 OK`):**
+    ```json
+    {
+      "status": "success",
+      "message": "Push subscription saved"
+    }
+    ```
+
+

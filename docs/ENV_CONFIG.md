@@ -19,6 +19,9 @@ VITE_API_BASE_URL=http://localhost:8000
 # Supabase Authentication & Sync Configuration (Optional for local mockup mode)
 VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key-here
+
+# VAPID Public Key for Web Push Subscriptions
+VITE_VAPID_PUBLIC_KEY=your-vapid-public-key-here
 ```
 
 ### 1.1 Client Variables Specification
@@ -28,6 +31,7 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key-here
 | `VITE_API_BASE_URL` | Base endpoint path where the API client makes requests. | `http://localhost:8000` | `https://prahari-api.onrender.com` |
 | `VITE_SUPABASE_URL` | Supabase project endpoint for auth and syncing. | `https://project.supabase.co` | `https://prod.supabase.co` |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anonymous public key. | `eyJhbGciOi...` | `eyJhbGciOi...` |
+| `VITE_VAPID_PUBLIC_KEY` | VAPID public key for Web Push. | `BF7kR5F7iVfG...` | `BF7kR5F7iVfG...` |
 
 ---
 
@@ -59,6 +63,14 @@ GROQ_API_KEY=your_groq_api_key_here
 # DATABASE_URL=postgresql://user:password@host:port/dbname
 SUPABASE_JWT_SECRET=your_supabase_jwt_secret_here
 SUPABASE_URL=https://your-supabase-project.supabase.co
+
+# ─── TWILIO & WEB PUSH NOTIFICATIONS ─────────────────────────────────────────
+TWILIO_ACCOUNT_SID=your_twilio_account_sid_here
+TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
+TWILIO_FROM_NUMBER=your_twilio_phone_number_here
+VAPID_PUBLIC_KEY=your_vapid_public_key_here
+VAPID_PRIVATE_KEY=your_vapid_private_key_here
+VAPID_MAILTO=mailto:admin@prahari.org
 ```
 
 ### 2.1 Backend Variables Grid
@@ -76,6 +88,12 @@ SUPABASE_URL=https://your-supabase-project.supabase.co
 | `DATABASE_URL` | Storage | SQL database URL for cabinet and appointment sync. | `sqlite:///./prahari.db` | RFC 3986 connection URL | If invalid, database connection fails at boot. |
 | `SUPABASE_JWT_SECRET` | Security | JWT signing secret to verify bearer tokens. | `""` | String value | If empty or invalid, user session verification fails. |
 | `SUPABASE_URL` | Security | Supabase URL matching the client configuration. | `""` | Fully qualified URL | If misconfigured, Supabase sync routes cannot authenticate correctly. |
+| `TWILIO_ACCOUNT_SID` | Alerts | Twilio account SID. | `""` | String value | If empty, remote SMS escalations use mock console logging. |
+| `TWILIO_AUTH_TOKEN` | Alerts | Twilio auth token. | `""` | String value | If empty, remote SMS escalations use mock console logging. |
+| `TWILIO_FROM_NUMBER` | Alerts | Registered Twilio SMS number. | `""` | Phone number | If empty, remote SMS escalations use mock console logging. |
+| `VAPID_PUBLIC_KEY` | Alerts | Public key for Web Push. | `""` | Base64 URL safe | If empty, web push notifications use mock console logging. |
+| `VAPID_PRIVATE_KEY` | Alerts | Private key for Web Push. | `""` | Base64 URL safe | If empty, web push notifications use mock console logging. |
+| `VAPID_MAILTO` | Alerts | Contact URI for Web Push endpoints. | `""` | `mailto:` URI | If empty, web push notifications use mock console logging. |
 
 ---
 
