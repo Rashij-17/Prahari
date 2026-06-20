@@ -353,216 +353,199 @@ export default function SentinelSettingsPage() {
   // -------------------------------------------------------------
 
   return (
-    <div style={{ padding: '1.5rem', fontFamily: 'var(--font-sans)', color: 'var(--color-slate-dark)' }}>
+    <div style={{ fontFamily: 'var(--font-sans)' }}>
       {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--color-forest)', margin: 0 }}>
-          🛡️ Guardian Sentinel & Profile Settings
+      <div className="page-header">
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          <span>🛡️</span> Guardian Sentinel & Profile
         </h1>
-        <p style={{ color: 'var(--color-slate-light)', marginTop: '0.25rem' }}>
+        <p>
           Configure emergency caregivers, medical risk factors, E2EE profile, and inactivity alarm alerts.
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
-        {/* Row 1: Sentinel Configuration & Alarms */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr md:1fr', gap: '2rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        {/* Row 1: Sentinel Configuration & Caregivers */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
+          gap: '2rem'
+        }}>
           {/* Card 1: Sentinel Mode */}
-          <div style={{
-            background: 'var(--color-cream-light)',
-            border: '1.5px solid var(--color-mint-border)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            boxShadow: 'var(--shadow-sm)'
-          }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="card">
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1.25rem 0', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
               🚨 Alert Inactivity Watcher
             </h2>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={sentinelEnabled}
                   onChange={handleToggleSentinel}
-                  style={{ width: '1.2rem', height: '1.2rem', accentColor: 'var(--color-forest)' }}
+                  style={{ width: '1.2rem', height: '1.2rem', marginTop: '0.2rem', accentColor: 'var(--color-forest)', cursor: 'pointer' }}
                 />
                 <div>
-                  <strong style={{ display: 'block', fontSize: '0.95rem' }}>Enable Guardian Sentinel</strong>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--color-slate-light)' }}>
+                  <strong style={{ display: 'block', fontSize: '0.95rem', color: 'var(--color-ink)' }}>Enable Guardian Sentinel</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>
                     Monitor device motion and trigger alarms if medication check-offs are missed.
                   </span>
                 </div>
               </label>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={demoMode}
                   onChange={handleToggleDemoMode}
-                  style={{ width: '1.2rem', height: '1.2rem', accentColor: 'var(--color-forest)' }}
+                  style={{ width: '1.2rem', height: '1.2rem', marginTop: '0.2rem', accentColor: 'var(--color-forest)', cursor: 'pointer' }}
                 />
                 <div>
-                  <strong style={{ display: 'block', fontSize: '0.95rem' }}>Demo / Fast Testing Mode</strong>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--color-slate-light)' }}>
+                  <strong style={{ display: 'block', fontSize: '0.95rem', color: 'var(--color-ink)' }}>Demo / Fast Testing Mode</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)' }}>
                     Speeds up the inactivity alarm threshold from 2 hours to 15 seconds.
                   </span>
                 </div>
               </label>
 
-              <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px dashed var(--color-mint-border)' }}>
+              <div style={{ marginTop: '0.5rem', paddingTop: '1.25rem', borderTop: '1px dashed var(--color-border)' }}>
                 <button
                   onClick={subscribeWebPush}
-                  style={{
-                    backgroundColor: 'var(--color-forest)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.85rem',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
+                  className="btn-primary-forest"
+                  style={{ width: '100%', justifyContent: 'center' }}
                 >
                   🔔 Enable Caregiver App Notifications
                 </button>
                 {pushStatus.active && (
-                  <p style={{
-                    fontSize: '0.8rem',
-                    marginTop: '0.5rem',
-                    color: pushStatus.type === 'success' ? 'var(--color-alert-safe)' : 'var(--color-alert-critical)'
+                  <div style={{
+                    fontSize: '0.85rem',
+                    marginTop: '0.75rem',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '6px',
+                    backgroundColor: pushStatus.type === 'success' ? 'var(--color-safe-bg)' : 'var(--color-critical-bg)',
+                    color: pushStatus.type === 'success' ? 'var(--color-safe)' : 'var(--color-critical)',
+                    border: `1px solid ${pushStatus.type === 'success' ? 'var(--color-safe-border)' : 'var(--color-critical-border)'}`
                   }}>
                     {pushStatus.message}
-                  </p>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
           {/* Card 2: Caregiver Circle */}
-          <div style={{
-            background: 'var(--color-cream-light)',
-            border: '1.5px solid var(--color-mint-border)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            boxShadow: 'var(--shadow-sm)'
-          }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1rem 0' }}>
+          <div className="card">
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1.25rem 0' }}>
               👥 Caregiver Circle (Encrypted)
             </h2>
 
-            <form onSubmit={handleAddCaregiver} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-              <input
-                type="text"
-                placeholder="Caregiver Name"
-                value={cgName}
-                onChange={(e) => setCgName(e.target.value)}
-                required
-                style={{ padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1.5px solid var(--color-mint-border)', fontSize: '0.9rem' }}
-              />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  <select
-                    value={countryCode}
-                    onChange={(e) => setCountryCode(e.target.value)}
-                    style={{
-                      padding: '0.5rem 0.25rem',
-                      borderRadius: '8px',
-                      border: '1.5px solid var(--color-mint-border)',
-                      fontSize: '0.85rem',
-                      backgroundColor: 'white',
-                      color: 'var(--color-charcoal)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <option value="+91">🇮🇳 +91</option>
-                    <option value="+1">🇺🇸 +1</option>
-                    <option value="+44">🇬🇧 +44</option>
-                    <option value="+61">🇦🇺 +61</option>
-                    <option value="+65">🇸🇬 +65</option>
-                    <option value="+49">🇩🇪 +49</option>
-                    <option value="+971">🇦🇪 +971</option>
-                  </select>
-                  <input
-                    type="tel"
-                    placeholder="Phone"
-                    value={cgPhone}
-                    onChange={(e) => setCgPhone(e.target.value)}
-                    style={{
-                      flex: 1,
-                      minWidth: '0',
-                      padding: '0.5rem 0.75rem',
-                      borderRadius: '8px',
-                      border: '1.5px solid var(--color-mint-border)',
-                      fontSize: '0.9rem'
-                    }}
-                  />
-                </div>
+            <form onSubmit={handleAddCaregiver} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-muted)' }}>Name</label>
                 <input
-                  type="email"
-                  placeholder="Email Address"
-                  value={cgEmail}
-                  onChange={(e) => setCgEmail(e.target.value)}
-                  style={{ padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1.5px solid var(--color-mint-border)', fontSize: '0.9rem' }}
+                  type="text"
+                  placeholder="e.g. Jane Doe"
+                  value={cgName}
+                  onChange={(e) => setCgName(e.target.value)}
+                  required
+                  className="input-base"
                 />
               </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-muted)' }}>Phone</label>
+                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="input-base"
+                      style={{ padding: '0.5rem 0.35rem', width: '80px', flexShrink: 0 }}
+                    >
+                      <option value="+91">🇮🇳 +91</option>
+                      <option value="+1">🇺🇸 +1</option>
+                      <option value="+44">🇬🇧 +44</option>
+                      <option value="+61">🇦🇺 +61</option>
+                      <option value="+65">🇸🇬 +65</option>
+                      <option value="+49">🇩🇪 +49</option>
+                      <option value="+971">🇦🇪 +971</option>
+                    </select>
+                    <input
+                      type="tel"
+                      placeholder="9876543210"
+                      value={cgPhone}
+                      onChange={(e) => setCgPhone(e.target.value)}
+                      className="input-base"
+                      style={{ flex: 1, minWidth: 0 }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-muted)' }}>Email</label>
+                  <input
+                    type="email"
+                    placeholder="e.g. jane@example.com"
+                    value={cgEmail}
+                    onChange={(e) => setCgEmail(e.target.value)}
+                    className="input-base"
+                  />
+                </div>
+              </div>
+              
               <button
                 type="submit"
                 disabled={cgLoading}
-                style={{
-                  backgroundColor: 'var(--color-forest)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '0.5rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
+                className="btn-primary-forest"
+                style={{ width: '100%', marginTop: '0.5rem', justifyContent: 'center' }}
               >
-                Add Member
+                {cgLoading ? 'Saving...' : '➕ Add Caregiver'}
               </button>
             </form>
 
             {cgStatus.active && (
-              <p style={{
-                fontSize: '0.8rem',
+              <div style={{
+                fontSize: '0.85rem',
                 marginBottom: '1rem',
-                color: cgStatus.type === 'success' ? 'var(--color-alert-safe)' : 'var(--color-forest)'
+                padding: '0.5rem 0.75rem',
+                borderRadius: '6px',
+                backgroundColor: cgStatus.type === 'success' ? 'var(--color-safe-bg)' : 'var(--color-forest-subtle)',
+                color: cgStatus.type === 'success' ? 'var(--color-safe)' : 'var(--color-forest)',
+                border: `1px solid ${cgStatus.type === 'success' ? 'var(--color-safe-border)' : 'rgba(45, 90, 61, 0.15)'}`
               }}>
                 {cgStatus.message}
-              </p>
+              </div>
             )}
 
             <div>
-              <h3 style={{ fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem' }}>Active Circle</h3>
-              {cgLoading && <p style={{ fontSize: '0.85rem' }}>Loading circle...</p>}
-              {!cgLoading && caregivers.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--color-slate-light)' }}>No caregivers registered.</p>}
+              <h3 style={{ fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.75rem', color: 'var(--color-ink)' }}>Active Circle</h3>
+              {cgLoading && <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Loading circle...</p>}
+              {!cgLoading && caregivers.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>No caregivers registered.</p>}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {caregivers.map((cg) => (
                   <div key={cg.id} style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    padding: '0.5rem 0.75rem',
-                    background: 'rgba(255,255,255,0.6)',
-                    borderRadius: '8px',
-                    border: '1px solid var(--color-mint-border)',
-                    fontSize: '0.85rem'
+                    padding: '0.75rem 1rem',
+                    background: 'var(--color-cream)',
+                    borderRadius: '10px',
+                    border: '1px solid var(--color-border)',
+                    fontSize: '0.875rem'
                   }}>
                     <div>
-                      <strong>{cg.name}</strong>
-                      <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--color-slate-light)' }}>
-                        {cg.phone} | {cg.email}
+                      <strong style={{ color: 'var(--color-ink)' }}>{cg.name}</strong>
+                      <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.15rem' }}>
+                        📞 {cg.phone} &nbsp;·&nbsp; ✉️ {cg.email}
                       </span>
                     </div>
                     <button
                       onClick={() => handleDeleteCaregiver(cg.id)}
+                      className="btn-ghost"
                       style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--color-alert-critical)',
-                        cursor: 'pointer',
+                        color: 'var(--color-critical)',
+                        padding: '0.25rem 0.5rem',
+                        fontSize: '0.8rem',
                         fontWeight: '600'
                       }}
                     >
@@ -576,29 +559,27 @@ export default function SentinelSettingsPage() {
         </div>
 
         {/* Row 2: Medication Reminders */}
-        <div style={{
-          background: 'var(--color-cream-light)',
-          border: '1.5px solid var(--color-mint-border)',
-          borderRadius: '16px',
-          padding: '1.5rem',
-          boxShadow: 'var(--shadow-sm)'
-        }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1rem 0' }}>
+        <div className="card">
+          <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             ⏰ Pill Reminders & Alarm Schedules
           </h2>
-          {medsLoading && <p style={{ fontSize: '0.85rem' }}>Loading medications...</p>}
+          {medsLoading && <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Loading medications...</p>}
           {!medsLoading && meds.length === 0 && (
-            <p style={{ fontSize: '0.85rem', color: 'var(--color-slate-light)' }}>Your Medicine Cabinet is empty. Scan medicines to schedule alerts.</p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Your Medicine Cabinet is empty. Scan medicines to schedule alerts.</p>
           )}
 
           {medsStatus.active && (
-            <p style={{
-              fontSize: '0.8rem',
-              marginBottom: '1rem',
-              color: medsStatus.type === 'success' ? 'var(--color-alert-safe)' : 'var(--color-forest)'
+            <div style={{
+              padding: '0.75rem 1rem',
+              borderRadius: '8px',
+              backgroundColor: medsStatus.type === 'success' ? 'var(--color-safe-bg)' : 'var(--color-critical-bg)',
+              color: medsStatus.type === 'success' ? 'var(--color-safe)' : 'var(--color-critical)',
+              border: `1px solid ${medsStatus.type === 'success' ? 'var(--color-safe-border)' : 'var(--color-critical-border)'}`,
+              fontSize: '0.85rem',
+              marginBottom: '1rem'
             }}>
               {medsStatus.message}
-            </p>
+            </div>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
@@ -608,41 +589,40 @@ export default function SentinelSettingsPage() {
                 flexWrap: 'wrap',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '0.75rem 1rem',
-                background: 'rgba(255,255,255,0.6)',
+                padding: '1rem',
+                background: 'var(--color-cream)',
                 borderRadius: '12px',
-                border: '1px solid var(--color-mint-border)',
+                border: '1px solid var(--color-border)',
                 gap: '1rem'
               }}>
                 <div>
-                  <strong style={{ fontSize: '0.95rem' }}>{med.brand_name}</strong>
-                  <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-slate-light)' }}>
+                  <strong style={{ fontSize: '1rem', color: 'var(--color-ink)' }}>{med.brand_name}</strong>
+                  <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--color-muted)', marginTop: '0.15rem' }}>
                     Generic: {med.generic_name || 'Not specified'}
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: 'var(--color-ink)', cursor: 'pointer' }}>
                     <input
                       type="checkbox"
                       checked={med.is_high_priority}
                       onChange={(e) => handleUpdateMedReminder(index, { is_high_priority: e.target.checked })}
-                      style={{ accentColor: 'var(--color-forest)' }}
+                      style={{ width: '1.1rem', height: '1.1rem', accentColor: 'var(--color-forest)', cursor: 'pointer' }}
                     />
                     🚨 High Priority
                   </label>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.85rem' }}>Reminder Time:</span>
+                    <span style={{ fontSize: '0.875rem', color: 'var(--color-muted)' }}>Reminder Time:</span>
                     <input
                       type="time"
                       value={med.reminder_time}
                       onChange={(e) => handleUpdateMedReminder(index, { reminder_time: e.target.value })}
+                      className="input-base"
                       style={{
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '6px',
-                        border: '1px solid var(--color-mint-border)',
-                        fontSize: '0.85rem'
+                        padding: '0.375rem 0.75rem',
+                        width: '130px',
                       }}
                     />
                   </div>
@@ -653,16 +633,14 @@ export default function SentinelSettingsPage() {
         </div>
 
         {/* Row 3: Allergies & Lab Results */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr md:1fr', gap: '2rem' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))',
+          gap: '2rem'
+        }}>
           {/* Card 1: Allergies */}
-          <div style={{
-            background: 'var(--color-cream-light)',
-            border: '1.5px solid var(--color-mint-border)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            boxShadow: 'var(--shadow-sm)'
-          }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1rem 0' }}>
+          <div className="card">
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1.25rem 0' }}>
               🚫 Drug Allergies (Encrypted)
             </h2>
             
@@ -672,42 +650,34 @@ export default function SentinelSettingsPage() {
                 placeholder="e.g. Penicillin"
                 value={allergyInput}
                 onChange={(e) => setAllergyInput(e.target.value)}
-                style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1.5px solid var(--color-mint-border)', fontSize: '0.9rem' }}
+                className="input-base"
               />
               <button
                 onClick={handleAddAllergy}
-                style={{
-                  backgroundColor: 'var(--color-forest)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
+                className="btn-primary-forest"
+                style={{ padding: '0.75rem 1.25rem' }}
               >
                 Add Tag
               </button>
             </div>
 
-            {profileLoading && <p style={{ fontSize: '0.85rem' }}>Loading profile...</p>}
+            {profileLoading && <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>Loading profile...</p>}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               {!profileLoading && allergies.length === 0 && (
-                <p style={{ fontSize: '0.85rem', color: 'var(--color-slate-light)' }}>No allergy records. Add tags to enable safety scans.</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>No allergy records. Add tags to enable safety scans.</p>
               )}
               {allergies.map((a, i) => (
                 <span key={i} style={{
-                  backgroundColor: 'rgba(194,75,60,0.15)',
-                  border: '1px solid rgba(194,75,60,0.3)',
-                  color: 'var(--color-alert-critical)',
-                  padding: '0.25rem 0.6rem',
+                  backgroundColor: 'var(--color-critical-bg)',
+                  border: '1px solid var(--color-critical-border)',
+                  color: 'var(--color-critical)',
+                  padding: '0.35rem 0.75rem',
                   borderRadius: '20px',
                   fontSize: '0.85rem',
                   fontWeight: '600',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.35rem'
+                  gap: '0.5rem'
                 }}>
                   {a}
                   <button
@@ -715,11 +685,12 @@ export default function SentinelSettingsPage() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: 'var(--color-alert-critical)',
+                      color: 'var(--color-critical)',
                       cursor: 'pointer',
-                      fontSize: '0.8rem',
+                      fontSize: '0.95rem',
                       fontWeight: '800',
-                      padding: 0
+                      padding: 0,
+                      lineHeight: 1
                     }}
                   >
                     ×
@@ -730,14 +701,8 @@ export default function SentinelSettingsPage() {
           </div>
 
           {/* Card 2: Lab Results & Conditions */}
-          <div style={{
-            background: 'var(--color-cream-light)',
-            border: '1.5px solid var(--color-mint-border)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            boxShadow: 'var(--shadow-sm)'
-          }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1rem 0' }}>
+          <div className="card">
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-forest)', margin: '0 0 1.25rem 0' }}>
               🔬 Health Conditions & Labs (Encrypted)
             </h2>
 
@@ -747,27 +712,21 @@ export default function SentinelSettingsPage() {
                 placeholder="Metric (e.g. Creatinine)"
                 value={labKey}
                 onChange={(e) => setLabKey(e.target.value)}
-                style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1.5px solid var(--color-mint-border)', fontSize: '0.9rem' }}
+                className="input-base"
+                style={{ flex: 1 }}
               />
               <input
                 type="text"
                 placeholder="Value (e.g. High)"
                 value={labVal}
                 onChange={(e) => setLabVal(e.target.value)}
-                style={{ width: '30%', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1.5px solid var(--color-mint-border)', fontSize: '0.9rem' }}
+                className="input-base"
+                style={{ width: '30%' }}
               />
               <button
                 onClick={handleAddLab}
-                style={{
-                  backgroundColor: 'var(--color-forest)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
+                className="btn-primary-forest"
+                style={{ padding: '0.75rem 1.25rem' }}
               >
                 Save
               </button>
@@ -775,29 +734,29 @@ export default function SentinelSettingsPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {!profileLoading && labs.length === 0 && (
-                <p style={{ fontSize: '0.85rem', color: 'var(--color-slate-light)' }}>No active health conditions or lab results.</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)' }}>No active health conditions or lab results.</p>
               )}
               {labs.map((item, i) => (
                 <div key={i} style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0.5rem 0.75rem',
-                  background: 'rgba(255,255,255,0.6)',
-                  borderRadius: '8px',
-                  border: '1px solid var(--color-mint-border)',
-                  fontSize: '0.85rem'
+                  padding: '0.75rem 1rem',
+                  background: 'var(--color-cream)',
+                  borderRadius: '10px',
+                  border: '1px solid var(--color-border)',
+                  fontSize: '0.875rem'
                 }}>
                   <div>
-                    <span style={{ fontWeight: '700' }}>{item.key}</span>: <span style={{ color: 'var(--color-forest)', fontWeight: '600' }}>{item.value}</span>
+                    <span style={{ fontWeight: '700', color: 'var(--color-ink)' }}>{item.key}</span>: <span style={{ color: 'var(--color-forest)', fontWeight: '600' }}>{item.value}</span>
                   </div>
                   <button
                     onClick={() => handleRemoveLab(i)}
+                    className="btn-ghost"
                     style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--color-alert-critical)',
-                      cursor: 'pointer',
+                      color: 'var(--color-critical)',
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.8rem',
                       fontWeight: '600'
                     }}
                   >

@@ -1,19 +1,19 @@
 """
-Prahari — Symptom Triage Service (Infermedica Integration)
-===========================================================
-Interfaces with the Infermedica Clinical NLP API to:
-    1. Parse free-text symptoms into structured medical concepts
-    2. Run the evidence-based triage assessment algorithm
-    3. Return an urgency level + actionable recommendation
-
-Infermedica API Docs: https://developer.infermedica.com/
-Free tier: 100 calls/day (sufficient for development and personal use).
+Prahari — Symptom Triage Service (Multi-Provider with Gemini/Groq Fallback)
+===========================================================================
+Interfaces with a priority fallback chain of triage providers:
+    1. Infermedica Clinical NLP API (if credentials configured)
+    2. Gemini AI (if GEMINI_API_KEY configured)
+    3. Groq AI  (if GROQ_API_KEY configured)
+    4. Static mock response (last resort)
 
 API credentials are loaded from the .env file:
-    INFERMEDICA_APP_ID=your_id
-    INFERMEDICA_APP_KEY=your_key
+    INFERMEDICA_APP_ID=your_id      (optional)
+    INFERMEDICA_APP_KEY=your_key    (optional)
+    GEMINI_API_KEY=your_key         (recommended)
+    GROQ_API_KEY=your_key           (optional fallback)
 
-If credentials are not set, the service returns a demo mock response
+If no credentials are set, the service returns a demo mock response
 so the UI remains testable without API registration.
 """
 
@@ -65,7 +65,7 @@ _MOCK_TRIAGE_RESPONSE = {
     "urgency_label":   "See a Doctor Soon",
     "urgency_color":   "moderate",
     "recommendation":  (
-        "Based on your symptoms, a medical consultation within 24–48 hours "
+        "Based on your symptoms, a medical consultation within 24-48 hours "
         "is recommended. Monitor your symptoms and seek emergency care "
         "immediately if they worsen significantly."
     ),
@@ -89,8 +89,8 @@ _MOCK_TRIAGE_RESPONSE = {
     "risk_factors":    [],
     "is_mock":         True,
     "mock_notice":     (
-        "⚠️ This is a demonstration result. Configure INFERMEDICA_APP_ID and "
-        "INFERMEDICA_APP_KEY in your .env file to enable live triage analysis."
+        "This is a demonstration result. Configure GEMINI_API_KEY "
+        "in your .env file to enable live AI triage analysis."
     ),
 }
 
@@ -173,12 +173,12 @@ def _normalise_triage(raw: dict) -> dict:
     Normalise the raw Infermedica triage response into Prahari's
     standardised format for consistent frontend display.
 
-    Urgency level mapping (Infermedica → Prahari):
-        emergency_ambulance  → critical
-        emergency            → critical
-        consultation_24      → moderate
-        consultation         → moderate
-        self_care            → safe
+    Urgency level mapping (Infermedica -> Prahari):
+        emergency_ambulance  -> critical
+        emergency            -> critical
+        consultation_24      -> moderate
+        consultation         -> moderate
+        self_care            -> safe
 
     Args:
         raw: Raw /triage response from Infermedica.
@@ -189,15 +189,15 @@ def _normalise_triage(raw: dict) -> dict:
     triage_level = raw.get("triage_level", "consultation")
 
     _LEVEL_MAP = {
-        "emergency_ambulance": ("critical",  "🚨 Seek Emergency Care Immediately",  "critical"),
-        "emergency":           ("critical",  "🚨 Go to Emergency Room Now",          "critical"),
-        "consultation_24":     ("moderate",  "⚠️ See a Doctor Within 24 Hours",      "moderate"),
-        "consultation":        ("moderate",  "🩺 Schedule a Doctor Appointment",     "moderate"),
-        "self_care":           ("safe",      "✅ Self-Care Recommended",              "safe"),
+        "emergency_ambulance": ("critical",  "Seek Emergency Care Immediately",  "critical"),
+        "emergency":           ("critical",  "Go to Emergency Room Now",          "critical"),
+        "consultation_24":     ("moderate",  "See a Doctor Within 24 Hours",      "moderate"),
+        "consultation":        ("moderate",  "Schedule a Doctor Appointment",     "moderate"),
+        "self_care":           ("safe",      "Self-Care Recommended",             "safe"),
     }
 
     urgency_level, urgency_label, urgency_color = _LEVEL_MAP.get(
-        triage_level, ("moderate", "🩺 Consult a Doctor", "moderate")
+        triage_level, ("moderate", "Consult a Doctor", "moderate")
     )
 
     _RECOMMENDATIONS = {
@@ -254,13 +254,11 @@ async def assess_symptoms(
     """
     Main triage pipeline entry point.
 
-    If Infermedica credentials are present:
-        1. NLP parse symptom text → evidence list
-        2. Submit to /triage → urgency level + conditions
-        3. Return normalised result
-
-    If credentials are not configured:
-        Returns mock response so the UI remains functional.
+    Fallback chain:
+        1. Infermedica (if credentials configured)
+        2. Gemini AI  (if GEMINI_API_KEY configured)
+        3. Groq AI    (if GROQ_API_KEY configured)
+        4. Static mock response (last resort)
 
     Args:
         symptom_text: Free-text symptom description.
@@ -270,39 +268,85 @@ async def assess_symptoms(
     Returns:
         Normalised triage result dict.
     """
-    if not _has_credentials():
-        logger.info("Infermedica credentials not configured — returning mock triage response.")
-        return _MOCK_TRIAGE_RESPONSE
+    # --- Tier 1: Infermedica ---
+    if _has_credentials():
+        try:
+            evidence = await _parse_symptoms(symptom_text)
+            if not evidence:
+                return {
+                    **_MOCK_TRIAGE_RESPONSE,
+                    "is_mock": False,
+                    "mock_notice": (
+                        "No specific medical symptoms were recognised in your description. "
+                        "Try describing your symptoms in plain terms (e.g. 'I have a headache and fever')."
+                    ),
+                    "urgency_level": "safe",
+                    "urgency_label": "No Symptoms Detected",
+                    "recommendation": "Please describe your symptoms more specifically and try again.",
+                }
+            raw = await _run_triage(evidence, sex, age)
+            result = _normalise_triage(raw)
+            logger.info("Triage complete (Infermedica): level=%s, conditions=%d", result["urgency_level"], len(result["conditions"]))
+            return result
+        except httpx.HTTPStatusError as exc:
+            logger.warning("Infermedica API error %s - falling back to AI provider.", exc)
+        except Exception as exc:
+            logger.warning("Infermedica triage failed: %s - falling back to AI provider.", exc)
+    else:
+        logger.info("Infermedica not configured - trying Gemini/Groq fallback.")
 
-    try:
-        evidence = await _parse_symptoms(symptom_text)
+    # Shared one-shot prompt context (no prior evidence, just the symptom text)
+    one_shot_evidence: list[dict] = []
 
-        if not evidence:
-            # No recognisable symptoms — return safe default
-            return {
-                **_MOCK_TRIAGE_RESPONSE,
-                "is_mock": False,
-                "mock_notice": (
-                    "No specific medical symptoms were recognised in your description. "
-                    "Try describing your symptoms in plain terms (e.g. 'I have a headache and fever')."
-                ),
-                "urgency_level": "safe",
-                "urgency_label": "No Symptoms Detected",
-                "recommendation": "Please describe your symptoms more specifically and try again.",
-            }
+    # --- Tier 2: Gemini ---
+    is_gemini_configured = bool(
+        settings.gemini_api_key
+        and "your_gemini_api_key" not in settings.gemini_api_key
+        and settings.gemini_api_key.strip() != ""
+    )
+    if is_gemini_configured:
+        try:
+            logger.info("Attempting assess_symptoms via Gemini.")
+            raw_result = await _run_gemini_triage(
+                one_shot_evidence, sex, age, "gemini-2.0-flash", text=symptom_text
+            )
+            validated = _sanitize_and_validate_triage_response(raw_result)
+            triage_result = validated.get("triage_result")
+            if triage_result:
+                triage_result["is_mock"] = False
+                triage_result["mock_notice"] = ""
+                triage_result.setdefault("risk_factors", [])
+                logger.info("Triage complete (Gemini): level=%s", triage_result.get("urgency_level"))
+                return triage_result
+        except Exception as exc:
+            logger.warning("Gemini triage failed: %s - trying Groq.", exc)
 
-        raw = await _run_triage(evidence, sex, age)
-        result = _normalise_triage(raw)
-        logger.info("Triage complete: level=%s, conditions=%d", result["urgency_level"], len(result["conditions"]))
-        return result
+    # --- Tier 3: Groq ---
+    is_groq_configured = bool(
+        settings.groq_api_key
+        and "your_groq_api_key" not in settings.groq_api_key
+        and settings.groq_api_key.strip() != ""
+    )
+    if is_groq_configured:
+        try:
+            logger.info("Attempting assess_symptoms via Groq.")
+            raw_result = await _run_groq_triage(
+                one_shot_evidence, sex, age, "llama-3.3-70b-versatile", text=symptom_text
+            )
+            validated = _sanitize_and_validate_triage_response(raw_result)
+            triage_result = validated.get("triage_result")
+            if triage_result:
+                triage_result["is_mock"] = False
+                triage_result["mock_notice"] = ""
+                triage_result.setdefault("risk_factors", [])
+                logger.info("Triage complete (Groq): level=%s", triage_result.get("urgency_level"))
+                return triage_result
+        except Exception as exc:
+            logger.warning("Groq triage failed: %s - returning mock.", exc)
 
-    except httpx.HTTPStatusError as exc:
-        if exc.response.status_code == 401:
-            raise ValueError("Invalid Infermedica API credentials. Check your .env file.") from exc
-        raise RuntimeError(f"Infermedica API error: {exc}") from exc
-    except Exception as exc:
-        logger.error("Triage service failed: %s", exc)
-        raise RuntimeError(f"Triage assessment failed: {exc}") from exc
+    # --- Tier 4: Mock fallback ---
+    logger.info("All triage providers unavailable - returning mock response.")
+    return _MOCK_TRIAGE_RESPONSE
 
 
 def _build_triage_prompt(evidence: list[dict], sex: str, age: int, text: Optional[str] = None) -> str:
@@ -339,7 +383,7 @@ Return a JSON object matching this schema exactly:
   "question": null,
   "triage_result": {{
     "urgency_level": "critical" | "moderate" | "safe",
-    "urgency_label": "🚨 Seek Emergency Care Immediately" | "⚠️ See a Doctor Within 24 Hours" | "✅ Self-Care Recommended",
+    "urgency_label": "Seek Emergency Care Immediately" | "See a Doctor Within 24 Hours" | "Self-Care Recommended",
     "urgency_color": "critical" | "moderate" | "safe",
     "recommendation": "Detailed actionable clinical instructions. If critical, mention calling 112 / 102.",
     "conditions": [
@@ -385,7 +429,7 @@ Return a JSON object matching this schema exactly:
   }}, // Set question to null if should_stop is true
   "triage_result": {{
     "urgency_level": "critical" | "moderate" | "safe",
-    "urgency_label": "🚨 Seek Emergency Care Immediately" | "⚠️ See a Doctor Within 24 Hours" | "✅ Self-Care Recommended",
+    "urgency_label": "Seek Emergency Care Immediately" | "See a Doctor Within 24 Hours" | "Self-Care Recommended",
     "urgency_color": "critical" | "moderate" | "safe",
     "recommendation": "Detailed actionable clinical instructions. If critical, mention calling 112 / 102.",
     "conditions": [
@@ -424,7 +468,7 @@ def _sanitize_and_validate_triage_response(raw_data: dict) -> dict:
         if not isinstance(triage_res, dict):
             triage_res = {
                 "urgency_level": "moderate",
-                "urgency_label": "🩺 Consult a Doctor",
+                "urgency_label": "Consult a Doctor",
                 "urgency_color": "moderate",
                 "recommendation": "Please consult a healthcare professional. Monitor your symptoms.",
                 "conditions": []
@@ -432,7 +476,7 @@ def _sanitize_and_validate_triage_response(raw_data: dict) -> dict:
         
         # Ensure critical keys exist
         triage_res["urgency_level"] = triage_res.get("urgency_level", "moderate")
-        triage_res["urgency_label"] = triage_res.get("urgency_label", "🩺 Consult a Doctor")
+        triage_res["urgency_label"] = triage_res.get("urgency_label", "Consult a Doctor")
         triage_res["urgency_color"] = triage_res.get("urgency_color", "moderate")
         triage_res["recommendation"] = triage_res.get("recommendation", "Please consult a healthcare professional.")
         
@@ -768,11 +812,11 @@ async def assess_triage_chat(
                     
                     mock_res = dict(_MOCK_TRIAGE_RESPONSE)
                     mock_res["is_mock"] = True
-                    mock_res["mock_notice"] = "⚠️ Local Triage Simulator Fallback active."
+                    mock_res["mock_notice"] = "Local Triage Simulator Fallback active."
                     
                     if has_dyspnea:
                         mock_res["urgency_level"] = "critical"
-                        mock_res["urgency_label"] = "🚨 Seek Emergency Care Immediately"
+                        mock_res["urgency_label"] = "Seek Emergency Care Immediately"
                         mock_res["urgency_color"] = "critical"
                         mock_res["recommendation"] = (
                             "Difficulty breathing detected. Call the National Emergency Helpline (112) "
@@ -780,7 +824,7 @@ async def assess_triage_chat(
                         )
                     elif has_fever:
                         mock_res["urgency_level"] = "moderate"
-                        mock_res["urgency_label"] = "⚠️ See a Doctor Within 24 Hours"
+                        mock_res["urgency_label"] = "See a Doctor Within 24 Hours"
                         mock_res["urgency_color"] = "moderate"
                         mock_res["recommendation"] = (
                             "Fever detected. Please consult a local healthcare provider within 24 hours "
@@ -788,7 +832,7 @@ async def assess_triage_chat(
                         )
                     else:
                         mock_res["urgency_level"] = "safe"
-                        mock_res["urgency_label"] = "✅ Self-Care Recommended"
+                        mock_res["urgency_label"] = "Self-Care Recommended"
                         mock_res["urgency_color"] = "safe"
                         mock_res["recommendation"] = (
                             "Your symptoms appear mild and can likely be managed at home with rest and "
@@ -811,10 +855,9 @@ async def assess_triage_chat(
         "evidence": current_evidence,
         "triage_result": {
             "urgency_level": "moderate",
-            "urgency_label": "🩺 Consult a Doctor",
+            "urgency_label": "Consult a Doctor",
             "urgency_color": "moderate",
             "recommendation": f"All triage engines failed. Last error: {str(last_error)}. Please monitor symptoms and consult a doctor.",
             "conditions": []
         }
     })
-

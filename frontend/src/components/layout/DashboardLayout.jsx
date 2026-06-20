@@ -99,6 +99,48 @@ const Icons = {
       <circle cx="12" cy="7" r="4" />
     </svg>
   ),
+  Cabinet: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+      <rect x="9" y="3" width="6" height="4" rx="2"/>
+      <line x1="9" y1="12" x2="15" y2="12"/>
+      <line x1="9" y1="16" x2="12" y2="16"/>
+    </svg>
+  ),
+  Calendar: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+    </svg>
+  ),
+  Decode: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 6h4M14 6h8M6 6h8"/>
+      <path d="M2 12h2M20 12h2M4 12h16M2 18h8M14 18h8M10 18h4"/>
+    </svg>
+  ),
+  QR: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7"/>
+      <rect x="14" y="3" width="7" height="7"/>
+      <rect x="3" y="14" width="7" height="7"/>
+      <path d="M14 14h3v3M17 17h3v3M14 20h3"/>
+    </svg>
+  ),
+  Search: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+  ),
 }
 
 // ----------------------------------------------------------------
@@ -112,6 +154,11 @@ const NAV_ITEMS = [
   { id: 'clinician',   label: 'AI Doctor',   path: '/clinician',   Icon: Icons.Heartbeat },
   { id: 'triage',      label: 'Triage',      path: '/triage',      Icon: Icons.Heartbeat },
   { id: 'directory',   label: 'Directory',   path: '/directory',   Icon: Icons.MapPin },
+  { id: 'cabinet',     label: 'Cabinet',     path: '/cabinet',     Icon: Icons.Cabinet },
+  { id: 'scheduler',   label: 'Scheduler',   path: '/scheduler',   Icon: Icons.Calendar },
+  { id: 'decoder',     label: 'Decoder',     path: '/decoder',     Icon: Icons.Decode },
+  { id: 'qrsync',      label: 'QR Sync',     path: '/qrsync',      Icon: Icons.QR },
+  { id: 'substitute',  label: 'Generics',    path: '/substitute',  Icon: Icons.Search },
   { id: 'profile',     label: 'Sentinel',    path: '/profile',     Icon: Icons.User },
 ]
 
@@ -590,7 +637,7 @@ function TopNav({ scrolled, onMenuClick, menuOpen, user, logout }) {
 // ----------------------------------------------------------------
 function BottomTabs() {
   const location = useLocation()
-  const tabItems = NAV_ITEMS.filter(i => ['scanner', 'medications', 'clinician', 'triage', 'profile'].includes(i.id))
+  const tabItems = NAV_ITEMS.filter(i => ['cabinet', 'scheduler', 'decoder', 'substitute', 'profile'].includes(i.id))
 
   return (
     <nav
@@ -791,6 +838,154 @@ const stopAlarmSound = () => {
     audioCtx.close()
     audioCtx = null
   }
+}
+
+// ----------------------------------------------------------------
+// Desktop Sidebar Component
+// ----------------------------------------------------------------
+function Sidebar({ user, logout }) {
+  return (
+    <aside className="sidebar-desktop">
+      {/* Sidebar header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '1.5rem 1.25rem',
+        borderBottom: '1px solid var(--color-border)',
+      }}>
+        <PrahariLogo />
+      </div>
+
+      {/* Nav items list */}
+      <nav style={{
+        padding: '1.25rem 0.75rem',
+        flex: 1,
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.25rem',
+      }}>
+        {NAV_ITEMS.map(({ id, label, path, exact, Icon }) => (
+          <NavLink
+            key={id}
+            to={path}
+            end={exact}
+            className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+          >
+            <Icon />
+            {label}
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* User Profile Card & Theme Toggle in Sidebar */}
+      {user && (
+        <div style={{
+          padding: '1.25rem',
+          borderTop: '1px solid var(--color-border)',
+          backgroundColor: 'var(--color-cream)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+          }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--color-forest-subtle)',
+              border: '1.5px solid var(--color-forest)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+            }}>
+              {user.user_metadata?.avatar_url ? (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt={user.user_metadata.full_name || 'User Avatar'}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <Icons.User />
+              )}
+            </div>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              minWidth: 0,
+              lineHeight: 1.2,
+            }}>
+              <span style={{
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                color: 'var(--color-ink)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {user.user_metadata?.full_name || 'User'}
+              </span>
+              <span style={{
+                fontSize: '0.75rem',
+                color: 'var(--color-muted)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {user.email}
+              </span>
+            </div>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: '0.25rem',
+          }}>
+            <ThemeToggle />
+            <button
+              onClick={logout}
+              title="Sign Out"
+              aria-label="Sign Out"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.375rem',
+                padding: '0.375rem 0.75rem',
+                borderRadius: '6px',
+                border: 'none',
+                backgroundColor: 'transparent',
+                color: 'var(--color-muted)',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#ef4444';
+                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-muted)';
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              <Icons.LogOut />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </aside>
+  )
 }
 
 export default function DashboardLayout({ children }) {
@@ -1018,13 +1213,13 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div style={{
+    <div className="app-layout" style={{
       minHeight: '100dvh',
-      display: 'flex',
-      flexDirection: 'column',
       background: 'var(--color-paper)',
       color: 'var(--color-ink)',
     }}>
+      <Sidebar user={user} logout={logout} />
+
       <TopNav
         scrolled={scrolled}
         onMenuClick={() => setMenuOpen(o => !o)}
@@ -1035,38 +1230,42 @@ export default function DashboardLayout({ children }) {
 
       <MobileDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} user={user} logout={logout} />
 
-      {/* Accelerometer Sandbox Denied Warning Banner */}
-      {localStorage.getItem('prahari_sentinel_enabled') === 'true' && accelPermissionDenied && (
-        <div style={{
-          backgroundColor: 'var(--color-alert-moderate-bg)',
-          borderBottom: '1px solid var(--color-alert-moderate-border)',
-          color: 'var(--color-alert-moderate)',
-          padding: '0.5rem 1rem',
-          fontSize: '0.8rem',
-          textAlign: 'center',
-          fontWeight: '600'
-        }}>
-          ⚠️ Accelerometer permissions disabled. Falling back to active browser click/scroll activity checking.
-        </div>
-      )}
+      <div className="main-container">
+        {/* Accelerometer Sandbox Denied Warning Banner */}
+        {localStorage.getItem('prahari_sentinel_enabled') === 'true' && accelPermissionDenied && (
+          <div style={{
+            backgroundColor: 'var(--color-alert-moderate-bg)',
+            borderBottom: '1px solid var(--color-alert-moderate-border)',
+            color: 'var(--color-alert-moderate)',
+            padding: '0.5rem 1rem',
+            fontSize: '0.8rem',
+            textAlign: 'center',
+            fontWeight: '600'
+          }}>
+            ⚠️ Accelerometer permissions disabled. Falling back to active browser click/scroll activity checking.
+          </div>
+        )}
 
-      <main
-        id="main-content"
-        role="main"
-        aria-label="Main content"
-        className="mobile-safe-bottom"
-        style={{ flex: 1 }}
-      >
-        <div
-          className="container-prahari"
-          style={{
-            paddingTop: 'clamp(1.5rem, 4vw, 2.5rem)',
-            paddingBottom: '2.5rem',
-          }}
+        <main
+          id="main-content"
+          role="main"
+          aria-label="Main content"
+          className="mobile-safe-bottom"
+          style={{ flex: 1 }}
         >
-          {children}
-        </div>
-      </main>
+          <div
+            className="container-prahari"
+            style={{
+              paddingTop: 'clamp(1.5rem, 4vw, 2.5rem)',
+              paddingBottom: '2.5rem',
+            }}
+          >
+            {children}
+          </div>
+        </main>
+
+        <Footer />
+      </div>
 
       {/* Alarm Warning Fullscreen Overlay Modal */}
       {alarmActive && (
@@ -1131,7 +1330,6 @@ export default function DashboardLayout({ children }) {
         </div>
       )}
 
-      <Footer />
       <BottomTabs />
     </div>
   )

@@ -28,6 +28,13 @@ import SentinelSettingsPage from './pages/SentinelSettingsPage.jsx'
 import PocketClinicianPage from './pages/PocketClinicianPage.jsx'
 import { useAuth } from './hooks/useAuth.jsx'
 
+// ── New Feature Modules ────────────────────────────────────────────
+import MedicineCabinetPage from './pages/MedicineCabinetPage.jsx'
+import SchedulerPage from './pages/SchedulerPage.jsx'
+import DecoderPage from './pages/DecoderPage.jsx'
+import QRSyncPage from './pages/QRSyncPage.jsx'
+import SubstitutePage from './pages/SubstitutePage.jsx'
+
 /**
  * Premium, network-aware offline banner component.
  * Monitors browser network status and alerts the user when offline.
@@ -150,6 +157,22 @@ export default function App() {
 
         {/* Doctor Directory — Phase 5 ✅ */}
         <Route path="/directory" element={<DirectoryPage />} />
+
+        {/* ── Feature Modules ── */}
+        {/* Medicine Cabinet — Module 1 ✅ */}
+        <Route path="/cabinet" element={<MedicineCabinetPage />} />
+
+        {/* Daily Scheduler — Module 2 ✅ */}
+        <Route path="/scheduler" element={<SchedulerPage />} />
+
+        {/* Prescription Decoder — Module 3 ✅ */}
+        <Route path="/decoder" element={<DecoderPage />} />
+
+        {/* Caregiver QR Sync — Module 4 ✅ */}
+        <Route path="/qrsync" element={<QRSyncPage />} />
+
+        {/* Generic Substitute Finder — Module 5 ✅ */}
+        <Route path="/substitute" element={<SubstitutePage />} />
 
         {/* Catch-all — redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />

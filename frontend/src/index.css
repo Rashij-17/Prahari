@@ -798,7 +798,6 @@ button { cursor: pointer; font-family: var(--font-sans); }
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
-
 /* ----------------------------------------------------------------
    20. MOBILE SAFE AREA
    ---------------------------------------------------------------- */
@@ -823,3 +822,104 @@ button { cursor: pointer; font-family: var(--font-sans); }
 button, a, input, select, textarea {
   transition: var(--transition-fast);
 }
+
+/* ----------------------------------------------------------------
+   22. VERTICAL SIDEBAR LAYOUT (DESKTOP)
+   ---------------------------------------------------------------- */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.sidebar-desktop {
+  display: none !important;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--color-muted);
+  background: transparent;
+  transition: all 180ms ease;
+  border-left: 3px solid transparent;
+  margin-bottom: 0.2rem;
+}
+
+.sidebar-link svg {
+  transition: transform 180ms ease;
+  flex-shrink: 0;
+  color: var(--color-muted);
+}
+
+.sidebar-link:hover {
+  color: var(--color-ink);
+  background: var(--color-forest-subtle);
+}
+
+.sidebar-link:hover svg {
+  transform: scale(1.08) translateX(1px);
+  color: var(--color-ink);
+}
+
+.sidebar-link.active {
+  color: var(--color-forest);
+  font-weight: 600;
+  background: var(--color-forest-glow);
+  border-left-color: var(--color-forest);
+}
+
+.sidebar-link.active svg {
+  color: var(--color-forest);
+}
+
+
+@media (min-width: 768px) {
+  .app-layout {
+    flex-direction: row !important;
+  }
+
+  .sidebar-desktop {
+    display: flex !important;
+    flex-direction: column;
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 110;
+    background: var(--color-paper);
+    border-right: 1px solid var(--color-border);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .main-container {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
+
+  header#main-nav,
+  .top-nav {
+    display: none !important;
+  }
+
+  nav#mobile-bottom-nav,
+  .bottom-tabs {
+    display: none !important;
+  }
+}
+
+

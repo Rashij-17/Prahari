@@ -42,15 +42,20 @@ def get_current_user(
                     # Decode and verify token using the symmetric secret
                     # Try base64-decoded secret first (standard for Supabase), fall back to raw string
                     try:
-                        import base64
-                        decoded_secret = base64.b64decode(secret)
+                        import base64, binascii
+                        # Only attempt base64 decode if the secret is valid base64
+                        decoded_secret = base64.b64decode(secret + "==")  # pad to avoid length errors
+                        # Validate it's actually binary (Supabase secrets are base64url)
+                        if len(decoded_secret) < 16:
+                            raise ValueError("Decoded secret too short, not a real base64 secret")
                         payload = jwt.decode(
                             token,
                             decoded_secret,
                             algorithms=["HS256"],
                             audience="authenticated"
                         )
-                    except (jwt.InvalidSignatureError, Exception):
+                    except (jwt.InvalidSignatureError, binascii.Error, ValueError, Exception):
+                        # Fall back to using the raw string secret
                         payload = jwt.decode(
                             token,
                             secret,
