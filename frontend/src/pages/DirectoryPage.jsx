@@ -206,13 +206,32 @@ export default function DirectoryPage() {
     }
   }, [phase, results, specialty, radius, error, isMock, mockNote])
 
+  const searchWithFallbackCoordinates = async (reason) => {
+    // Default coordinates: New Delhi (28.6139, 77.2090)
+    const fallbackLat = 28.6139
+    const fallbackLng = 77.2090
+    setPhase('loading')
+
+    try {
+      const data = await searchProviders({ lat: fallbackLat, lng: fallbackLng, specialty, radius_km: radius })
+      setResults(data.providers || [])
+      setIsMock(data.is_mock || false)
+      
+      const fallbackWarning = `⚠️ ${reason} Using default location (New Delhi) to display search.`
+      setMockNote(data.mock_notice ? `${fallbackWarning}\n\n${data.mock_notice}` : fallbackWarning)
+      setPhase('results')
+    } catch (err) {
+      setError(err.message || 'Provider search failed.')
+      setPhase('error')
+    }
+  }
+
   const locateAndSearch = () => {
     setPhase('locating')
     setError('')
 
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser. Please use a modern browser.')
-      setPhase('error')
+      searchWithFallbackCoordinates('Geolocation is not supported by your browser.')
       return
     }
 
@@ -232,17 +251,16 @@ export default function DirectoryPage() {
           setPhase('error')
         }
       },
-      (err) => {
-        setError(
-          err.code === 1
-            ? 'Location access was denied. Please allow location access in your browser settings.'
-            : 'Could not determine your location. Please try again.'
-        )
-        setPhase('error')
+      async (err) => {
+        const reason = err.code === 1
+          ? 'Location access was denied.'
+          : 'Could not determine location (timeout/error).'
+        await searchWithFallbackCoordinates(reason)
       },
-      { timeout: 10000, maximumAge: 60000 }
+      { timeout: 8000, maximumAge: 60000 }
     )
   }
+
 
   const reset = () => {
     setResults([])

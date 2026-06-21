@@ -235,9 +235,32 @@ GROQ_API_KEY=your_groq_key
 SUPABASE_JWT_SECRET=your_jwt_secret
 SUPABASE_URL=https://your-project.supabase.co
 
-# App Environment Settings
-DEBUG=true
-FRONTEND_ORIGIN=http://localhost:5173
+---
+
+## 🟢 Feature Modules v3.0 (Client-Side AI & Chronotherapy)
+
+Three advanced privacy-first client-side features are implemented in v3.0 under `frontend/src/features`:
+
+### 👁️ 1. Pill Scan (Visual Pill Identifier & Verification)
+* **Location:** `src/features/pill-scan/`
+* **Stack:** OpenCV.js + ONNX Runtime Web (WASM execution)
+* **Mechanics:** Captures browser video frames $\rightarrow$ runs binarization, gaussian blur & Canny contours detection $\rightarrow$ filters by area ($>2000\text{px}^2$) and circularity ($>0.5$) $\rightarrow$ classifies using standard quantized MobileNetV2 ONNX model inside browser.
+* **WASM/ONNX Model Note:** Place the quantized ONNX model file under `frontend/public/models/pill_classifier.onnx`. If the file is missing, the scanner automatically falls back to a smart, clinical color + shape lookup query.
+
+### 📅 2. Chronotherapy Engine (Schedule Constraint Optimizer)
+* **Location:** `src/features/chronotherapy/`
+* **Stack:** Pure Javascript Constraint Satisfaction Problem (CSP) solver
+* **Mechanics:** Models daily doses as variables and 30-min intervals as domains $\rightarrow$ runs **AC-3 (Arc Consistency)** domain pruning $\rightarrow$ executes Backtracking search with **MRV (Minimum Remaining Values)** and **LCV (Least Constraining Value)** heuristics $\rightarrow$ ranks matching outputs against bio-timing chronotherapy guidelines (e.g. evening for ACE inhibitors, meals for Metformin). Exporter writes custom daily recurring `.ics` calendar calendar reminders.
+
+### 📄 3. Paper-to-Dashboard (Lab Locker & Trendline Charting)
+* **Location:** `src/features/paper-dashboard/`
+* **Stack:** OpenCV.js + Tesseract.js + Recharts + Web Crypto API (AES-GCM)
+* **Mechanics:** Takes scanned reports $\rightarrow$ isolates table grids using vertical/horizontal structural morphology $\rightarrow$ triggers local cell OCR using Tesseract.js english/hindi workers $\rightarrow$ parses names/units $\rightarrow$ encrypts data client-side with AES-GCM $\rightarrow$ persists records locally inside IndexedDB $\rightarrow$ plots multi-report biomarker analytics on Recharts line graphs.
+
+### 📦 Client Library Installation
+To restore client libraries manually, run the following command in the `frontend/` directory:
+```bash
+npm install onnxruntime-web tesseract.js recharts
 ```
 
 ---

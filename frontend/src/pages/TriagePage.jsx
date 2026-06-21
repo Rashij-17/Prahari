@@ -525,16 +525,8 @@ export default function TriagePage() {
   const activeTab = searchParams.get('tab') || 'triage'
   const [expandedGuide, setExpandedGuide] = useState(null)
 
-  const [phase,    setPhase]    = useState(() => {
-    try {
-      const saved = localStorage.getItem('prahari_triage_state')
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        return parsed.phase === 'loading' ? 'idle' : (parsed.phase ?? 'idle')
-      }
-    } catch (e) {}
-    return 'idle'
-  })
+  // Only restore form inputs from localStorage — never restore old results
+  const [phase,    setPhase]    = useState('idle')
   const [symptoms, setSymptoms] = useState(() => {
     try {
       const saved = localStorage.getItem('prahari_triage_state')
@@ -553,35 +545,19 @@ export default function TriagePage() {
       return saved ? (JSON.parse(saved).age ?? 30) : 30
     } catch (e) { return 30 }
   })
-  const [result,   setResult]   = useState(() => {
-    try {
-      const saved = localStorage.getItem('prahari_triage_state')
-      return saved ? (JSON.parse(saved).result ?? null) : null
-    } catch (e) { return null }
-  })
-  const [error,    setError]    = useState(() => {
-    try {
-      const saved = localStorage.getItem('prahari_triage_state')
-      return saved ? (JSON.parse(saved).error ?? '') : ''
-    } catch (e) { return '' }
-  })
+  // Result and error are always fresh — never restored from cache
+  const [result,   setResult]   = useState(null)
+  const [error,    setError]    = useState('')
 
-  // Sync state to localStorage
+  // Only persist form inputs to localStorage, not results
   useEffect(() => {
     try {
-      const stateToSave = {
-        phase,
-        symptoms,
-        sex,
-        age,
-        result,
-        error,
-      }
+      const stateToSave = { symptoms, sex, age }
       localStorage.setItem('prahari_triage_state', JSON.stringify(stateToSave))
     } catch (e) {
       console.error('Failed to save triage state to localStorage:', e)
     }
-  }, [phase, symptoms, sex, age, result, error])
+  }, [symptoms, sex, age])
 
   const handleAssess = async () => {
     if (symptoms.trim().length < 5) return

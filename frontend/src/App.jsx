@@ -34,6 +34,15 @@ import SchedulerPage from './pages/SchedulerPage.jsx'
 import DecoderPage from './pages/DecoderPage.jsx'
 import QRSyncPage from './pages/QRSyncPage.jsx'
 import SubstitutePage from './pages/SubstitutePage.jsx'
+import SubsidyFinderPage from './pages/SubsidyFinderPage.jsx'
+import BarcodeScannerPage from './pages/BarcodeScannerPage.jsx'
+
+// ── Added Feature Modules ──────────────────────────────────────────
+import PillScanner from './features/pill-scan/PillScanner.jsx'
+import ScheduleOptimizer from './features/chronotherapy/ScheduleOptimizer.jsx'
+import ReportScanner from './features/paper-dashboard/ReportScanner.jsx'
+import { PrahariDebugConsole } from './shared/error-handler.jsx'
+
 
 /**
  * Premium, network-aware offline banner component.
@@ -133,6 +142,7 @@ export default function App() {
   return (
     <DashboardLayout>
       <OfflineBanner />
+      <PrahariDebugConsole />
       <Routes>
         {/* Home / Dashboard */}
         <Route path="/" element={<HomePage />} />
@@ -163,7 +173,13 @@ export default function App() {
         <Route path="/cabinet" element={<MedicineCabinetPage />} />
 
         {/* Daily Scheduler — Module 2 ✅ */}
-        <Route path="/scheduler" element={<SchedulerPage />} />
+        <Route path="/scheduler" element={<ScheduleOptimizer />} />
+
+        {/* Pill Visual Scan — Feature 1 ✅ */}
+        <Route path="/pill-scan" element={<PillScanner />} />
+
+        {/* Paper Report Locker — Feature 3 ✅ */}
+        <Route path="/reports" element={<ReportScanner />} />
 
         {/* Prescription Decoder — Module 3 ✅ */}
         <Route path="/decoder" element={<DecoderPage />} />
@@ -174,10 +190,17 @@ export default function App() {
         {/* Generic Substitute Finder — Module 5 ✅ */}
         <Route path="/substitute" element={<SubstitutePage />} />
 
+        {/* Jan Aushadhi Cost-Saver — Module 6 ✅ */}
+        <Route path="/subsidy" element={<SubsidyFinderPage />} />
+
+        {/* Barcode Scanner — Module 7 ✅ */}
+        <Route path="/barcode" element={<BarcodeScannerPage />} />
+
         {/* Catch-all — redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </DashboardLayout>
+
   )
 }
 

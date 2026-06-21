@@ -19,6 +19,7 @@ so the UI remains testable without API registration.
 
 import logging
 import json
+import asyncio
 from typing import Optional
 
 import httpx
@@ -572,38 +573,44 @@ def _sanitize_and_validate_triage_response(raw_data: dict) -> dict:
 
 
 async def _run_gemini_triage(evidence: list[dict], sex: str, age: int, model_name: str, text: Optional[str] = None) -> dict:
-    client = genai.Client(api_key=settings.gemini_api_key)
     prompt = _build_triage_prompt(evidence, sex, age, text)
-    
-    response = client.models.generate_content(
-        model=model_name,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-        ),
-    )
-    
-    if response and response.text:
-        return json.loads(response.text)
-    raise ValueError("Empty response from Gemini")
+
+    def _sync_gemini_call():
+        client = genai.Client(api_key=settings.gemini_api_key)
+        response = client.models.generate_content(
+            model=model_name,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            ),
+        )
+        if response and response.text:
+            return json.loads(response.text)
+        raise ValueError("Empty response from Gemini")
+
+    # Run the synchronous SDK call in a thread pool to avoid blocking the event loop
+    return await asyncio.to_thread(_sync_gemini_call)
 
 
 async def _run_groq_triage(evidence: list[dict], sex: str, age: int, model_name: str, text: Optional[str] = None) -> dict:
-    client = Groq(api_key=settings.groq_api_key)
     prompt = _build_triage_prompt(evidence, sex, age, text)
-    
-    response = client.chat.completions.create(
-        model=model_name,
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
-        response_format={"type": "json_object"},
-    )
-    
-    content = response.choices[0].message.content
-    if content:
-        return json.loads(content)
-    raise ValueError("Empty response from Groq")
+
+    def _sync_groq_call():
+        client = Groq(api_key=settings.groq_api_key)
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"},
+        )
+        content = response.choices[0].message.content
+        if content:
+            return json.loads(content)
+        raise ValueError("Empty response from Groq")
+
+    # Run the synchronous SDK call in a thread pool to avoid blocking the event loop
+    return await asyncio.to_thread(_sync_groq_call)
 
 
 from core.models import TRIAGE_FALLBACK_CHAIN

@@ -10,13 +10,15 @@ export function AuthProvider({ children }) {
 
   // Helper to generate a dummy JWT token for offline testing
   const getMockToken = () => {
-    const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }))
-    const payload = btoa(JSON.stringify({ 
+    const cleanB64 = (str) => btoa(str).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+    const header = cleanB64(JSON.stringify({ alg: "HS256", typ: "JWT" }))
+    const payload = cleanB64(JSON.stringify({ 
       sub: "mock_user_12345", 
       email: "demo-patient@prahari.org",
       name: "Demo Patient"
     }))
-    return `${header}.${payload}.mocksignature`
+    // "mocksignature123" has a length of 16, which is a multiple of 4, ensuring valid base64 padding
+    return `${header}.${payload}.mocksignature123`
   }
 
   useEffect(() => {

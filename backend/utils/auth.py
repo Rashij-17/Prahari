@@ -43,8 +43,15 @@ def get_current_user(
                     # Try base64-decoded secret first (standard for Supabase), fall back to raw string
                     try:
                         import base64, binascii
-                        # Only attempt base64 decode if the secret is valid base64
-                        decoded_secret = base64.b64decode(secret + "==")  # pad to avoid length errors
+                        # Strip existing padding before re-adding it to avoid double-padding
+                        stripped = secret.rstrip("=")
+                        # Add correct padding (length must be multiple of 4)
+                        padded = stripped + "=" * ((4 - len(stripped) % 4) % 4)
+                        # Try urlsafe_b64decode first (handles - and _ chars used by Supabase)
+                        try:
+                            decoded_secret = base64.urlsafe_b64decode(padded)
+                        except Exception:
+                            decoded_secret = base64.b64decode(padded)
                         # Validate it's actually binary (Supabase secrets are base64url)
                         if len(decoded_secret) < 16:
                             raise ValueError("Decoded secret too short, not a real base64 secret")
@@ -79,6 +86,10 @@ def get_current_user(
                 # In debug/development mode, fall back to decoding without verification
                 if settings.debug:
                     print(f"JWT Signature Verification failed: {str(e)}. Falling back to unverified decode for development.")
+                    parts = token.split('.')
+                    if len(parts) == 3:
+                        parts[2] = "mocksignature123"
+                        token = '.'.join(parts)
                     payload = jwt.decode(
                         token,
                         options={"verify_signature": False}
@@ -87,6 +98,10 @@ def get_current_user(
                     raise e
         else:
             # Local/offline development: decode without verification
+            parts = token.split('.')
+            if len(parts) == 3:
+                parts[2] = "mocksignature123"
+                token = '.'.join(parts)
             payload = jwt.decode(
                 token,
                 options={"verify_signature": False}

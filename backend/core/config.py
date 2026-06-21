@@ -10,7 +10,7 @@ Usage:
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field, AliasChoices
+from pydantic import Field, AliasChoices, model_validator
 
 
 class Settings(BaseSettings):
@@ -64,6 +64,18 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def clean_quotes(cls, data: any) -> any:
+        if isinstance(data, dict):
+            return {
+                k: (v.strip().strip("'\"") if isinstance(v, str) else v)
+                for k, v in data.items()
+            }
+        return data
+
+
 
 # Singleton instance — import this throughout the application
 settings = Settings()
+

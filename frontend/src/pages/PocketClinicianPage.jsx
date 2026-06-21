@@ -12,24 +12,13 @@ const formatMessageTextHtml = (text) => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
-  // Bold (**text**) - constrained to a single line to prevent layout leakage
   safeText = safeText.replace(/\*\*([^\n]+?)\*\*/g, '<strong>$1</strong>');
-  
-  // Headings (e.g. ### Heading)
   safeText = safeText.replace(/^###\s+(.+)$/gm, '<strong style="font-size: 1.1em; display: block; margin-top: 0.5rem; color: var(--color-forest);">$1</strong>');
   safeText = safeText.replace(/^##\s+(.+)$/gm, '<strong style="font-size: 1.25em; display: block; margin-top: 0.75rem; color: var(--color-forest);">$1</strong>');
   safeText = safeText.replace(/^#\s+(.+)$/gm, '<strong style="font-size: 1.4em; display: block; margin-top: 1rem; color: var(--color-forest);">$1</strong>');
-
-  // Horizontal rules (a single asterisk on a line, possibly with whitespace)
-  safeText = safeText.replace(/^\*\s*$/gm, '<hr style="border: 0; border-top: 1.5px dashed var(--color-mint-border); margin: 0.75rem 0;" />');
-  
-  // Bullet points (* Item)
+  safeText = safeText.replace(/^\*\s*$/gm, '<hr style="border: 0; border-top: 1.5px dashed var(--color-border); margin: 0.75rem 0;" />');
   safeText = safeText.replace(/^\*\s+/gm, '• ');
-  
-  // Italics (*text*) - constrained to a single line to prevent layout leakage
   safeText = safeText.replace(/\*([^\*\n]+?)\*/g, '<em>$1</em>');
-  
-  // Newlines to line breaks
   safeText = safeText.replace(/\n/g, '<br />');
   
   return { __html: safeText };
@@ -39,13 +28,12 @@ export default function PocketClinicianPage() {
   const { user, token } = useAuth()
   const encryptionSeed = user?.id || 'demo-fallback-seed'
 
-  // Chat conversation state
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem('prahari_clinician_messages')
     return saved ? JSON.parse(saved) : [
       {
         role: 'model',
-        text: 'Hello! I am Prahari’s Pocket Clinician. I can analyze safety warnings for your medications, allergies, and health conditions. How can I help you today?'
+        text: 'Hello! I am Prahari\u2019s Pocket Clinician. I can analyze safety warnings for your medications, allergies, and health conditions. How can I help you today?'
       }
     ]
   })
@@ -56,7 +44,6 @@ export default function PocketClinicianPage() {
   const [lastUserQuery, setLastUserQuery] = useState('')
   const [isEmergency, setIsEmergency] = useState(false)
 
-  // Profile Context (for UI Sidebar)
   const [allergies, setAllergies] = useState([])
   const [labs, setLabs] = useState([])
   const [meds, setMeds] = useState([])
@@ -64,7 +51,6 @@ export default function PocketClinicianPage() {
 
   const messagesEndRef = useRef(null)
 
-  // Auto scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -74,15 +60,12 @@ export default function PocketClinicianPage() {
     localStorage.setItem('prahari_clinician_messages', JSON.stringify(messages))
   }, [messages])
 
-  // Load patient context details
   const loadProfileContext = async () => {
     setProfileLoading(true)
     try {
-      // Load allergies and labs
       const prof = await getUserProfile(token).catch(() => ({ allergies: '', lab_results: '' }))
       let decAllergies = []
       let decLabs = []
-
       if (prof.allergies) {
         const decAll = await decryptText(prof.allergies, encryptionSeed)
         try { decAllergies = JSON.parse(decAll) } catch {}
@@ -93,8 +76,6 @@ export default function PocketClinicianPage() {
       }
       setAllergies(decAllergies)
       setLabs(decLabs)
-
-      // Load medicine cabinet
       const res = await fetch('http://localhost:8000/medication/cabinet', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       })
@@ -109,23 +90,16 @@ export default function PocketClinicianPage() {
         setMeds(decCabinet)
       }
     } catch (err) {
-      console.error('Failed to load profile context for clinician chat:', err)
+      console.error('Failed to load profile context:', err)
     } finally {
       setProfileLoading(false)
     }
   }
 
-  useEffect(() => {
-    loadProfileContext()
-  }, [])
-
-  // -------------------------------------------------------------
-  // Chat Submit Handlers
-  // -------------------------------------------------------------
+  useEffect(() => { loadProfileContext() }, [])
 
   const handleSend = async (e, forceAiScan = false) => {
     if (e) e.preventDefault()
-    
     const activeQuery = forceAiScan ? lastUserQuery : query
     if (!activeQuery.trim() && !forceAiScan) return
 
@@ -133,7 +107,6 @@ export default function PocketClinicianPage() {
     setShowAiButton(false)
     setIsEmergency(false)
 
-    // Add user message to UI
     let updatedMessages = [...messages]
     if (!forceAiScan) {
       updatedMessages.push({ role: 'user', text: activeQuery.trim() })
@@ -143,42 +116,18 @@ export default function PocketClinicianPage() {
     }
 
     try {
-      // Map ChatMessage format to matches backend Pydantic ClinicianChatRequest message histories
-      const historyPayload = updatedMessages.map((m) => ({
-        role: m.role,
-        text: m.text
-      }))
-
+      const historyPayload = updatedMessages.map((m) => ({ role: m.role, text: m.text }))
       const chatRes = await clinicianChat(
-        token,
-        activeQuery.trim(),
-        historyPayload,
-        forceAiScan,
-        allergies,
-        labs.map((l) => `${l.key}: ${l.value}`)
+        token, activeQuery.trim(), historyPayload, forceAiScan,
+        allergies, labs.map((l) => `${l.key}: ${l.value}`)
       )
-
-      setMessages((prev) => [
-        ...prev,
-        { role: 'model', text: chatRes.response }
-      ])
-
-      // Check if emergency alert triggered
-      if (chatRes.is_emergency) {
-        setIsEmergency(true)
-      }
-
-      // If local safety rules matched a warning and blocked the response, show the "Detailed AI Scan" button
+      setMessages((prev) => [...prev, { role: 'model', text: chatRes.response }])
+      if (chatRes.is_emergency) setIsEmergency(true)
       const hasWarnings = chatRes.local_warnings && chatRes.local_warnings.length > 0
       const isBlocked = chatRes.response.includes('Safety Warning Alert')
-      if (hasWarnings && isBlocked && !forceAiScan) {
-        setShowAiButton(true)
-      }
+      if (hasWarnings && isBlocked && !forceAiScan) setShowAiButton(true)
     } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'model', text: `Failed to fetch response: ${err.message}` }
-      ])
+      setMessages((prev) => [...prev, { role: 'model', text: `Failed to fetch response: ${err.message}` }])
     } finally {
       setLoading(false)
     }
@@ -186,12 +135,7 @@ export default function PocketClinicianPage() {
 
   const handleClearChat = () => {
     if (confirm('Clear chat logs?')) {
-      const initial = [
-        {
-          role: 'model',
-          text: 'Hello! I am Prahari’s Pocket Clinician. I can analyze safety warnings for your medications, allergies, and health conditions. How can I help you today?'
-        }
-      ]
+      const initial = [{ role: 'model', text: 'Hello! I am Prahari\u2019s Pocket Clinician. I can analyze safety warnings for your medications, allergies, and health conditions. How can I help you today?' }]
       setMessages(initial)
       localStorage.removeItem('prahari_clinician_messages')
       setShowAiButton(false)
@@ -199,141 +143,140 @@ export default function PocketClinicianPage() {
     }
   }
 
-  // -------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------
+  const resetChat = () => {
+    const initial = [{ role: 'model', text: 'Hello! I am Prahari\u2019s Pocket Clinician. I can analyze safety warnings for your medications, allergies, and health conditions. How can I help you today?' }]
+    setMessages(initial)
+    localStorage.removeItem('prahari_clinician_messages')
+    setShowAiButton(false)
+    setIsEmergency(false)
+  }
 
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '1fr 300px',
+      gridTemplateColumns: 'minmax(0,1fr) 280px',
       height: 'calc(100vh - 140px)',
-      gap: '1.5rem',
+      gap: '1.25rem',
       fontFamily: 'var(--font-sans)',
-      padding: '1rem 1.5rem'
+      padding: '1rem 1.5rem',
     }}>
-      
-      {/* Column 1: Chat interface */}
+      <style>{`
+        @keyframes clinicSpin { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
+        @keyframes pulseBorder {
+          0%,100% { box-shadow: 0 0 0 0 rgba(185,28,28,0.25); }
+          50%      { box-shadow: 0 0 0 8px rgba(185,28,28,0); }
+        }
+        .clinic-spin { animation: clinicSpin 1s linear infinite; }
+      `}</style>
+
+      {/* ── Column 1: Chat interface ── */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        background: 'var(--color-cream-light)',
-        border: '1.5px solid var(--color-mint-border)',
+        background: 'var(--color-white)',
+        border: '1.5px solid var(--color-border)',
         borderRadius: '16px',
         overflow: 'hidden',
-        boxShadow: 'var(--shadow-sm)'
+        boxShadow: 'var(--shadow-sm)',
       }}>
         
-        {/* Chat Titlebar */}
+        {/* Titlebar */}
         <div style={{
-          padding: '1rem 1.5rem',
-          borderBottom: '1.5px solid var(--color-mint-border)',
-          background: 'white',
+          padding: '0.875rem 1.25rem',
+          borderBottom: '1px solid var(--color-border)',
+          background: 'var(--color-paper)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexShrink: 0,
         }}>
           <div>
-            <h1 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--color-forest)', margin: 0 }}>
+            <h1 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--color-forest)', margin: 0, fontFamily: 'var(--font-display)' }}>
               🧠 Pocket Clinician AI
             </h1>
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-slate-light)' }}>
-              Fully E2EE-integrated context-aware safety assistant
+            <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>
+              E2EE-integrated context-aware safety assistant
             </span>
           </div>
           <button
             onClick={handleClearChat}
             style={{
-              padding: '0.4rem 0.8rem',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              color: 'var(--color-alert-critical)',
-              background: 'none',
-              border: '1px solid var(--color-alert-critical-border)',
+              padding: '0.35rem 0.75rem',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              color: 'var(--color-critical)',
+              background: 'transparent',
+              border: '1px solid var(--color-critical-border)',
               borderRadius: '8px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontFamily: 'var(--font-sans)',
             }}
           >
             Clear History
           </button>
         </div>
 
-        {/* Informational Disclaimer Banner */}
+        {/* Disclaimer banner */}
         <div style={{
-          padding: '0.75rem 1.5rem',
-          backgroundColor: 'var(--color-alert-moderate-bg)',
-          borderBottom: '1px solid var(--color-alert-moderate-border)',
-          color: 'var(--color-alert-moderate)',
-          fontSize: '0.8rem',
-          fontWeight: '500',
+          padding: '0.6rem 1.25rem',
+          backgroundColor: 'var(--color-warning-bg)',
+          borderBottom: '1px solid var(--color-warning-border)',
+          color: 'var(--color-warning)',
+          fontSize: '0.78rem',
+          fontWeight: 500,
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem'
+          gap: '0.5rem',
+          flexShrink: 0,
         }}>
-          <span>⚠️ <strong>Disclaimer:</strong> Informational AI tool. Not a replacement for direct medical consultations.</span>
+          ⚠️ <strong>Disclaimer:</strong> Informational AI tool. Not a replacement for direct medical consultations.
         </div>
 
-        {/* Emergency Triage Overlay Card */}
+        {/* Emergency overlay */}
         {isEmergency && (
           <div style={{
-            margin: '1rem 1.5rem',
-            padding: '1.25rem',
-            backgroundColor: 'var(--color-alert-critical-bg)',
-            border: '2px solid var(--color-alert-critical-border)',
+            margin: '0.75rem 1.25rem',
+            padding: '1rem',
+            backgroundColor: 'var(--color-critical-bg)',
+            border: '2px solid var(--color-critical-border)',
             borderRadius: '12px',
-            color: 'var(--color-alert-critical)',
-            boxShadow: 'var(--shadow-md)',
+            color: 'var(--color-critical)',
             animation: 'pulseBorder 2s infinite',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.75rem',
-            alignItems: 'flex-start'
+            gap: '0.625rem',
+            flexShrink: 0,
           }}>
-            <h3 style={{ margin: 0, fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ margin: 0, fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
               🚨 EMERGENCY GUIDANCE DISPATCHED
             </h3>
-            <p style={{ margin: 0, fontSize: '0.85rem', lineHeight: '1.5' }}>
-              If you or the patient are experiencing chest pain, slurred speech, or breathing difficulties, please call <strong>112</strong> or go to the nearest emergency ward immediately. Do not wait for a chat response.
+            <p style={{ margin: 0, fontSize: '0.83rem', lineHeight: 1.5 }}>
+              If you or the patient are experiencing chest pain, slurred speech, or breathing difficulties, call <strong>112</strong> or go to the nearest emergency ward immediately.
             </p>
             <button
-              onClick={() => {
-                const initial = [
-                  {
-                    role: 'model',
-                    text: 'Hello! I am Prahari’s Pocket Clinician. I can analyze safety warnings for your medications, allergies, and health conditions. How can I help you today?'
-                  }
-                ]
-                setMessages(initial)
-                localStorage.removeItem('prahari_clinician_messages')
-                setShowAiButton(false)
-                setIsEmergency(false)
-              }}
+              onClick={resetChat}
               style={{
-                padding: '0.5rem 1rem',
-                fontSize: '0.8rem',
-                fontWeight: '700',
-                color: 'white',
-                background: 'var(--color-alert-critical)',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-sm)'
+                padding: '0.4rem 0.875rem', fontSize: '0.8rem', fontWeight: 700,
+                color: 'white', background: 'var(--color-critical)', border: 'none',
+                borderRadius: '8px', cursor: 'pointer', alignSelf: 'flex-start',
+                fontFamily: 'var(--font-sans)',
               }}
             >
-              🔄 Clear & Start Next Chat
+              🔄 Clear &amp; Start Next Chat
             </button>
           </div>
         )}
 
-        {/* Chat Messages Log */}
+        {/* Messages scroll area */}
         <div style={{
           flex: 1,
-          padding: '1.5rem',
+          padding: '1.25rem',
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1rem'
+          gap: '1rem',
+          background: 'var(--color-cream)',
         }}>
           {messages.map((msg, index) => (
             <div
@@ -342,65 +285,60 @@ export default function PocketClinicianPage() {
                 display: 'flex',
                 justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
                 alignItems: 'flex-start',
-                gap: '0.5rem'
+                gap: '0.5rem',
               }}
             >
+              {/* AI avatar */}
               {msg.role !== 'user' && (
                 <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: 'var(--color-forest-bg)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.9rem',
-                  fontWeight: '800',
-                  color: 'var(--color-forest)',
-                  border: '1px solid var(--color-mint-border)',
-                  flexShrink: 0
+                  width: '30px', height: '30px', borderRadius: '50%',
+                  background: 'var(--color-forest-subtle)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.9rem', border: '1px solid var(--color-border)',
+                  flexShrink: 0,
                 }}>
                   🩺
                 </div>
               )}
 
+              {/* Message bubble */}
               <div style={{
                 maxWidth: '75%',
-                padding: '0.85rem 1.1rem',
+                padding: '0.75rem 1rem',
                 borderRadius: '16px',
-                fontSize: '0.9rem',
-                lineHeight: '1.5',
+                fontSize: '0.875rem',
+                lineHeight: 1.55,
                 whiteSpace: 'pre-line',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                backgroundColor: msg.role === 'user' ? 'var(--color-forest)' : 'white',
-                color: msg.role === 'user' ? 'white' : 'var(--color-slate-dark)',
-                border: msg.role === 'user' ? 'none' : '1px solid var(--color-mint-border)',
+                boxShadow: 'var(--shadow-xs)',
+                backgroundColor: msg.role === 'user'
+                  ? 'var(--color-forest)'
+                  : 'var(--color-white)',
+                color: msg.role === 'user'
+                  ? '#ffffff'
+                  : 'var(--color-ink)',
+                border: msg.role === 'user'
+                  ? 'none'
+                  : '1px solid var(--color-border)',
                 borderTopRightRadius: msg.role === 'user' ? '4px' : '16px',
-                borderTopLeftRadius: msg.role === 'user' ? '16px' : '4px'
+                borderTopLeftRadius: msg.role === 'user' ? '16px' : '4px',
               }}>
                 <div dangerouslySetInnerHTML={formatMessageTextHtml(msg.text)} />
 
-                {/* Local safety warning fallback detailed scan button injection */}
+                {/* Detailed AI scan inline CTA */}
                 {msg.role === 'model' && index === messages.length - 1 && showAiButton && (
-                  <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--color-mint-border)' }}>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--color-slate-light)', margin: '0 0 0.5rem 0' }}>
+                  <div style={{ marginTop: '0.875rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--color-border)' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--color-muted)', margin: '0 0 0.5rem' }}>
                       Would you like to bypass local cache and run a detailed clinical AI review?
                     </p>
                     <button
                       onClick={(e) => handleSend(e, true)}
                       disabled={loading}
                       style={{
-                        backgroundColor: 'var(--color-forest)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '0.4rem 0.8rem',
-                        fontSize: '0.8rem',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
+                        background: 'var(--color-forest)', color: 'white', border: 'none',
+                        borderRadius: '8px', padding: '0.4rem 0.875rem',
+                        fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '0.4rem',
+                        fontFamily: 'var(--font-sans)',
                       }}
                     >
                       {loading ? 'Analyzing...' : '✨ Run Detailed AI Scan'}
@@ -410,53 +348,54 @@ export default function PocketClinicianPage() {
               </div>
             </div>
           ))}
+
+          {/* Typing indicator */}
           {loading && (
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                background: 'var(--color-forest-bg)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid var(--color-mint-border)'
+                width: '30px', height: '30px', borderRadius: '50%',
+                background: 'var(--color-forest-subtle)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '1px solid var(--color-border)',
               }}>
                 🩺
               </div>
               <div style={{
-                padding: '0.75rem 1rem',
-                backgroundColor: 'white',
-                border: '1px solid var(--color-mint-border)',
+                padding: '0.65rem 1rem',
+                background: 'var(--color-white)',
+                border: '1px solid var(--color-border)',
                 borderRadius: '16px',
                 borderTopLeftRadius: '4px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem'
+                gap: '0.5rem',
               }}>
-                <div className="spinner" style={{
-                  width: '14px',
-                  height: '14px',
-                  border: '2px solid var(--color-mint-border)',
+                <span className="clinic-spin" style={{
+                  width: '13px', height: '13px',
+                  border: '2px solid var(--color-border)',
                   borderTop: '2px solid var(--color-forest)',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
+                  borderRadius: '50%', display: 'block',
                 }} />
-                <span style={{ fontSize: '0.85rem', color: 'var(--color-slate-light)' }}>Evaluating safety profile...</span>
+                <span style={{ fontSize: '0.83rem', color: 'var(--color-muted)' }}>Evaluating safety profile...</span>
               </div>
             </div>
           )}
+
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input box */}
-        <form onSubmit={(e) => handleSend(e, false)} style={{
-          padding: '1rem 1.5rem',
-          borderTop: '1.5px solid var(--color-mint-border)',
-          background: 'white',
-          display: 'flex',
-          gap: '0.75rem'
-        }}>
+        {/* Input bar */}
+        <form
+          onSubmit={(e) => handleSend(e, false)}
+          style={{
+            padding: '0.875rem 1.25rem',
+            borderTop: '1px solid var(--color-border)',
+            background: 'var(--color-paper)',
+            display: 'flex',
+            gap: '0.625rem',
+            flexShrink: 0,
+          }}
+        >
           <input
             type="text"
             placeholder="Ask about medications, side effects, or warning flags..."
@@ -465,119 +404,115 @@ export default function PocketClinicianPage() {
             disabled={loading}
             style={{
               flex: 1,
-              padding: '0.75rem 1rem',
+              padding: '0.65rem 1rem',
               borderRadius: '10px',
-              border: '1.5px solid var(--color-mint-border)',
+              border: '1.5px solid var(--color-border)',
               fontSize: '0.9rem',
-              outline: 'none'
+              outline: 'none',
+              background: 'var(--color-white)',
+              color: 'var(--color-ink)',
+              fontFamily: 'var(--font-sans)',
+              transition: 'border-color 140ms ease',
             }}
+            onFocus={e => e.target.style.borderColor = 'var(--color-forest)'}
+            onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
           />
           <button
             type="submit"
             disabled={loading || !query.trim()}
-            style={{
-              backgroundColor: 'var(--color-forest)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              padding: '0.75rem 1.25rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              fontSize: '0.9rem'
-            }}
+            className="btn-primary-forest"
+            style={{ borderRadius: '10px', padding: '0.65rem 1.25rem', fontSize: '0.9rem', opacity: (loading || !query.trim()) ? 0.5 : 1, cursor: (loading || !query.trim()) ? 'not-allowed' : 'pointer' }}
           >
             Send
           </button>
         </form>
       </div>
 
-      {/* Column 2: Profile Context Sidebar */}
+      {/* ── Column 2: Profile Context Sidebar ── */}
       <div style={{
-        background: 'var(--color-cream-light)',
-        border: '1.5px solid var(--color-mint-border)',
+        background: 'var(--color-white)',
+        border: '1.5px solid var(--color-border)',
         borderRadius: '16px',
-        padding: '1.5rem',
+        padding: '1.25rem',
         display: 'flex',
         flexDirection: 'column',
-        gap: '1.5rem',
+        gap: '1.25rem',
         overflowY: 'auto',
-        boxShadow: 'var(--shadow-sm)'
+        boxShadow: 'var(--shadow-sm)',
       }}>
+        {/* Header */}
         <div>
-          <h2 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--color-forest)', margin: '0 0 0.25rem 0' }}>
+          <h2 style={{ fontSize: '0.9375rem', fontWeight: 800, color: 'var(--color-forest)', margin: '0 0 0.2rem', fontFamily: 'var(--font-display)' }}>
             📋 Active Patient Profile
           </h2>
-          <span style={{ fontSize: '0.75rem', color: 'var(--color-slate-light)' }}>
-            These details are compiled to contextualize queries
+          <span style={{ fontSize: '0.72rem', color: 'var(--color-muted)' }}>
+            Compiled context for queries
           </span>
         </div>
 
-        {profileLoading && <p style={{ fontSize: '0.85rem' }}>Loading context...</p>}
+        {profileLoading && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-muted)', fontSize: '0.83rem' }}>
+            <span className="clinic-spin" style={{ width: '14px', height: '14px', border: '2px solid var(--color-border)', borderTop: '2px solid var(--color-forest)', borderRadius: '50%', display: 'block' }} />
+            Loading context...
+          </div>
+        )}
 
         {!profileLoading && (
           <>
             {/* Medications */}
-            <div style={{ borderTop: '1px dashed var(--color-mint-border)', paddingTop: '1rem' }}>
-              <h3 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                💊 Cabinet Medications ({meds.length})
-              </h3>
-              {meds.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--color-slate-light)', margin: 0 }}>No medicines registered.</p>}
+            <div style={{ borderTop: '1px dashed var(--color-border)', paddingTop: '1rem' }}>
+              <div className="section-label">💊 Cabinet Medications ({meds.length})</div>
+              {meds.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--color-faint)', margin: 0, fontStyle: 'italic' }}>No medicines registered.</p>}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                 {meds.map((m, i) => (
-                  <div key={i} style={{ fontSize: '0.8rem', padding: '0.35rem 0.5rem', background: 'white', border: '1px solid var(--color-mint-border)', borderRadius: '6px' }}>
+                  <div key={i} style={{
+                    fontSize: '0.8rem', padding: '0.35rem 0.625rem',
+                    background: 'var(--color-cream)', border: '1px solid var(--color-border)',
+                    borderRadius: '6px',
+                  }}>
                     <strong style={{ color: 'var(--color-forest)' }}>{m.brand_name}</strong>
-                    {m.generic_name && <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--color-slate-light)' }}>{m.generic_name}</span>}
+                    {m.generic_name && <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--color-muted)' }}>{m.generic_name}</span>}
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Allergies */}
-            <div style={{ borderTop: '1px dashed var(--color-mint-border)', paddingTop: '1rem' }}>
-              <h3 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                🚫 Allergies ({allergies.length})
-              </h3>
-              {allergies.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--color-slate-light)', margin: 0 }}>No allergy tags.</p>}
+            <div style={{ borderTop: '1px dashed var(--color-border)', paddingTop: '1rem' }}>
+              <div className="section-label">🚫 Allergies ({allergies.length})</div>
+              {allergies.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--color-faint)', margin: 0, fontStyle: 'italic' }}>No allergy tags.</p>}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
                 {allergies.map((a, i) => (
-                  <span key={i} style={{
-                    backgroundColor: 'rgba(194,75,60,0.12)',
-                    border: '1px solid rgba(194,75,60,0.25)',
-                    color: 'var(--color-alert-critical)',
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: '12px',
-                    fontSize: '0.75rem',
-                    fontWeight: '600'
-                  }}>
-                    {a}
-                  </span>
+                  <span key={i} className="chip chip-critical">{a}</span>
                 ))}
               </div>
             </div>
 
             {/* Lab metrics */}
-            <div style={{ borderTop: '1px dashed var(--color-mint-border)', paddingTop: '1rem', borderBottom: '1px dashed var(--color-mint-border)', paddingBottom: '1rem' }}>
-              <h3 style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '0.5rem' }}>
-                🔬 Lab Markers / Conditions ({labs.length})
-              </h3>
-              {labs.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--color-slate-light)', margin: 0 }}>No lab notes.</p>}
+            <div style={{ borderTop: '1px dashed var(--color-border)', paddingTop: '1rem', borderBottom: '1px dashed var(--color-border)', paddingBottom: '1rem' }}>
+              <div className="section-label">🔬 Lab Markers ({labs.length})</div>
+              {labs.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--color-faint)', margin: 0, fontStyle: 'italic' }}>No lab notes.</p>}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                 {labs.map((l, i) => (
-                  <div key={i} style={{ fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between', padding: '0.35rem 0.5rem', background: 'white', border: '1px solid var(--color-mint-border)', borderRadius: '6px' }}>
-                    <span style={{ fontWeight: '600' }}>{l.key}</span>
-                    <span style={{ color: 'var(--color-forest)', fontWeight: '600' }}>{l.value}</span>
+                  <div key={i} style={{
+                    fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between',
+                    padding: '0.35rem 0.625rem',
+                    background: 'var(--color-cream)', border: '1px solid var(--color-border)',
+                    borderRadius: '6px',
+                  }}>
+                    <span style={{ fontWeight: 600, color: 'var(--color-ink)' }}>{l.key}</span>
+                    <span style={{ color: 'var(--color-forest)', fontWeight: 600 }}>{l.value}</span>
                   </div>
                 ))}
               </div>
             </div>
-            
-            <p style={{ fontSize: '0.75rem', color: 'var(--color-slate-light)', lineHeight: '1.4', margin: 0 }}>
-              💡 Profile settings can be configured on the **Sentinel Settings** page.
+
+            <p style={{ fontSize: '0.72rem', color: 'var(--color-faint)', lineHeight: 1.5, margin: 0 }}>
+              💡 Configure profile on the <strong>Sentinel Settings</strong> page.
             </p>
           </>
         )}
       </div>
-
     </div>
   )
 }
