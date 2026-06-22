@@ -147,6 +147,10 @@ from routers import clinician, alerts
 app.include_router(clinician.router, prefix="/clinician", tags=["Clinician"], include_in_schema=True)
 app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"], include_in_schema=True)
 
+# Prahari Core Agent — unified intent routing layer
+from routers import agent
+app.include_router(agent.router, prefix="/agent", tags=["Agent"], include_in_schema=True)
+
 # ---------------------------------------------------------------------------
 # Development Entry Point
 # ---------------------------------------------------------------------------

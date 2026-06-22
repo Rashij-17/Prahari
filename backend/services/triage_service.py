@@ -307,7 +307,7 @@ async def assess_symptoms(
     )
     if is_gemini_configured:
         try:
-            logger.info("Attempting assess_symptoms via Gemini.")
+            logger.info("Attempting assess_symptoms via Gemini (Core Agent prompt).")
             raw_result = await _run_gemini_triage(
                 one_shot_evidence, sex, age, "gemini-2.0-flash", text=symptom_text
             )
@@ -320,7 +320,12 @@ async def assess_symptoms(
                 logger.info("Triage complete (Gemini): level=%s", triage_result.get("urgency_level"))
                 return triage_result
         except Exception as exc:
-            logger.warning("Gemini triage failed: %s - trying Groq.", exc)
+            logger.warning("Gemini triage failed: %s — trying Groq.", exc, exc_info=True)
+    else:
+        logger.warning(
+            "Gemini API key is not configured or appears invalid "
+            "(valid keys start with 'AIzaSy'). Skipping Gemini tier."
+        )
 
     # --- Tier 3: Groq ---
     is_groq_configured = bool(
@@ -330,7 +335,7 @@ async def assess_symptoms(
     )
     if is_groq_configured:
         try:
-            logger.info("Attempting assess_symptoms via Groq.")
+            logger.info("Attempting assess_symptoms via Groq (Core Agent prompt).")
             raw_result = await _run_groq_triage(
                 one_shot_evidence, sex, age, "llama-3.3-70b-versatile", text=symptom_text
             )
@@ -343,10 +348,15 @@ async def assess_symptoms(
                 logger.info("Triage complete (Groq): level=%s", triage_result.get("urgency_level"))
                 return triage_result
         except Exception as exc:
-            logger.warning("Groq triage failed: %s - returning mock.", exc)
+            logger.warning("Groq triage failed: %s — returning mock.", exc, exc_info=True)
+    else:
+        logger.warning("Groq API key not configured. Skipping Groq tier.")
 
     # --- Tier 4: Mock fallback ---
-    logger.info("All triage providers unavailable - returning mock response.")
+    logger.error(
+        "ALL triage providers failed. Returning mock. "
+        "Check that GEMINI_API_KEY starts with 'AIzaSy' and GROQ_API_KEY starts with 'gsk_'."
+    )
     return _MOCK_TRIAGE_RESPONSE
 
 
@@ -572,44 +582,150 @@ def _sanitize_and_validate_triage_response(raw_data: dict) -> dict:
     return validated.model_dump()
 
 
+# ---------------------------------------------------------------------------
+# Prahari Core Agent System Prompt (shared with /agent/chat endpoint)
+# Using this as system_instruction forces strict JSON output for triage.
+# ---------------------------------------------------------------------------
+
+_PRAHARI_TRIAGE_SYSTEM_PROMPT = """
+You are the core intelligence engine for "Prahari," a professional, high-accuracy health sentinel and triage application.
+
+CRITICAL INSTRUCTION: You must strictly output in minified JSON format only. Do not include markdown formatting, code blocks, conversational filler, or pleasantries. Your entire response must be a single, valid JSON object.
+
+The user will provide symptoms. Act as a deterministic triage analyzer. Do not provide a definitive medical diagnosis. Calculate the probabilities of the top 3 most likely conditions based on standard clinical presentations.
+
+Your output MUST map exactly to this schema:
+{
+  "intent": "triage",
+  "data": {
+    "alert_title": "Select one: 'Self-Care', 'See a Doctor Soon', 'Urgent Care', or 'Emergency Room'",
+    "alert_description": "Provide a sterile, clinical, 2-sentence recommendation advising the user on what to do next. If critical, mention calling 112 or 102.",
+    "conditions": [
+      {"name": "Condition Name 1", "probability_percentage": integer_0_to_100},
+      {"name": "Condition Name 2", "probability_percentage": integer_0_to_100},
+      {"name": "Condition Name 3", "probability_percentage": integer_0_to_100}
+    ]
+  }
+}
+""".strip()
+
+
+_TITLE_TO_PRAHARI = {
+    "Self-Care":         ("safe",     "Self-Care Recommended",              "safe"),
+    "See a Doctor Soon": ("moderate", "See a Doctor Soon",                  "moderate"),
+    "Urgent Care":       ("moderate", "Urgent Care Needed",                 "moderate"),
+    "Emergency Room":    ("critical", "Go to Emergency Room Now",           "critical"),
+}
+
+
+def _agent_json_to_triage_result(raw: dict) -> Optional[dict]:
+    """
+    Convert the Prahari Core Agent JSON response into the existing
+    Prahari triage schema so the TriagePage renders it correctly.
+    Returns None if the raw dict is not a valid triage response.
+    """
+    data = raw.get("data") if raw.get("intent") == "triage" else raw
+    if not isinstance(data, dict):
+        return None
+
+    alert_title = data.get("alert_title", "See a Doctor Soon")
+    urgency_level, urgency_label, urgency_color = _TITLE_TO_PRAHARI.get(
+        alert_title, ("moderate", alert_title, "moderate")
+    )
+
+    conditions = [
+        {
+            "name":        c.get("name", "Unknown"),
+            "probability": round(c.get("probability_percentage", 10) / 100, 3),
+            "urgency":     urgency_level,
+        }
+        for c in data.get("conditions", [])
+    ]
+
+    return {
+        "urgency_level":  urgency_level,
+        "urgency_label":  urgency_label,
+        "urgency_color":  urgency_color,
+        "recommendation": data.get("alert_description", ""),
+        "conditions":     conditions,
+        "risk_factors":   [],
+        "is_mock":        False,
+        "mock_notice":    "",
+    }
+
+
 async def _run_gemini_triage(evidence: list[dict], sex: str, age: int, model_name: str, text: Optional[str] = None) -> dict:
-    prompt = _build_triage_prompt(evidence, sex, age, text)
+    # Build a compact symptom context string from evidence + raw text
+    context_parts = []
+    if text:
+        context_parts.append(f"Symptoms: {text}")
+    if evidence:
+        context_parts.append(f"Patient: {sex}, age {age}")
+    user_query = "\n".join(context_parts) if context_parts else _build_triage_prompt(evidence, sex, age, text)
 
     def _sync_gemini_call():
         client = genai.Client(api_key=settings.gemini_api_key)
         response = client.models.generate_content(
             model=model_name,
-            contents=prompt,
+            contents=user_query,
             config=types.GenerateContentConfig(
+                system_instruction=_PRAHARI_TRIAGE_SYSTEM_PROMPT,
                 response_mime_type="application/json",
+                temperature=0.1,
             ),
         )
         if response and response.text:
-            return json.loads(response.text)
+            raw = json.loads(response.text)
+            # Try to map agent-style JSON → Prahari triage schema
+            triage = _agent_json_to_triage_result(raw)
+            if triage:
+                # Return in the shape _sanitize_and_validate_triage_response expects
+                return {
+                    "should_stop": True,
+                    "evidence": evidence,
+                    "question": None,
+                    "triage_result": triage,
+                }
+            # Fallback: pass raw through (existing multi-turn format)
+            return raw
         raise ValueError("Empty response from Gemini")
 
-    # Run the synchronous SDK call in a thread pool to avoid blocking the event loop
     return await asyncio.to_thread(_sync_gemini_call)
 
 
 async def _run_groq_triage(evidence: list[dict], sex: str, age: int, model_name: str, text: Optional[str] = None) -> dict:
-    prompt = _build_triage_prompt(evidence, sex, age, text)
+    context_parts = []
+    if text:
+        context_parts.append(f"Symptoms: {text}")
+    if evidence:
+        context_parts.append(f"Patient: {sex}, age {age}")
+    user_query = "\n".join(context_parts) if context_parts else _build_triage_prompt(evidence, sex, age, text)
 
     def _sync_groq_call():
         client = Groq(api_key=settings.groq_api_key)
         response = client.chat.completions.create(
             model=model_name,
             messages=[
-                {"role": "user", "content": prompt}
+                {"role": "system",  "content": _PRAHARI_TRIAGE_SYSTEM_PROMPT},
+                {"role": "user",    "content": user_query},
             ],
             response_format={"type": "json_object"},
+            temperature=0.1,
         )
         content = response.choices[0].message.content
         if content:
-            return json.loads(content)
+            raw = json.loads(content)
+            triage = _agent_json_to_triage_result(raw)
+            if triage:
+                return {
+                    "should_stop": True,
+                    "evidence": evidence,
+                    "question": None,
+                    "triage_result": triage,
+                }
+            return raw
         raise ValueError("Empty response from Groq")
 
-    # Run the synchronous SDK call in a thread pool to avoid blocking the event loop
     return await asyncio.to_thread(_sync_groq_call)
 
 

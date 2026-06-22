@@ -42,6 +42,7 @@ import PillScanner from './features/pill-scan/PillScanner.jsx'
 import ScheduleOptimizer from './features/chronotherapy/ScheduleOptimizer.jsx'
 import ReportScanner from './features/paper-dashboard/ReportScanner.jsx'
 import { PrahariDebugConsole } from './shared/error-handler.jsx'
+import PrahariAgentPage from './pages/PrahariAgentPage.jsx'
 
 
 /**
@@ -155,6 +156,9 @@ export default function App() {
 
         {/* Medication Intelligence — Phase 4 ✅ */}
         <Route path="/medications" element={<MedicationsPage />} />
+
+        {/* Prahari Core Agent — unified AI assistant ✅ */}
+        <Route path="/agent" element={<PrahariAgentPage />} />
 
         {/* Clinician Chat — Phase 4 ✅ */}
         <Route path="/clinician" element={<PocketClinicianPage />} />

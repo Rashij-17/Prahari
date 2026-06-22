@@ -99,6 +99,16 @@ export const assessSymptoms = (payload) =>
 export const searchProviders = (payload) =>
   apiFetch('/directory/search', { method: 'POST', body: JSON.stringify(payload) })
 
+/**
+ * Geocodes a free-text location name to lat/lng using OSM Nominatim.
+ * Returns { lat, lng, display_name }.
+ *
+ * @param {string} location - e.g. "Connaught Place, Delhi"
+ */
+export const geocodeLocation = (location) =>
+  apiFetch(`/directory/geocode?location=${encodeURIComponent(location)}`)
+
+
 // ---------------------------------------------------------------
 // Phase 2 — Interactions, Triage Chat & Multimodal OCR
 // ---------------------------------------------------------------
@@ -123,6 +133,28 @@ export const assessTriageChat = (evidence, sex, age, text) =>
     method: 'POST',
     body: JSON.stringify({ evidence, sex, age, text }),
   })
+
+// ---------------------------------------------------------------
+// Prahari Core Agent — unified intent routing
+// ---------------------------------------------------------------
+
+/**
+ * Sends a free-text query to the Prahari Core Agent.
+ * The agent classifies the query and returns a strict JSON object:
+ *   { intent: "triage" | "directory" | "unknown", data: {...}, triage_result: {...} | null }
+ *
+ * For triage intent, `triage_result` contains the full urgency assessment
+ * (same shape as assessSymptoms) so no second API call is needed.
+ *
+ * @param {string} query - Plain-language user query
+ * @returns {Promise<AgentChatResponse>}
+ */
+export const agentChat = (query) =>
+  apiFetch('/agent/chat', {
+    method: 'POST',
+    body: JSON.stringify({ query }),
+  })
+
 
 // ---------------------------------------------------------------
 // Phase 4 — Contextual AI & Caregiver Alerts

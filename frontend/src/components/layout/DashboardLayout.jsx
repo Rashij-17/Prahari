@@ -181,6 +181,7 @@ const Icons = {
 // ----------------------------------------------------------------
 const NAV_ITEMS = [
   { id: 'home',        label: 'Home',        path: '/', exact: true, Icon: Icons.Home },
+  { id: 'agent',       label: 'AI Sentinel', path: '/agent',        Icon: Icons.Heartbeat },
   { id: 'pillscan',    label: 'Pill Scan',   path: '/pill-scan',   Icon: Icons.PillScan },
   { id: 'reports',     label: 'Reports',     path: '/reports',     Icon: Icons.Report },
   { id: 'scanner',     label: 'Scanner',     path: '/scanner',     Icon: Icons.Scanner },
