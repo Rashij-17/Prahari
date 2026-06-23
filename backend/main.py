@@ -112,6 +112,9 @@ async def health_check() -> dict:
     return {"status": "Sentinel Active"}
 
 
+# Trigger reload for environment settings update
+
+
 # ---------------------------------------------------------------------------
 # Router Registration
 # ---------------------------------------------------------------------------

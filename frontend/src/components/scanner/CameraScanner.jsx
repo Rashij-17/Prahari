@@ -394,6 +394,7 @@ export default function CameraScanner() {
     return 'idle'
   })
   const [statusText, setStatusText] = useState('Reading label…')
+  const [activeStream, setActiveStream] = useState(null)
   const [ocrResult, setOcrResult] = useState(() => {
     try {
       const saved = localStorage.getItem('prahari_scanner_state')
@@ -454,6 +455,7 @@ export default function CameraScanner() {
         video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
       })
       streamRef.current = stream
+      setActiveStream(stream)
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         await videoRef.current.play()
@@ -471,9 +473,20 @@ export default function CameraScanner() {
       streamRef.current = null
     }
     if (videoRef.current) videoRef.current.srcObject = null
+    setActiveStream(null)
   }, [])
 
   useEffect(() => { return () => stopStream() }, [stopStream])
+
+  // Bind stream to video element when phase is 'camera' and ref becomes available
+  useEffect(() => {
+    if (phase === 'camera' && activeStream && videoRef.current) {
+      videoRef.current.srcObject = activeStream
+      videoRef.current.play().catch(err => {
+        console.warn('Failed to play camera stream in useEffect:', err)
+      })
+    }
+  }, [phase, activeStream])
 
   const animateStatus = useCallback(() => {
     const messages = ['Reading label…', 'Identifying medication…', 'Fetching clinical data…']

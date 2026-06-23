@@ -12,11 +12,12 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 /**
  * Generic fetch wrapper with JSON handling and error surfacing.
+ * Exported so service modules can reuse it.
  * @param {string} endpoint - API path (e.g. '/health')
  * @param {RequestInit} options - fetch options
  * @returns {Promise<any>} Parsed JSON response
  */
-async function apiFetch(endpoint, options = {}) {
+export async function apiFetch(endpoint, options = {}) {
   const { headers, ...restOptions } = options;
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     headers: {
@@ -33,6 +34,7 @@ async function apiFetch(endpoint, options = {}) {
 
   return response.json()
 }
+
 
 // ---------------------------------------------------------------
 // Health Check

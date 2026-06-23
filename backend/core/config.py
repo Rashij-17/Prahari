@@ -32,7 +32,15 @@ class Settings(BaseSettings):
     infermedica_app_id: str = ""
     infermedica_app_key: str = ""
     google_places_api_key: str = ""
-    
+
+    # ABDM Health Facility Registry (HFR) — Ayushman Bharat Digital Mission
+    # Register free at: https://sandbox.abdm.gov.in → Developer Signup → HIU role
+    abdm_client_id: str = ""
+    abdm_client_secret: str = ""
+    abdm_base_url: str = "https://dev.abdm.gov.in"        # sandbox; prod: https://prod.abdm.gov.in
+    abdm_hfr_base_url: str = "https://hfr.abdm.gov.in"   # HFR search API
+    abdm_cm_id: str = "sbx"                               # use 'abdm' in production
+
     # Vision & OCR Models configuration
     gemini_api_key: str = ""
     groq_api_key: str = ""
